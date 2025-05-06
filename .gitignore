@@ -1,0 +1,11 @@
+# .gitignore
+target/
+*.log
+*.class
+*.jar
+*.war
+*.iml
+.idea/
+*.env
+*.db
+*.bak
