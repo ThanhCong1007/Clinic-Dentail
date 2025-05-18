@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS nhakhoa_simple;
-USE nhakhoa_simple;
+CREATE DATABASE IF NOT EXISTS nhakhoachuan;
+USE nhakhoachuan;
 
 -- Bảng vai trò người dùng
 CREATE TABLE vai_tro (
@@ -421,3 +421,24 @@ CREATE TABLE lich_su_api (
     nguoi_dung INT,                 -- Người dùng thực hiện
     FOREIGN KEY (nguoi_dung) REFERENCES nguoi_dung(ma_nguoi_dung)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO nguoi_dung (ma_vai_tro, ten_dang_nhap, mat_khau, email, ho_ten, so_dien_thoai)
+VALUES
+-- ADMIN
+(5, 'admin01', 'admin@123', 'admin01@example.com', 'Nguyễn Văn A', '0901234567'),
+
+-- BACSI
+(6, 'bacsi01', 'bacsi@123', 'bacsi01@example.com', 'Trần Thị B', '0912345678'),
+(6, 'bacsi02', 'bacsi@123', 'bacsi02@example.com', 'Lê Văn C', '0923456789'),
+
+-- USER
+(7, 'user01', 'user@123', 'user01@example.com', 'Phạm Thị D', '0934567890'),
+(7, 'user02', 'user@123', 'user02@example.com', 'Đỗ Văn E', '0945678901');
+INSERT INTO bac_si (ma_nguoi_dung, chuyen_khoa, so_nam_kinh_nghiem)
+VALUES
+    (2, 'Răng hàm mặt', 5),
+    (3, 'Nha chu', 3);
+INSERT INTO benh_nhan (ma_nguoi_dung, ho_ten, ngay_sinh, gioi_tinh, so_dien_thoai, email, dia_chi, tien_su_benh, di_ung)
+VALUES
+    (4, 'Phạm Thị D', '1995-04-12', 'Nữ', '0934567890', 'user01@example.com', '123 Lê Lợi, TP.HCM', 'Viêm lợi mãn tính', 'Penicillin'),
+    (5, 'Đỗ Văn E', '1989-08-22', 'Nam', '0945678901', 'user02@example.com', '456 Trần Hưng Đạo, TP.HCM', 'Không rõ', 'Không');
