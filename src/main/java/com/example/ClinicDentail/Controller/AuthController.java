@@ -105,7 +105,7 @@ public class AuthController {
     /**
      * Xử lý yêu cầu đăng xuất
      *
-     * @param request Đối tượng HttpServletRequest để lấy token từ header
+//     * @param request Đối tượng HttpServletRequest để lấy token từ header
      * @return Thông báo kết quả đăng xuất
      */
     @PostMapping("/logout")
