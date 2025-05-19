@@ -422,6 +422,11 @@ CREATE TABLE lich_su_api (
     FOREIGN KEY (nguoi_dung) REFERENCES nguoi_dung(ma_nguoi_dung)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT INTO vai_tro (ma_vai_tro, ten_vai_tro, mo_ta) VALUES
+(5, 'ADMIN', 'Quản trị hệ thống'),
+(6, 'BACSI', 'Bác sĩ trong hệ thống'),
+(7, 'USER', 'Người dùng bình thường');
+
 INSERT INTO nguoi_dung (ma_vai_tro, ten_dang_nhap, mat_khau, email, ho_ten, so_dien_thoai)
 VALUES
 -- ADMIN
@@ -442,3 +447,12 @@ INSERT INTO benh_nhan (ma_nguoi_dung, ho_ten, ngay_sinh, gioi_tinh, so_dien_thoa
 VALUES
     (4, 'Phạm Thị D', '1995-04-12', 'Nữ', '0934567890', 'user01@example.com', '123 Lê Lợi, TP.HCM', 'Viêm lợi mãn tính', 'Penicillin'),
     (5, 'Đỗ Văn E', '1989-08-22', 'Nam', '0945678901', 'user02@example.com', '456 Trần Hưng Đạo, TP.HCM', 'Không rõ', 'Không');
+INSERT INTO dich_vu (ten_dich_vu, mo_ta, gia, thoi_gian_du_kien, trang_thai_hoat_dong) VALUES
+('Khám tổng quát', 'Kiểm tra tổng quát tình trạng răng miệng', 100000, 30, TRUE),
+('Lấy cao răng', 'Làm sạch cao răng và mảng bám', 200000, 45, TRUE),
+('Trám răng', 'Trám răng sâu bằng vật liệu composite', 300000, 60, TRUE),
+('Nhổ răng sữa', 'Nhổ răng sữa cho trẻ em', 150000, 30, TRUE),
+('Nhổ răng vĩnh viễn', 'Nhổ răng vĩnh viễn thông thường', 500000, 60, TRUE),
+('Tẩy trắng răng', 'Tẩy trắng răng bằng công nghệ laser', 1200000, 90, TRUE),
+('Niềng răng', 'Tư vấn và thực hiện niềng răng chỉnh nha', 25000000, 120, TRUE),
+('Chụp X-quang răng', 'Chụp phim X-quang toàn hàm', 250000, 20, TRUE);

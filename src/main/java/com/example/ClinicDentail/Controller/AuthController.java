@@ -1,13 +1,12 @@
 package com.example.ClinicDentail.Controller;
 
-import com.example.ClinicDentail.Enity.BacSi;
 import com.example.ClinicDentail.Enity.BenhNhan;
 import com.example.ClinicDentail.Enity.NguoiDung;
 import com.example.ClinicDentail.Enity.VaiTro;
 import com.example.ClinicDentail.Repository.NguoiDungRepository;
 import com.example.ClinicDentail.Repository.VaiTroRepository;
-import com.example.ClinicDentail.Repository.bacSiRepository;
-import com.example.ClinicDentail.Repository.benhNhanRepository;
+import com.example.ClinicDentail.Repository.BacSiRepository;
+import com.example.ClinicDentail.Repository.BenhNhanRepository;
 import com.example.ClinicDentail.Security.Jwt.JwtUtils;
 import com.example.ClinicDentail.Security.Service.UserDetailsImpl;
 import com.example.ClinicDentail.payload.request.JwtResponse;
@@ -54,9 +53,9 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
     @Autowired
-    private benhNhanRepository benhNhanRepository;
+    private BenhNhanRepository benhNhanRepository;
     @Autowired
-    private bacSiRepository bacSiRepository;
+    private BacSiRepository bacSiRepository;
 
     /**
      * Endpoint kiểm tra trạng thái hoạt động của API auth
@@ -258,7 +257,7 @@ public class AuthController {
                 benhNhan.setHoTen(signupRequest.getHoTen());
                 benhNhan.setSoDienThoai(signupRequest.getSoDienThoai());
                 benhNhan.setEmail(signupRequest.getEmail());
-
+                benhNhan.setNgaySinh(signupRequest.getNgaySinh());
                 benhNhanRepository.save(benhNhan);
                 logger.info("Basic patient information created for user: {}", signupRequest.getTenDangNhap());
             } catch (Exception ex) {

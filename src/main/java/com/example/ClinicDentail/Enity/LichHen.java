@@ -1,5 +1,6 @@
 package com.example.ClinicDentail.Enity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Entity
@@ -23,6 +25,7 @@ public class LichHen {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ma_benh_nhan", nullable = false)
+    @JsonBackReference
     private BenhNhan benhNhan;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -62,4 +65,12 @@ public class LichHen {
 
     @OneToMany(mappedBy = "lichHen", fetch = FetchType.LAZY)
     private List<HoaDon> hoaDons;
+    /**
+     * Tính thời gian của cuộc hẹn theo phút
+     * @return Thời lượng cuộc hẹn (phút)
+     */
+    @Transient
+    public long getThoiLuong() {
+        return ChronoUnit.MINUTES.between(gioBatDau, gioKetThuc);
+    }
 }
