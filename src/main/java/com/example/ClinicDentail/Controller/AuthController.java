@@ -134,78 +134,146 @@ public class AuthController {
 
 
 
+//    @PostMapping("/register")
+//    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+//        logger.info("Processing registration request for user: {}", signupRequest.getTenDangNhap());
+//
+//        // Kiểm tra username đã tồn tại chưa
+//        if (nguoiDungRepository.existsByTenDangNhap(signupRequest.getTenDangNhap())) {
+//            logger.warn("Registration failed: Username {} is already taken", signupRequest.getTenDangNhap());
+//            return ResponseEntity
+//                    .badRequest()
+//                    .body(new MessageResponse("Lỗi: Tên đăng nhập đã được sử dụng!"));
+//        }
+//
+//        // Kiểm tra email đã tồn tại chưa
+//        if (nguoiDungRepository.existsByEmail(signupRequest.getEmail())) {
+//            logger.warn("Registration failed: Email {} is already in use", signupRequest.getEmail());
+//            return ResponseEntity
+//                    .badRequest()
+//                    .body(new MessageResponse("Lỗi: Email đã được sử dụng!"));
+//        }
+//
+//        // Kiểm tra vai trò hợp lệ không
+//        VaiTro vaiTro = vaiTroRepository.findByTenVaiTro(signupRequest.getVaiTro())
+//                .orElseThrow(() -> {
+//                    logger.error("Registration failed: Role {} not found", signupRequest.getVaiTro());
+//                    return new RuntimeException("Lỗi: Vai trò không tồn tại!");
+//                });
+//
+//        // Tạo tài khoản người dùng mới
+//        NguoiDung nguoiDung = new NguoiDung();
+//        nguoiDung.setTenDangNhap(signupRequest.getTenDangNhap());
+//        nguoiDung.setMatKhau(encoder.encode(signupRequest.getMatKhau()));
+//        nguoiDung.setEmail(signupRequest.getEmail());
+//        nguoiDung.setHoTen(signupRequest.getHoTen());
+//        nguoiDung.setSoDienThoai(signupRequest.getSoDienThoai());
+//        nguoiDung.setTrangThaiHoatDong(true);
+//        nguoiDung.setVaiTro(vaiTro);
+//
+//        // Lưu thông tin người dùng vào database
+//        NguoiDung savedNguoiDung = nguoiDungRepository.save(nguoiDung);
+//
+//        // Xử lý dữ liệu phụ thuộc vào vai trò
+//        String tenVaiTro = vaiTro.getTenVaiTro();
+//
+//        if ("BACSI".equals(tenVaiTro)) {
+//            // Tạo thông tin bác sĩ
+//            BacSi bacSi = new BacSi();
+//            bacSi.setNguoiDung(savedNguoiDung);  // Thiết lập mối quan hệ với đối tượng NguoiDung
+//            bacSi.setChuyenKhoa(signupRequest.getChuyenKhoa());
+//            bacSi.setSoNamKinhNghiem(signupRequest.getSoNamKinhNghiem());
+//            bacSi.setTrangThaiLamViec(true);
+//
+//            bacSiRepository.save(bacSi);
+//            logger.info("Doctor information created for user: {}", signupRequest.getTenDangNhap());
+//        } else if ("USER".equals(tenVaiTro)) {
+//            // Tạo thông tin bệnh nhân
+//            BenhNhan benhNhan = new BenhNhan();
+//            benhNhan.setNguoiDung(savedNguoiDung);  // Thiết lập mối quan hệ với đối tượng NguoiDung
+//            benhNhan.setHoTen(signupRequest.getHoTen());
+//            benhNhan.setNgaySinh(signupRequest.getNgaySinh());
+//            benhNhan.setGioiTinh(signupRequest.getGioiTinh());
+//            benhNhan.setSoDienThoai(signupRequest.getSoDienThoai());
+//            benhNhan.setEmail(signupRequest.getEmail());
+//            benhNhan.setDiaChi(signupRequest.getDiaChi());
+//            benhNhan.setTienSuBenh(signupRequest.getTienSuBenh());
+//            benhNhan.setDiUng(signupRequest.getDiUng());
+//
+//            benhNhanRepository.save(benhNhan);
+//            logger.info("Patient information created for user: {}", signupRequest.getTenDangNhap());
+//        }
+//
+//        logger.info("User registered successfully: {}", signupRequest.getTenDangNhap());
+//        return ResponseEntity.ok(new MessageResponse("Đăng ký người dùng thành công!"));
+//    }
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
-        logger.info("Processing registration request for user: {}", signupRequest.getTenDangNhap());
+        try {
+            logger.info("Processing registration request for user: {}", signupRequest.getTenDangNhap());
 
-        // Kiểm tra username đã tồn tại chưa
-        if (nguoiDungRepository.existsByTenDangNhap(signupRequest.getTenDangNhap())) {
-            logger.warn("Registration failed: Username {} is already taken", signupRequest.getTenDangNhap());
+            // Kiểm tra username đã tồn tại chưa
+            if (nguoiDungRepository.existsByTenDangNhap(signupRequest.getTenDangNhap())) {
+                logger.warn("Registration failed: Username {} is already taken", signupRequest.getTenDangNhap());
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Lỗi: Tên đăng nhập đã được sử dụng!"));
+            }
+
+            // Kiểm tra email đã tồn tại chưa
+            if (nguoiDungRepository.existsByEmail(signupRequest.getEmail())) {
+                logger.warn("Registration failed: Email {} is already in use", signupRequest.getEmail());
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Lỗi: Email đã được sử dụng!"));
+            }
+
+            // Lấy vai trò USER mặc định
+            VaiTro vaiTro = vaiTroRepository.findByTenVaiTro("USER")
+                    .orElseThrow(() -> {
+                        logger.error("Registration failed: Default USER role not found");
+                        return new RuntimeException("Lỗi: Vai trò mặc định không tồn tại!");
+                    });
+
+            // Tạo tài khoản người dùng mới
+            NguoiDung nguoiDung = new NguoiDung();
+            nguoiDung.setTenDangNhap(signupRequest.getTenDangNhap());
+            nguoiDung.setMatKhau(encoder.encode(signupRequest.getMatKhau()));
+            nguoiDung.setEmail(signupRequest.getEmail());
+            nguoiDung.setHoTen(signupRequest.getHoTen());
+            nguoiDung.setSoDienThoai(signupRequest.getSoDienThoai());
+            nguoiDung.setTrangThaiHoatDong(true);
+            nguoiDung.setVaiTro(vaiTro);
+            // Ngày tạo sẽ được tự động thiết lập bởi @PrePersist
+
+            // Lưu thông tin người dùng vào database
+            NguoiDung savedNguoiDung = nguoiDungRepository.save(nguoiDung);
+            logger.info("User registered successfully: {}", signupRequest.getTenDangNhap());
+
+            try {
+                // Tạo thông tin bệnh nhân với thông tin cơ bản
+                BenhNhan benhNhan = new BenhNhan();
+                benhNhan.setNguoiDung(savedNguoiDung);
+                benhNhan.setHoTen(signupRequest.getHoTen());
+                benhNhan.setSoDienThoai(signupRequest.getSoDienThoai());
+                benhNhan.setEmail(signupRequest.getEmail());
+
+                benhNhanRepository.save(benhNhan);
+                logger.info("Basic patient information created for user: {}", signupRequest.getTenDangNhap());
+            } catch (Exception ex) {
+                // Log lỗi nhưng vẫn tiếp tục vì người dùng đã được tạo thành công
+                logger.warn("Error creating patient record: " + ex.getMessage(), ex);
+                // Không trả về lỗi cho client vì việc đăng ký người dùng vẫn thành công
+            }
+
+            return ResponseEntity.ok(new MessageResponse("Đăng ký người dùng thành công!"));
+        } catch (Exception e) {
+            logger.error("Registration error: " + e.getMessage(), e);
             return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Lỗi: Tên đăng nhập đã được sử dụng!"));
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Lỗi đăng ký: " + e.getMessage()));
         }
-
-        // Kiểm tra email đã tồn tại chưa
-        if (nguoiDungRepository.existsByEmail(signupRequest.getEmail())) {
-            logger.warn("Registration failed: Email {} is already in use", signupRequest.getEmail());
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Lỗi: Email đã được sử dụng!"));
-        }
-
-        // Kiểm tra vai trò hợp lệ không
-        VaiTro vaiTro = vaiTroRepository.findByTenVaiTro(signupRequest.getVaiTro())
-                .orElseThrow(() -> {
-                    logger.error("Registration failed: Role {} not found", signupRequest.getVaiTro());
-                    return new RuntimeException("Lỗi: Vai trò không tồn tại!");
-                });
-
-        // Tạo tài khoản người dùng mới
-        NguoiDung nguoiDung = new NguoiDung();
-        nguoiDung.setTenDangNhap(signupRequest.getTenDangNhap());
-        nguoiDung.setMatKhau(encoder.encode(signupRequest.getMatKhau()));
-        nguoiDung.setEmail(signupRequest.getEmail());
-        nguoiDung.setHoTen(signupRequest.getHoTen());
-        nguoiDung.setSoDienThoai(signupRequest.getSoDienThoai());
-        nguoiDung.setTrangThaiHoatDong(true);
-        nguoiDung.setVaiTro(vaiTro);
-
-        // Lưu thông tin người dùng vào database
-        NguoiDung savedNguoiDung = nguoiDungRepository.save(nguoiDung);
-
-        // Xử lý dữ liệu phụ thuộc vào vai trò
-        String tenVaiTro = vaiTro.getTenVaiTro();
-
-        if ("BACSI".equals(tenVaiTro)) {
-            // Tạo thông tin bác sĩ
-            BacSi bacSi = new BacSi();
-            bacSi.setNguoiDung(savedNguoiDung);  // Thiết lập mối quan hệ với đối tượng NguoiDung
-            bacSi.setChuyenKhoa(signupRequest.getChuyenKhoa());
-            bacSi.setSoNamKinhNghiem(signupRequest.getSoNamKinhNghiem());
-            bacSi.setTrangThaiLamViec(true);
-
-            bacSiRepository.save(bacSi);
-            logger.info("Doctor information created for user: {}", signupRequest.getTenDangNhap());
-        } else if ("USER".equals(tenVaiTro)) {
-            // Tạo thông tin bệnh nhân
-            BenhNhan benhNhan = new BenhNhan();
-            benhNhan.setNguoiDung(savedNguoiDung);  // Thiết lập mối quan hệ với đối tượng NguoiDung
-            benhNhan.setHoTen(signupRequest.getHoTen());
-            benhNhan.setNgaySinh(signupRequest.getNgaySinh());
-            benhNhan.setGioiTinh(signupRequest.getGioiTinh());
-            benhNhan.setSoDienThoai(signupRequest.getSoDienThoai());
-            benhNhan.setEmail(signupRequest.getEmail());
-            benhNhan.setDiaChi(signupRequest.getDiaChi());
-            benhNhan.setTienSuBenh(signupRequest.getTienSuBenh());
-            benhNhan.setDiUng(signupRequest.getDiUng());
-
-            benhNhanRepository.save(benhNhan);
-            logger.info("Patient information created for user: {}", signupRequest.getTenDangNhap());
-        }
-
-        logger.info("User registered successfully: {}", signupRequest.getTenDangNhap());
-        return ResponseEntity.ok(new MessageResponse("Đăng ký người dùng thành công!"));
     }
 
 }

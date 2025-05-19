@@ -27,10 +27,10 @@ public class SignupRequest {
     @Size(min = 3, max = 100)
     private String hoTen;
 
+    @NotBlank
     @Size(max = 20)
     private String soDienThoai;
 
-    @NotBlank
     private String vaiTro;
 
     // Thông tin cho bác sĩ
