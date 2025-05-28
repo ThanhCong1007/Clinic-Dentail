@@ -67,6 +67,7 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("Auth API is running"));
     }
 
+
     /**
      * Xử lý yêu cầu đăng nhập
      * @param loginRequest Thông tin đăng nhập
