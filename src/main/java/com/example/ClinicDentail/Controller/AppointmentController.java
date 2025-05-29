@@ -337,56 +337,6 @@ public class AppointmentController {
         }
     }
 
-//    /**
-//     * API để xóa lịch hẹn
-//     */
-//    @DeleteMapping("/{maLichHen}")
-//    public ResponseEntity<?> deleteAppointment(@PathVariable Integer maLichHen) {
-//        try {
-//            logger.info("Deleting appointment ID: {}", maLichHen);
-//
-//            Optional<LichHen> lichHenOpt = lichHenRepository.findById(maLichHen);
-//            if (!lichHenOpt.isPresent()) {
-//                logger.warn("Delete appointment failed: Appointment ID {} not found", maLichHen);
-//                return ResponseEntity
-//                        .status(HttpStatus.NOT_FOUND)
-//                        .body(new MessageResponse("Không tìm thấy lịch hẹn với mã: " + maLichHen));
-//            }
-//
-//            LichHen lichHen = lichHenOpt.get();
-//
-//            LocalDate today = LocalDate.now();
-//            if (lichHen.getNgayHen().isBefore(today)) {
-//                logger.warn("Delete appointment failed: Cannot delete past appointment ID {}", maLichHen);
-//                return ResponseEntity
-//                        .badRequest()
-//                        .body(new MessageResponse("Không thể xóa lịch hẹn đã diễn ra trong quá khứ!"));
-//            }
-//
-//            String tenTrangThai = lichHen.getTrangThai().getTenTrangThai();
-//            if ("Đã hoàn thành".equalsIgnoreCase(tenTrangThai) || "Đã hủy".equalsIgnoreCase(tenTrangThai)) {
-//                logger.warn("Delete appointment failed: Cannot delete appointment ID {} with status {}", maLichHen, tenTrangThai);
-//                return ResponseEntity
-//                        .badRequest()
-//                        .body(new MessageResponse("Không thể xóa lịch hẹn đã hoàn thành hoặc đã hủy!"));
-//            }
-//
-//            // Lưu thông tin để trả về sau khi xóa
-//            LichHenDTO lichHenDTO = new LichHenDTO(lichHen);
-//
-//            lichHenRepository.delete(lichHen);
-//            logger.info("Appointment ID {} deleted successfully", maLichHen);
-//
-//            return ResponseEntity.ok(lichHenDTO);
-//        } catch (Exception e) {
-//            logger.error("Error deleting appointment: " + e.getMessage(), e);
-//            return ResponseEntity
-//                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new MessageResponse("Lỗi khi xóa lịch hẹn: " + e.getMessage()));
-//        }
-//    }
-
-
     /**
      * API để hủy lịch hẹn (thay đổi trạng thái thành "Đã hủy" thay vì xóa hoàn toàn)
      */
@@ -455,4 +405,53 @@ public class AppointmentController {
         }
     }
 
+
+//    /**
+//     * API để xóa lịch hẹn
+//     */
+//    @DeleteMapping("/{maLichHen}")
+//    public ResponseEntity<?> deleteAppointment(@PathVariable Integer maLichHen) {
+//        try {
+//            logger.info("Deleting appointment ID: {}", maLichHen);
+//
+//            Optional<LichHen> lichHenOpt = lichHenRepository.findById(maLichHen);
+//            if (!lichHenOpt.isPresent()) {
+//                logger.warn("Delete appointment failed: Appointment ID {} not found", maLichHen);
+//                return ResponseEntity
+//                        .status(HttpStatus.NOT_FOUND)
+//                        .body(new MessageResponse("Không tìm thấy lịch hẹn với mã: " + maLichHen));
+//            }
+//
+//            LichHen lichHen = lichHenOpt.get();
+//
+//            LocalDate today = LocalDate.now();
+//            if (lichHen.getNgayHen().isBefore(today)) {
+//                logger.warn("Delete appointment failed: Cannot delete past appointment ID {}", maLichHen);
+//                return ResponseEntity
+//                        .badRequest()
+//                        .body(new MessageResponse("Không thể xóa lịch hẹn đã diễn ra trong quá khứ!"));
+//            }
+//
+//            String tenTrangThai = lichHen.getTrangThai().getTenTrangThai();
+//            if ("Đã hoàn thành".equalsIgnoreCase(tenTrangThai) || "Đã hủy".equalsIgnoreCase(tenTrangThai)) {
+//                logger.warn("Delete appointment failed: Cannot delete appointment ID {} with status {}", maLichHen, tenTrangThai);
+//                return ResponseEntity
+//                        .badRequest()
+//                        .body(new MessageResponse("Không thể xóa lịch hẹn đã hoàn thành hoặc đã hủy!"));
+//            }
+//
+//            // Lưu thông tin để trả về sau khi xóa
+//            LichHenDTO lichHenDTO = new LichHenDTO(lichHen);
+//
+//            lichHenRepository.delete(lichHen);
+//            logger.info("Appointment ID {} deleted successfully", maLichHen);
+//
+//            return ResponseEntity.ok(lichHenDTO);
+//        } catch (Exception e) {
+//            logger.error("Error deleting appointment: " + e.getMessage(), e);
+//            return ResponseEntity
+//                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new MessageResponse("Lỗi khi xóa lịch hẹn: " + e.getMessage()));
+//        }
+//    }
 }

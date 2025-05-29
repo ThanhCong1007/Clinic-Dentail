@@ -1,8 +1,10 @@
 package com.example.ClinicDentail.DTO;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-
+@Data
 public class LichHenDTO {
     private Integer maLichHen;
     private Integer maBenhNhan;
@@ -59,124 +61,4 @@ public class LichHenDTO {
         this.thoiGian = lichHen.getThoiLuong();
     }
 
-    // Getters and Setters
-    public Integer getMaLichHen() {
-        return maLichHen;
-    }
-
-    public void setMaLichHen(Integer maLichHen) {
-        this.maLichHen = maLichHen;
-    }
-
-    public Integer getMaBenhNhan() {
-        return maBenhNhan;
-    }
-
-    public void setMaBenhNhan(Integer maBenhNhan) {
-        this.maBenhNhan = maBenhNhan;
-    }
-
-    public String getTenBenhNhan() {
-        return tenBenhNhan;
-    }
-
-    public void setTenBenhNhan(String tenBenhNhan) {
-        this.tenBenhNhan = tenBenhNhan;
-    }
-
-    public String getSoDienThoaiBenhNhan() {
-        return soDienThoaiBenhNhan;
-    }
-
-    public void setSoDienThoaiBenhNhan(String soDienThoaiBenhNhan) {
-        this.soDienThoaiBenhNhan = soDienThoaiBenhNhan;
-    }
-
-    public Integer getMaBacSi() {
-        return maBacSi;
-    }
-
-    public void setMaBacSi(Integer maBacSi) {
-        this.maBacSi = maBacSi;
-    }
-
-    public String getTenBacSi() {
-        return tenBacSi;
-    }
-
-    public void setTenBacSi(String tenBacSi) {
-        this.tenBacSi = tenBacSi;
-    }
-
-    public Integer getMaDichVu() {
-        return maDichVu;
-    }
-
-    public void setMaDichVu(Integer maDichVu) {
-        this.maDichVu = maDichVu;
-    }
-
-    public String getTenDichVu() {
-        return tenDichVu;
-    }
-
-    public void setTenDichVu(String tenDichVu) {
-        this.tenDichVu = tenDichVu;
-    }
-
-    public LocalDate getNgayHen() {
-        return ngayHen;
-    }
-
-    public void setNgayHen(LocalDate ngayHen) {
-        this.ngayHen = ngayHen;
-    }
-
-    public LocalTime getGioBatDau() {
-        return gioBatDau;
-    }
-
-    public void setGioBatDau(LocalTime gioBatDau) {
-        this.gioBatDau = gioBatDau;
-    }
-
-    public LocalTime getGioKetThuc() {
-        return gioKetThuc;
-    }
-
-    public void setGioKetThuc(LocalTime gioKetThuc) {
-        this.gioKetThuc = gioKetThuc;
-    }
-
-    public Integer getMaTrangThai() {
-        return maTrangThai;
-    }
-
-    public void setMaTrangThai(Integer maTrangThai) {
-        this.maTrangThai = maTrangThai;
-    }
-
-    public String getTenTrangThai() {
-        return tenTrangThai;
-    }
-
-    public void setTenTrangThai(String tenTrangThai) {
-        this.tenTrangThai = tenTrangThai;
-    }
-
-    public String getGhiChu() {
-        return ghiChu;
-    }
-
-    public void setGhiChu(String ghiChu) {
-        this.ghiChu = ghiChu;
-    }
-
-    public long getThoiGian() {
-        return thoiGian;
-    }
-
-    public void setThoiGian(long thoiGian) {
-        this.thoiGian = thoiGian;
-    }
 }

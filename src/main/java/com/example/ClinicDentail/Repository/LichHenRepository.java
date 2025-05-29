@@ -24,7 +24,14 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
             @Param("ngayHen") LocalDate ngayHen,
             @Param("gioKetThuc") LocalTime gioKetThuc,
             @Param("gioBatDau") LocalTime gioBatDau);
-
+    @Query("SELECT l FROM LichHen l WHERE l.bacSi.maBacSi = :maBacSi AND l.ngayHen = :ngayHen AND " +
+            "((l.gioBatDau <= :gioBatDau AND l.gioKetThuc > :gioBatDau) OR " +
+            "(l.gioBatDau < :gioKetThuc AND l.gioKetThuc >= :gioKetThuc) OR " +
+            "(l.gioBatDau >= :gioBatDau AND l.gioKetThuc <= :gioKetThuc))")
+    List<LichHen> findConflictingAppointments(@Param("maBacSi") Integer maBacSi,
+                                              @Param("ngayHen") LocalDate ngayHen,
+                                              @Param("gioBatDau") LocalTime gioBatDau,
+                                              @Param("gioKetThuc") LocalTime gioKetThuc);
 ////     Kiểm tra xem bác sĩ có lịch hẹn trùng trong khoảng thời gian này không
 //    boolean existsByMaBacSiAndNgayHenAndGioBatDauBeforeAndGioKetThucAfter(
 //            Integer maBacSi, LocalDate ngayHen, LocalTime gioKetThuc, LocalTime gioBatDau);
