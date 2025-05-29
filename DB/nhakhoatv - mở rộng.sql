@@ -430,15 +430,15 @@ INSERT INTO vai_tro (ma_vai_tro, ten_vai_tro, mo_ta) VALUES
 INSERT INTO nguoi_dung (ma_vai_tro, ten_dang_nhap, mat_khau, email, ho_ten, so_dien_thoai)
 VALUES
 -- ADMIN
-(5, 'admin01', 'admin@123', 'admin01@example.com', 'Nguyễn Văn A', '0901234567'),
+(5, 'admin01', '234', 'admin01@example.com', 'Nguyễn Văn A', '0901234567'),
 
 -- BACSI
-(6, 'bacsi01', 'bacsi@123', 'bacsi01@example.com', 'Trần Thị B', '0912345678'),
-(6, 'bacsi02', 'bacsi@123', 'bacsi02@example.com', 'Lê Văn C', '0923456789'),
+(6, 'bacsi01', '234', 'bacsi01@example.com', 'Trần Thị B', '0912345678'),
+(6, 'bacsi02', '234', 'bacsi02@example.com', 'Lê Văn C', '0923456789'),
 
 -- USER
-(7, 'user01', 'user@123', 'user01@example.com', 'Phạm Thị D', '0934567890'),
-(7, 'user02', 'user@123', 'user02@example.com', 'Đỗ Văn E', '0945678901');
+(7, 'user01', '234', 'user01@example.com', 'Phạm Thị D', '0934567890'),
+(7, 'user02', '234', 'user02@example.com', 'Đỗ Văn E', '0945678901');
 INSERT INTO bac_si (ma_nguoi_dung, chuyen_khoa, so_nam_kinh_nghiem)
 VALUES
     (2, 'Răng hàm mặt', 5),
