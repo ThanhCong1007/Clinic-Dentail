@@ -67,20 +67,34 @@ public class UserDTO {
 
     // Constructor từ BenhNhan entity
     public UserDTO(BenhNhan benhNhan) {
-        this(benhNhan.getNguoiDung()); // Gọi constructor trên
+        if (benhNhan.getNguoiDung() != null) {
+            NguoiDung nguoiDung = benhNhan.getNguoiDung();
+            this.maNguoiDung = nguoiDung.getMaNguoiDung();
+            this.tenDangNhap = nguoiDung.getTenDangNhap();
+            this.email = nguoiDung.getEmail();
+            this.hoTen = nguoiDung.getHoTen();
+            this.soDienThoai = nguoiDung.getSoDienThoai();
+            this.trangThaiHoatDong = nguoiDung.getTrangThaiHoatDong();
+            this.ngayTao = nguoiDung.getNgayTao();
+
+            if (nguoiDung.getVaiTro() != null) {
+                this.maVaiTro = nguoiDung.getVaiTro().getMaVaiTro();
+                this.tenVaiTro = nguoiDung.getVaiTro().getTenVaiTro();
+            }
+        }
 
         this.maBenhNhan = benhNhan.getMaBenhNhan();
         this.ngaySinh = benhNhan.getNgaySinh();
-        this.gioiTinh = benhNhan.getGioiTinh().toString();
+        this.gioiTinh = benhNhan.getGioiTinh() != null ? benhNhan.getGioiTinh().toString() : null;
         this.diaChi = benhNhan.getDiaChi();
         this.tienSuBenh = benhNhan.getTienSuBenh();
         this.diUng = benhNhan.getDiUng();
 
-        // Tính tuổi từ ngày sinh
         if (benhNhan.getNgaySinh() != null) {
             this.tuoi = Period.between(benhNhan.getNgaySinh(), LocalDate.now()).getYears();
         }
     }
+
 
     // Method để tạo DTO từ NguoiDung với thông tin mở rộng
     public static UserDTO fromNguoiDungWithDetails(NguoiDung nguoiDung, BacSi bacSi, BenhNhan benhNhan) {
