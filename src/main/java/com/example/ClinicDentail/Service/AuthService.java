@@ -1,6 +1,5 @@
 package com.example.ClinicDentail.Service;
 
-import com.example.ClinicDentail.Controller.AuthUtils;
 import com.example.ClinicDentail.Enity.BenhNhan;
 import com.example.ClinicDentail.Enity.NguoiDung;
 import com.example.ClinicDentail.Enity.VaiTro;

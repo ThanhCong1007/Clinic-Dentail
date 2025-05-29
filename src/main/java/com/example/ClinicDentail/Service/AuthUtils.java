@@ -1,4 +1,4 @@
-package com.example.ClinicDentail.Controller;
+package com.example.ClinicDentail.Service;
 
 import com.example.ClinicDentail.Enity.NguoiDung;
 import com.example.ClinicDentail.Repository.NguoiDungRepository;
