@@ -1,9 +1,12 @@
 package com.example.ClinicDentail.Controller;
 
-
 import com.example.ClinicDentail.DTO.UserDTO;
-import com.example.ClinicDentail.Enity.*;
-import com.example.ClinicDentail.Repository.*;
+import com.example.ClinicDentail.Enity.BacSi;
+import com.example.ClinicDentail.Enity.BenhNhan;
+import com.example.ClinicDentail.Repository.BacSiRepository;
+import com.example.ClinicDentail.Repository.BenhNhanRepository;
+import com.example.ClinicDentail.Repository.NguoiDungRepository;
+import com.example.ClinicDentail.Repository.VaiTroRepository;
 import com.example.ClinicDentail.Service.UserDTOConverter;
 import com.example.ClinicDentail.payload.request.MessageResponse;
 import org.slf4j.Logger;
@@ -17,12 +20,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.HashMap;
 import java.util.Map;
-
 
 @RestController
 @RequestMapping("/api/bacsi")
@@ -38,14 +40,6 @@ public class BacsiController {
 
     @Autowired
     private UserDTOConverter userDTOConverter;
-    @Autowired
-    private LichHenRepository lichHenRepository;
-    @Autowired
-    private BenhAnrepository benhAnrepository;
-    @Autowired
-    private TrangThaiLichHenRepository trangThaiLichHenRepository;
-    @Autowired
-    private DichVuRepository dichVuRepository;
 
     /**
      * Xem tất cả bệnh nhân
@@ -166,7 +160,6 @@ public class BacsiController {
                     .body(new MessageResponse("Lỗi: Không thể lấy thông tin bác sĩ!"));
         }
     }
-
 
 
 }
