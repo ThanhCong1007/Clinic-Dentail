@@ -179,7 +179,7 @@ public class AppointmentService {
 
         // Update status and notes
         lichHen.setTrangThai(trangThaiHuyOpt.get());
-        updateCancellationNotes(lichHen, lyDo);
+//        updateCancellationNotes(lichHen, lyDo);
 
         // Save to database
         LichHen lichHenDaHuy = lichHenRepository.save(lichHen);
