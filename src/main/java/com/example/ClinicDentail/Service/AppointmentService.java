@@ -7,15 +7,20 @@ import com.example.ClinicDentail.payload.request.AppointmentRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@EnableScheduling
 public class AppointmentService {
 
     private static final Logger logger = LoggerFactory.getLogger(AppointmentService.class);
@@ -34,6 +39,71 @@ public class AppointmentService {
 
     @Autowired
     private TrangThaiLichHenRepository trangThaiLichHenRepository;
+    @Autowired
+    private BacSiService bacSiService;
+
+    /**
+     * Tự động hủy lịch hẹn quá hạn - chạy mỗi 30 phút
+     */
+//    @Scheduled(cron = "0 0 2 * * *") // 02:00 AM mỗi ngày
+    @Scheduled(fixedRate = 30 * 60 * 1000) // Mỗi 30 phút
+    @Transactional
+    public void tuDongHuyLichHenQuaHan() {
+        try {
+            logger.info("Bắt đầu kiểm tra và hủy lịch hẹn quá hạn...");
+
+            // Kiểm tra số lượng lịch hẹn quá hạn trước khi hủy
+            int soLuongTruocKhiHuy = lichHenRepository.demLichHenQuaHan();
+
+            if (soLuongTruocKhiHuy == 0) {
+                logger.debug("Không có lịch hẹn quá hạn nào cần hủy.");
+                return;
+            }
+
+            // Log danh sách lịch hẹn sẽ bị hủy (optional)
+            List<LichHen> danhSachQuaHan = lichHenRepository.findLichHenQuaHan();
+            for (LichHen lichHen : danhSachQuaHan) {
+                logger.warn("Lịch hẹn quá hạn sẽ bị hủy - ID: {}, Bệnh nhân: {}, Ngày hẹn: {}, Trạng thái hiện tại: {}",
+                        lichHen.getMaLichHen(),
+                        lichHen.getBenhNhan().getHoTen(),
+                        lichHen.getNgayHen(),
+                        lichHen.getTrangThai().getTenTrangThai());
+            }
+
+            String lyDo = "Tự động hủy do quá hạn khám bệnh";
+            int soLuong = lichHenRepository.huyLichHenQuaHan(lyDo);
+
+            logger.info("Đã tự động hủy {} lịch hẹn quá hạn.", soLuong);
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi tự động hủy lịch hẹn quá hạn: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Kiểm tra thủ công số lượng lịch hẹn quá hạn
+     */
+    public int kiemTraLichHenQuaHan() {
+        return lichHenRepository.demLichHenQuaHan();
+    }
+
+    /**
+     * Hủy thủ công lịch hẹn quá hạn (nếu cần)
+     */
+    @Transactional
+    public int huyThuCongLichHenQuaHan() {
+        String lyDo = "Hủy thủ công do quá hạn khám bệnh";
+        int soLuong = lichHenRepository.huyLichHenQuaHan(lyDo);
+        logger.info("Đã hủy thủ công {} lịch hẹn quá hạn.", soLuong);
+        return soLuong;
+    }
+
+    /**
+     * Lấy danh sách chi tiết lịch hẹn quá hạn
+     */
+    public List<LichHen> getDanhSachLichHenQuaHan() {
+        return lichHenRepository.findLichHenQuaHan();
+    }
 
     /**
      * Đăng ký lịch hẹn mới
@@ -330,6 +400,170 @@ public class AppointmentService {
                     ? ghiChuHienTai + "\nLý do hủy: " + lyDo
                     : "Lý do hủy: " + lyDo;
             lichHen.setGhiChu(ghiChuMoi);
+        }
+    }
+    /**
+     * Lấy danh sách lịch hẹn của bác sĩ theo ngày
+     */
+    public List<LichHenDTO> getAppointmentsByDoctorAndDate(Integer maBacSi, LocalDate date) {
+        try {
+            List<LichHen> lichHenList = lichHenRepository.findByBacSi_MaBacSiAndNgayHenOrderByGioBatDauAsc(maBacSi, date);
+            return lichHenList.stream()
+                    .map(LichHenDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy lịch hẹn theo bác sĩ và ngày: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy danh sách lịch hẹn của bác sĩ trong khoảng thời gian
+     */
+    public List<LichHenDTO> getAppointmentsByDoctorAndDateRange(Integer maBacSi, LocalDate fromDate, LocalDate toDate) {
+        try {
+            List<LichHen> lichHenList = lichHenRepository.findByBacSi_MaBacSiAndNgayHenBetweenOrderByNgayHenAscGioBatDauAsc(maBacSi, fromDate, toDate);
+            return lichHenList.stream()
+                    .map(LichHenDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy lịch hẹn trong khoảng thời gian: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Đếm số lượng lịch hẹn hôm nay
+     */
+    public long countTodayAppointments() {
+        try {
+            LocalDate today = LocalDate.now();
+            return lichHenRepository.countByNgayHen(today);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi đếm lịch hẹn hôm nay: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Đếm số lượng lịch hẹn của bác sĩ trong ngày
+     */
+    public long countAppointmentsByDoctorAndDate(Integer maBacSi, LocalDate date) {
+        try {
+            return lichHenRepository.countByBacSi_MaBacSiAndNgayHen(maBacSi, date);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi đếm lịch hẹn của bác sĩ: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Kiểm tra khung giờ có bị trung không
+     */
+    public boolean isTimeSlotConflict(Integer maBacSi, LocalDate date, LocalTime startTime, LocalTime endTime) {
+        try {
+            long conflictCount = lichHenRepository.countConflictingAppointments(maBacSi, date, startTime, endTime);
+            return conflictCount > 0;
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi kiểm tra xung đột lịch hẹn: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Kiểm tra khung giờ có khả dụng không (tổng hợp)
+     */
+    public boolean isTimeSlotAvailable(Integer maBacSi, LocalDate date, LocalTime startTime, LocalTime endTime) {
+        try {
+            // Kiểm tra bác sĩ có hoạt động không
+            if (!bacSiService.isDoctorActive(maBacSi)) {
+                return false;
+            }
+
+            // Kiểm tra ngày có phải ngày làm việc không (thứ 2-6)
+            int dayOfWeek = date.getDayOfWeek().getValue();
+            if (dayOfWeek > 5) { // 6 = thứ 7, 7 = chủ nhật
+                return false;
+            }
+
+            // Kiểm tra giờ làm việc (8:00-17:00, trừ 12:00-13:00)
+            LocalTime workStart = LocalTime.of(8, 0);
+            LocalTime workEnd = LocalTime.of(17, 0);
+            LocalTime lunchStart = LocalTime.of(12, 0);
+            LocalTime lunchEnd = LocalTime.of(13, 0);
+
+            if (startTime.isBefore(workStart) || endTime.isAfter(workEnd)) {
+                return false;
+            }
+
+            // Kiểm tra có trùng giờ nghỉ trưa không
+            if (!(endTime.isBefore(lunchStart) || startTime.isAfter(lunchEnd))) {
+                return false;
+            }
+
+            // Kiểm tra xung đột với lịch hẹn khác
+            return !isTimeSlotConflict(maBacSi, date, startTime, endTime);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi kiểm tra tính khả dụng của khung giờ: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy lịch hẹn theo ID
+     */
+    public LichHenDTO getAppointmentById(Integer maLichHen) {
+        try {
+            return lichHenRepository.findById(maLichHen)
+                    .map(LichHenDTO::new)
+                    .orElse(null);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy lịch hẹn theo ID: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy lịch hẹn sắp tới của bác sĩ
+     */
+    public List<LichHenDTO> getUpcomingAppointmentsByDoctor(Integer maBacSi, int limit) {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            List<LichHen> lichHenList = lichHenRepository.findUpcomingAppointmentsByDoctor(maBacSi, now.toLocalDate(), now.toLocalTime(), limit);
+            return lichHenList.stream()
+                    .map(LichHenDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy lịch hẹn sắp tới: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy lịch hẹn theo trạng thái
+     */
+    public List<LichHenDTO> getAppointmentsByStatus(Integer maTrangThai) {
+        try {
+            List<LichHen> lichHenList = lichHenRepository.findByTrangThai_MaTrangThaiOrderByNgayHenDescGioBatDauDesc(maTrangThai);
+            return lichHenList.stream()
+                    .map(LichHenDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy lịch hẹn theo trạng thái: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Đếm lịch hẹn theo trạng thái
+     */
+    public long countAppointmentsByStatus(Integer maTrangThai) {
+        try {
+            return lichHenRepository.countByTrangThai_MaTrangThai(maTrangThai);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi đếm lịch hẹn theo trạng thái: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy thống kê lịch hẹn theo tháng
+     */
+    public List<Object[]> getMonthlyAppointmentStats(int year, int month) {
+        try {
+            return lichHenRepository.getMonthlyAppointmentStats(year, month);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy thống kê lịch hẹn theo tháng: " + e.getMessage());
         }
     }
 }

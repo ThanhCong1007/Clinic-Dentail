@@ -52,6 +52,9 @@ public class LichHen {
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
 
+    @Column(name = "ly_do", columnDefinition = "TEXT")
+    private String lydo;
+
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
 

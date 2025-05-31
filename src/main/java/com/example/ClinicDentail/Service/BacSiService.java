@@ -16,7 +16,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BacSiService {
@@ -117,6 +120,20 @@ public class BacSiService {
             throw new RuntimeException("Không thể lấy thông tin bác sĩ!");
         }
     }
+//    /**
+//     * Lấy thông tin chi tiết bác sĩ theo ID
+//     */
+//    public UserDTO getDoctorById(Integer maBacSi) {
+//        try {
+//            Optional<BacSi> bacSiOptional = bacSiRepository.findByMaBacSiAndTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue(maBacSi);
+//            if (bacSiOptional.isPresent()) {
+//                return new UserDTO(bacSiOptional.get());
+//            }
+//            return null;
+//        } catch (Exception e) {
+//            throw new RuntimeException("Lỗi khi lấy thông tin bác sĩ: " + e.getMessage());
+//        }
+//    }
 
     /**
      * Kiểm tra xem người dùng hiện tại có role USER không
@@ -140,6 +157,109 @@ public class BacSiService {
             logger.warn("User {} attempted to access patient info of {}",
                     currentUsername, benhNhan.getNguoiDung().getTenDangNhap());
             throw new SecurityException("Bạn chỉ có thể xem thông tin của chính mình!");
+        }
+    }
+    /**
+     * Lấy danh sách tất cả bác sĩ đang hoạt động
+     */
+    public List<UserDTO> getAllActiveDoctors() {
+        try {
+            List<BacSi> bacSiList = bacSiRepository.findByTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue();
+            return bacSiList.stream()
+                    .map(UserDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy danh sách bác sĩ: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy danh sách bác sĩ theo chuyên khoa
+     */
+    public List<UserDTO> getDoctorsBySpecialty(String chuyenKhoa) {
+        try {
+            List<BacSi> bacSiList = bacSiRepository.findByChuyenKhoaContainingIgnoreCaseAndTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue(chuyenKhoa);
+            return bacSiList.stream()
+                    .map(UserDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy bác sĩ theo chuyên khoa: " + e.getMessage());
+        }
+    }
+
+
+
+    /**
+     * Lấy danh sách tất cả chuyên khoa
+     */
+    public List<String> getAllSpecialties() {
+        try {
+            return bacSiRepository.findDistinctChuyenKhoaByTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue();
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy danh sách chuyên khoa: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Đếm số lượng bác sĩ đang hoạt động
+     */
+    public long countActiveDoctors() {
+        try {
+            return bacSiRepository.countByTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue();
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi đếm số bác sĩ: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Đếm số lượng chuyên khoa
+     */
+    public long countSpecialties() {
+        try {
+            return bacSiRepository.countDistinctChuyenKhoaByTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue();
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi đếm số chuyên khoa: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Kiểm tra bác sĩ có tồn tại và đang hoạt động không
+     */
+    public boolean isDoctorActive(Integer maBacSi) {
+        try {
+            return bacSiRepository.existsByMaBacSiAndTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue(maBacSi);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi kiểm tra trạng thái bác sĩ: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy thông tin bác sĩ bao gồm cả thông tin người dùng
+     */
+    public UserDTO getDoctorWithUserInfo(Integer maBacSi) {
+        try {
+            Optional<BacSi> bacSiOptional = bacSiRepository.findById(maBacSi);
+            if (bacSiOptional.isPresent()) {
+                BacSi bacSi = bacSiOptional.get();
+                return UserDTO.fromNguoiDungWithDetails(bacSi.getNguoiDung(), bacSi, null);
+            }
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy thông tin chi tiết bác sĩ: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Tìm kiếm bác sĩ theo tên hoặc chuyên khoa
+     */
+    public List<UserDTO> searchDoctors(String keyword) {
+        try {
+            List<BacSi> bacSiList = bacSiRepository.findByNguoiDung_HoTenContainingIgnoreCaseOrChuyenKhoaContainingIgnoreCaseAndTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue(keyword, keyword);
+            return bacSiList.stream()
+                    .map(UserDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi tìm kiếm bác sĩ: " + e.getMessage());
         }
     }
 }

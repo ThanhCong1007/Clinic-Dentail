@@ -78,6 +78,7 @@ CREATE TABLE lich_hen (
     gio_ket_thuc TIME NOT NULL,
     ma_trang_thai INT NOT NULL,
     ghi_chu TEXT,
+    ly_do TEXT,
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ma_benh_nhan) REFERENCES benh_nhan(ma_benh_nhan),
     FOREIGN KEY (ma_bac_si) REFERENCES bac_si(ma_bac_si),
