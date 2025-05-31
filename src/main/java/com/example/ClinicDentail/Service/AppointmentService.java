@@ -393,15 +393,6 @@ public class AppointmentService {
         }
     }
 
-    private void updateCancellationNotes(LichHen lichHen, String lyDo) {
-        if (lyDo != null && !lyDo.trim().isEmpty()) {
-            String ghiChuHienTai = lichHen.getGhiChu();
-            String ghiChuMoi = (ghiChuHienTai != null && !ghiChuHienTai.isEmpty())
-                    ? ghiChuHienTai + "\nLý do hủy: " + lyDo
-                    : "Lý do hủy: " + lyDo;
-            lichHen.setGhiChu(ghiChuMoi);
-        }
-    }
     /**
      * Lấy danh sách lịch hẹn của bác sĩ theo ngày
      */
@@ -450,56 +441,6 @@ public class AppointmentService {
             return lichHenRepository.countByBacSi_MaBacSiAndNgayHen(maBacSi, date);
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi đếm lịch hẹn của bác sĩ: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Kiểm tra khung giờ có bị trung không
-     */
-    public boolean isTimeSlotConflict(Integer maBacSi, LocalDate date, LocalTime startTime, LocalTime endTime) {
-        try {
-            long conflictCount = lichHenRepository.countConflictingAppointments(maBacSi, date, startTime, endTime);
-            return conflictCount > 0;
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi kiểm tra xung đột lịch hẹn: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Kiểm tra khung giờ có khả dụng không (tổng hợp)
-     */
-    public boolean isTimeSlotAvailable(Integer maBacSi, LocalDate date, LocalTime startTime, LocalTime endTime) {
-        try {
-            // Kiểm tra bác sĩ có hoạt động không
-            if (!bacSiService.isDoctorActive(maBacSi)) {
-                return false;
-            }
-
-            // Kiểm tra ngày có phải ngày làm việc không (thứ 2-6)
-            int dayOfWeek = date.getDayOfWeek().getValue();
-            if (dayOfWeek > 5) { // 6 = thứ 7, 7 = chủ nhật
-                return false;
-            }
-
-            // Kiểm tra giờ làm việc (8:00-17:00, trừ 12:00-13:00)
-            LocalTime workStart = LocalTime.of(8, 0);
-            LocalTime workEnd = LocalTime.of(17, 0);
-            LocalTime lunchStart = LocalTime.of(12, 0);
-            LocalTime lunchEnd = LocalTime.of(13, 0);
-
-            if (startTime.isBefore(workStart) || endTime.isAfter(workEnd)) {
-                return false;
-            }
-
-            // Kiểm tra có trùng giờ nghỉ trưa không
-            if (!(endTime.isBefore(lunchStart) || startTime.isAfter(lunchEnd))) {
-                return false;
-            }
-
-            // Kiểm tra xung đột với lịch hẹn khác
-            return !isTimeSlotConflict(maBacSi, date, startTime, endTime);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi kiểm tra tính khả dụng của khung giờ: " + e.getMessage());
         }
     }
 
