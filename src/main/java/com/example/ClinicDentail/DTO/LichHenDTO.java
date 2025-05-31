@@ -20,6 +20,7 @@ public class LichHenDTO {
     private Integer maTrangThai;
     private String tenTrangThai;
     private String ghiChu;
+    private String lydo;
     private long thoiGian; // thời lượng phút
 
     // Constructors
@@ -58,6 +59,7 @@ public class LichHenDTO {
         this.gioBatDau = lichHen.getGioBatDau();
         this.gioKetThuc = lichHen.getGioKetThuc();
         this.ghiChu = lichHen.getGhiChu();
+        this.lydo = lichHen.getLydo();
         this.thoiGian = lichHen.getThoiLuong();
     }
 

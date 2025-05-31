@@ -250,7 +250,7 @@ public class AppointmentService {
         // Update status and notes
         lichHen.setTrangThai(trangThaiHuyOpt.get());
 //        updateCancellationNotes(lichHen, lyDo);
-
+        lichHen.setLydo(lyDo);
         // Save to database
         LichHen lichHenDaHuy = lichHenRepository.save(lichHen);
         logger.info("Appointment ID {} cancelled successfully", maLichHen);

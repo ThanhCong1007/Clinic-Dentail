@@ -164,11 +164,11 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE lich_hen SET ma_trang_thai = 5, ly_do = :lyDo, " +
-            "ghi_chu = CONCAT(COALESCE(ghi_chu, ''), '\nLý do hủy: ', :lyDo) " +
+    @Query(value = "UPDATE lich_hen SET ma_trang_thai = 5, ly_do = :lyDo " +
             "WHERE ngay_hen < CURRENT_DATE AND ma_trang_thai NOT IN (4, 5)",
             nativeQuery = true)
     int huyLichHenQuaHan(@Param("lyDo") String lyDo);
+
 
     // Query đếm số lượng
     @Query("SELECT COUNT(lh) FROM LichHen lh WHERE lh.ngayHen < CURRENT_DATE AND lh.trangThai.maTrangThai NOT IN (4, 5)")
