@@ -225,7 +225,12 @@ public class LichHenService {
     }
 
     /**
-     * Hủy lịch hẹn
+     * Hủy lịch hẹn theo mã và lý do cung cấp.
+     *
+     * @param maLichHen Mã lịch hẹn
+     * @param lyDo      Lý do hủy
+     * @return Thông tin lịch hẹn đã được cập nhật trạng thái
+     * @throws RuntimeException nếu không tìm thấy lịch hẹn, trạng thái "Đã hủy" hoặc không hợp lệ để hủy
      */
     public LichHenDTO cancelAppointment(Integer maLichHen, String lyDo) {
         logger.info("Cancelling appointment ID: {}", maLichHen);
@@ -260,7 +265,13 @@ public class LichHenService {
     }
 
     // Private helper methods
-
+    /**
+     * Kiểm tra sự tồn tại của bệnh nhân theo mã bệnh nhân.
+     *
+     * @param maBenhNhan Mã bệnh nhân
+     * @return Thực thể BenhNhan tương ứng
+     * @throws RuntimeException nếu không tìm thấy bệnh nhân
+     */
     private BenhNhan validatePatient(Integer maBenhNhan) {
         Optional<BenhNhan> benhNhanOpt = benhNhanRepository.findById(maBenhNhan);
         if (!benhNhanOpt.isPresent()) {
@@ -270,6 +281,13 @@ public class LichHenService {
         return benhNhanOpt.get();
     }
 
+    /**
+     * Kiểm tra sự tồn tại và tình trạng làm việc của bác sĩ.
+     *
+     * @param maBacSi Mã bác sĩ
+     * @return Thực thể BacSi nếu tồn tại và đang làm việc
+     * @throws RuntimeException nếu không tìm thấy hoặc bác sĩ đã nghỉ làm
+     */
     private BacSi validateDoctor(Integer maBacSi) {
         Optional<BacSi> bacSiOpt = bacSiRepository.findById(maBacSi);
         if (!bacSiOpt.isPresent()) {
@@ -286,6 +304,13 @@ public class LichHenService {
         return bacSi;
     }
 
+    /**
+     * Kiểm tra dịch vụ có tồn tại và còn hoạt động hay không.
+     *
+     * @param maDichVu Mã dịch vụ
+     * @return Thực thể DichVu hoặc null nếu mã là null
+     * @throws RuntimeException nếu không tìm thấy hoặc dịch vụ đã ngừng hoạt động
+     */
     private DichVu validateService(Integer maDichVu) {
         if (maDichVu == null) {
             return null;
@@ -306,11 +331,18 @@ public class LichHenService {
         return dichVu;
     }
 
+    /**
+     * Kiểm tra và lấy trạng thái lịch hẹn theo mã.
+     * Nếu không tìm thấy, thử lấy trạng thái mặc định "Chờ xác nhận".
+     *
+     * @param maTrangThai Mã trạng thái lịch hẹn
+     * @return Thực thể TrangThaiLichHen
+     * @throws RuntimeException nếu không tìm thấy trạng thái hợp lệ
+     */
     private TrangThaiLichHen validateAppointmentStatus(Integer maTrangThai) {
         Optional<TrangThaiLichHen> trangThaiOpt = trangThaiLichHenRepository.findById(maTrangThai);
         if (!trangThaiOpt.isPresent()) {
             logger.warn("Status ID {} not found", maTrangThai);
-            // Try to get default status
             trangThaiOpt = trangThaiLichHenRepository.findByTenTrangThai("Chờ xác nhận");
             if (!trangThaiOpt.isPresent()) {
                 logger.error("Default appointment status not found");
@@ -320,6 +352,14 @@ public class LichHenService {
         return trangThaiOpt.get();
     }
 
+    /**
+     * Kiểm tra ngày và giờ hẹn có hợp lệ không.
+     *
+     * @param ngayHen     Ngày hẹn
+     * @param gioBatDau   Giờ bắt đầu
+     * @param gioKetThuc  Giờ kết thúc
+     * @throws RuntimeException nếu ngày trong quá khứ hoặc giờ không hợp lệ
+     */
     private void validateAppointmentTime(LocalDate ngayHen, LocalTime gioBatDau, LocalTime gioKetThuc) {
         if (ngayHen.isBefore(LocalDate.now())) {
             logger.warn("Appointment date {} is in the past", ngayHen);
@@ -332,6 +372,15 @@ public class LichHenService {
         }
     }
 
+    /**
+     * Kiểm tra bác sĩ có bị trùng lịch trong khung giờ được chọn hay không.
+     *
+     * @param maBacSi     Mã bác sĩ
+     * @param ngayHen     Ngày hẹn
+     * @param gioBatDau   Giờ bắt đầu
+     * @param gioKetThuc  Giờ kết thúc
+     * @throws RuntimeException nếu có lịch trùng
+     */
     private void checkDoctorAvailability(Integer maBacSi, LocalDate ngayHen, LocalTime gioBatDau, LocalTime gioKetThuc) {
         boolean isConflict = lichHenRepository.existsByMaBacSiAndNgayHenAndGioBatDauBeforeAndGioKetThucAfter(
                 maBacSi, ngayHen, gioKetThuc, gioBatDau);
@@ -343,6 +392,16 @@ public class LichHenService {
         }
     }
 
+    /**
+     * Kiểm tra lịch hẹn của bác sĩ khi cập nhật có bị trùng không (loại trừ chính lịch hiện tại).
+     *
+     * @param maBacSi     Mã bác sĩ
+     * @param maLichHen   Mã lịch hẹn hiện tại
+     * @param ngayHen     Ngày hẹn
+     * @param gioBatDau   Giờ bắt đầu
+     * @param gioKetThuc  Giờ kết thúc
+     * @throws RuntimeException nếu có lịch trùng
+     */
     private void checkDoctorAvailabilityForUpdate(Integer maBacSi, Integer maLichHen,
                                                   LocalDate ngayHen, LocalTime gioBatDau, LocalTime gioKetThuc) {
         boolean isConflict = lichHenRepository.existsByBacSi_MaBacSiAndMaLichHenNotAndNgayHenAndGioBatDauBeforeAndGioKetThucAfter(
@@ -355,6 +414,16 @@ public class LichHenService {
         }
     }
 
+    /**
+     * Tạo đối tượng lịch hẹn mới từ các thực thể đã xác minh và request đầu vào.
+     *
+     * @param benhNhan   Thực thể bệnh nhân
+     * @param bacSi      Thực thể bác sĩ
+     * @param dichVu     Thực thể dịch vụ (có thể null)
+     * @param trangThai  Trạng thái lịch hẹn
+     * @param request    Dữ liệu yêu cầu từ client
+     * @return Đối tượng LichHen mới chưa lưu vào DB
+     */
     private LichHen createAppointment(BenhNhan benhNhan, BacSi bacSi, DichVu dichVu,
                                       TrangThaiLichHen trangThai, AppointmentRequest request) {
         LichHen lichHen = new LichHen();
@@ -369,6 +438,15 @@ public class LichHenService {
         return lichHen;
     }
 
+    /**
+     * Cập nhật thông tin lịch hẹn hiện tại từ các thực thể và dữ liệu request.
+     *
+     * @param lichHen    Lịch hẹn cần cập nhật
+     * @param bacSi      Bác sĩ mới
+     * @param dichVu     Dịch vụ mới
+     * @param trangThai  Trạng thái mới
+     * @param request    Dữ liệu mới từ client
+     */
     private void updateAppointmentFields(LichHen lichHen, BacSi bacSi, DichVu dichVu,
                                          TrangThaiLichHen trangThai, AppointmentRequest request) {
         lichHen.setBacSi(bacSi);
@@ -380,6 +458,15 @@ public class LichHenService {
         lichHen.setGhiChu(request.getGhiChu());
     }
 
+    /**
+     * Kiểm tra điều kiện để được phép hủy lịch hẹn.
+     * - Không cho hủy nếu lịch hẹn đã ở quá khứ.
+     * - Không cho hủy nếu trạng thái là "Đã hoàn thành" hoặc "Đã hủy".
+     *
+     * @param lichHen   Lịch hẹn cần kiểm tra
+     * @param maLichHen Mã lịch hẹn
+     * @throws RuntimeException nếu không hợp lệ để hủy
+     */
     private void validateCancellationConditions(LichHen lichHen, Integer maLichHen) {
         LocalDate today = LocalDate.now();
         if (lichHen.getNgayHen().isBefore(today)) {

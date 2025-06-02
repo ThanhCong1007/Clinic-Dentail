@@ -85,31 +85,4 @@ public class BacsiController {
                     .body(new MessageResponse("Lỗi: Không thể lấy thông tin bệnh nhân!"));
         }
     }
-
-    /**
-     * Xem thông tin chi tiết bác sĩ theo ID
-     * @param id ID của bác sĩ
-     * @return ResponseEntity chứa thông tin bác sĩ
-     */
-    @GetMapping("/doctors/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('BACSI') or hasRole('USER')")
-    public ResponseEntity<?> getDoctorById(@PathVariable Integer id) {
-
-        try {
-            UserDTO doctorDTO = bacSiService.getDoctorById(id);
-            return ResponseEntity.ok(doctorDTO);
-
-        } catch (RuntimeException e) {
-            logger.error("Runtime error getting doctor by ID {}: {}", id, e.getMessage());
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Lỗi: " + e.getMessage()));
-
-        } catch (Exception e) {
-            logger.error("Unexpected error getting doctor by ID {}: {}", id, e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageResponse("Lỗi: Không thể lấy thông tin bác sĩ!"));
-        }
-    }
 }

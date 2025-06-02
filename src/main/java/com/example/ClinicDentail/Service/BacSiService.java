@@ -173,8 +173,6 @@ public class BacSiService {
         }
     }
 
-
-
     /**
      * Lấy danh sách tất cả chuyên khoa
      */
