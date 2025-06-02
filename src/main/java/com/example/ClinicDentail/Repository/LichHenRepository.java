@@ -178,4 +178,5 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
     @Query("SELECT lh FROM LichHen lh WHERE lh.ngayHen < CURRENT_DATE AND lh.trangThai.maTrangThai NOT IN (4, 5)")
     List<LichHen> findLichHenQuaHan();
 
+    List<LichHen> findByBacSi_MaBacSiOrderByNgayTaoDesc(Integer bacSiMaBacSi);
 }

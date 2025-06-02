@@ -6,7 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface BenhAnRepository extends JpaRepository<BenhAn,Integer> {
-    Page<BenhAn> findByBenhNhan(Integer maBenhNhan, Pageable pageable);
+    Optional<BenhAn> findByLichHen_MaLichHen(Integer maLichHen);
+    List<BenhAn> findByBenhNhan_MaBenhNhanOrderByNgayTaoDesc(Integer maBenhNhan);
+    List<BenhAn> findByBacSi_MaBacSiOrderByNgayTaoDesc(Integer maBacSi);
 }

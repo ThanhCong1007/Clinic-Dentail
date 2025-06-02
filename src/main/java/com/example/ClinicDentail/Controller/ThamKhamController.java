@@ -1,14 +1,14 @@
 package com.example.ClinicDentail.Controller;
 
-import com.example.ClinicDentail.DTO.ThamKhamRequestDTO;
-import com.example.ClinicDentail.DTO.ThamKhamResponseDTO;
-import com.example.ClinicDentail.DTO.UserDTO;
+import com.example.ClinicDentail.DTO.*;
 import com.example.ClinicDentail.Enity.BenhNhan;
 import com.example.ClinicDentail.Service.ThamKhamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tham-kham")
@@ -19,25 +19,28 @@ public class ThamKhamController {
     private ThamKhamService thamKhamService;
 
     /**
-     * Thực hiện thăm khám cho bệnh nhân.
-     * - Nếu có mã lịch hẹn: kiểm tra lịch hẹn có thể thăm khám hay không.
-     * - Nếu không có lịch hẹn (khách vãng lai): kiểm tra họ tên và số điện thoại.
-     * @param request DTO chứa thông tin yêu cầu thăm khám:
-     *
-     * @return 200 OK nếu thăm khám thành công; 400 Bad Request nếu dữ liệu không hợp lệ hoặc có lỗi.
+     * ENDPOINT 1: Thực hiện thăm khám (dành cho bác sĩ khi khám bệnh nhân)
+     * - Xử lý cả khách hẹn trước và khách vãng lai
+     * - Tạo bệnh án tự động sau khi khám
+     * - Có thể tạo lịch hẹn mới nếu cần
      */
-    @PostMapping("/kham-benh")
+    @PostMapping("/tham-kham")
     @PreAuthorize("hasRole('BACSI')")
-    public ResponseEntity<?> thucHienThamKham(@RequestBody ThamKhamRequestDTO request) {
+    public ResponseEntity<?> thucHienThamKham(@RequestBody BenhAnDTO request) {
         try {
-            // Validate dữ liệu đầu vào
+            // Validate dữ liệu đầu vào cơ bản
             if (request.getMaBacSi() == null) {
                 return ResponseEntity.badRequest().body("Mã bác sĩ không được để trống");
             }
 
+            if (request.getLyDoKham() == null || request.getLyDoKham().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Lý do khám không được để trống");
+            }
+
+            // Validate theo từng trường hợp
             if (request.getMaLichHen() == null) {
-                // Trường hợp khách vãng lai - validate thông tin bắt buộc
-                if (request.getHoTen() == null || request.getHoTen().trim().isEmpty()) {
+                // Trường hợp khách vãng lai
+                if (request.getTenBenhNhan() == null || request.getTenBenhNhan().trim().isEmpty()) {
                     return ResponseEntity.badRequest().body("Họ tên không được để trống");
                 }
                 if (request.getSoDienThoai() == null || request.getSoDienThoai().trim().isEmpty()) {
@@ -50,11 +53,7 @@ public class ThamKhamController {
                 }
             }
 
-            if (request.getLyDoKham() == null || request.getLyDoKham().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("Lý do khám không được để trống");
-            }
-
-            ThamKhamResponseDTO response = thamKhamService.thamKhamBenhNhan(request);
+            BenhAnDTO response = thamKhamService.thamKhamBenhNhan(request);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -63,10 +62,27 @@ public class ThamKhamController {
     }
 
     /**
-     * Tìm kiếm thông tin bệnh nhân theo số điện thoại.
-     * @param soDienThoai Số điện thoại của bệnh nhân.
-     * @return 200 OK với thông tin bệnh nhân nếu tìm thấy; 404 Not Found nếu không có dữ liệu;
-     *         400 Bad Request nếu có lỗi trong quá trình xử lý.
+     * Cập nhật bệnh án hiện có
+     */
+    @PutMapping("/benh-an/{maBenhAn}")
+    @PreAuthorize("hasRole('BACSI')")
+    public ResponseEntity<?> capNhatBenhAn(
+            @PathVariable Integer maBenhAn,
+            @RequestBody BenhAnDTO request) {
+        try {
+            // Set mã bệnh án từ path variable
+            request.setMaBenhAn(maBenhAn);
+
+            BenhAnDTO result = thamKhamService.capNhatBenhAn(request);
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Tìm kiếm thông tin bệnh nhân theo số điện thoại
      */
     @GetMapping("/benh-nhan/sdt/{soDienThoai}")
     @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
@@ -84,16 +100,70 @@ public class ThamKhamController {
     }
 
     /**
-     * Kiểm tra xem lịch hẹn có thể thăm khám được hay không.
-     * @param maLichHen Mã lịch hẹn cần kiểm tra.
-     * @return 200 OK với kết quả {@code { "coTheKham": true/false }};
-     *         400 Bad Request nếu có lỗi xử lý.
+     * Kiểm tra xem lịch hẹn có thể thăm khám được hay không
      */
     @GetMapping("/lich-hen/{maLichHen}/kiem-tra")
+    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
     public ResponseEntity<?> kiemTraLichHen(@PathVariable Integer maLichHen) {
         try {
             boolean coTheKham = thamKhamService.kiemTraLichHenCoTheKham(maLichHen);
             return ResponseEntity.ok(java.util.Map.of("coTheKham", coTheKham));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy danh sách lịch hẹn kèm bệnh án theo bác sĩ
+     */
+    @GetMapping("/bac-si/{maBacSi}/lich-hen-benh-an")
+    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
+    public ResponseEntity<?> getLichHenBenhAnByBacSi(@PathVariable Integer maBacSi) {
+        try {
+            List<LichHenBenhAnDTO> result = thamKhamService.getLichHenBenhAnByBacSi(maBacSi);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy chi tiết lịch hẹn và bệnh án
+     */
+    @GetMapping("/lich-hen/{maLichHen}/chi-tiet")
+    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
+    public ResponseEntity<?> getChiTietLichHenBenhAn(@PathVariable Integer maLichHen) {
+        try {
+            LichHenBenhAnDTO result = thamKhamService.getChiTietLichHenBenhAn(maLichHen);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Xóa bệnh án
+     */
+    @DeleteMapping("/benh-an/{maBenhAn}")
+    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
+    public ResponseEntity<?> xoaBenhAn(@PathVariable Integer maBenhAn) {
+        try {
+            thamKhamService.xoaBenhAn(maBenhAn);
+            return ResponseEntity.ok("Xóa bệnh án thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy danh sách bệnh án của bệnh nhân
+     */
+    @GetMapping("/benh-nhan/{maBenhNhan}/benh-an")
+    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
+    public ResponseEntity<?> getBenhAnByBenhNhan(@PathVariable Integer maBenhNhan) {
+        try {
+            List<BenhAnDTO> result = thamKhamService.getBenhAnByBenhNhan(maBenhNhan);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         }
