@@ -120,20 +120,6 @@ public class BacSiService {
             throw new RuntimeException("Không thể lấy thông tin bác sĩ!");
         }
     }
-//    /**
-//     * Lấy thông tin chi tiết bác sĩ theo ID
-//     */
-//    public UserDTO getDoctorById(Integer maBacSi) {
-//        try {
-//            Optional<BacSi> bacSiOptional = bacSiRepository.findByMaBacSiAndTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue(maBacSi);
-//            if (bacSiOptional.isPresent()) {
-//                return new UserDTO(bacSiOptional.get());
-//            }
-//            return null;
-//        } catch (Exception e) {
-//            throw new RuntimeException("Lỗi khi lấy thông tin bác sĩ: " + e.getMessage());
-//        }
-//    }
 
     /**
      * Kiểm tra xem người dùng hiện tại có role USER không
@@ -222,44 +208,4 @@ public class BacSiService {
         }
     }
 
-    /**
-     * Kiểm tra bác sĩ có tồn tại và đang hoạt động không
-     */
-    public boolean isDoctorActive(Integer maBacSi) {
-        try {
-            return bacSiRepository.existsByMaBacSiAndTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue(maBacSi);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi kiểm tra trạng thái bác sĩ: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Lấy thông tin bác sĩ bao gồm cả thông tin người dùng
-     */
-    public UserDTO getDoctorWithUserInfo(Integer maBacSi) {
-        try {
-            Optional<BacSi> bacSiOptional = bacSiRepository.findById(maBacSi);
-            if (bacSiOptional.isPresent()) {
-                BacSi bacSi = bacSiOptional.get();
-                return UserDTO.fromNguoiDungWithDetails(bacSi.getNguoiDung(), bacSi, null);
-            }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi lấy thông tin chi tiết bác sĩ: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Tìm kiếm bác sĩ theo tên hoặc chuyên khoa
-     */
-    public List<UserDTO> searchDoctors(String keyword) {
-        try {
-            List<BacSi> bacSiList = bacSiRepository.findByNguoiDung_HoTenContainingIgnoreCaseOrChuyenKhoaContainingIgnoreCaseAndTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue(keyword, keyword);
-            return bacSiList.stream()
-                    .map(UserDTO::new)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi tìm kiếm bác sĩ: " + e.getMessage());
-        }
-    }
 }

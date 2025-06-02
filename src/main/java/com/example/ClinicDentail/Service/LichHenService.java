@@ -39,6 +39,7 @@ public class LichHenService {
 
     @Autowired
     private TrangThaiLichHenRepository trangThaiLichHenRepository;
+
     @Autowired
     private BacSiService bacSiService;
 
@@ -408,20 +409,6 @@ public class LichHenService {
     }
 
     /**
-     * Lấy danh sách lịch hẹn của bác sĩ trong khoảng thời gian
-     */
-    public List<LichHenDTO> getAppointmentsByDoctorAndDateRange(Integer maBacSi, LocalDate fromDate, LocalDate toDate) {
-        try {
-            List<LichHen> lichHenList = lichHenRepository.findByBacSi_MaBacSiAndNgayHenBetweenOrderByNgayHenAscGioBatDauAsc(maBacSi, fromDate, toDate);
-            return lichHenList.stream()
-                    .map(LichHenDTO::new)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi lấy lịch hẹn trong khoảng thời gian: " + e.getMessage());
-        }
-    }
-
-    /**
      * Đếm số lượng lịch hẹn hôm nay
      */
     public long countTodayAppointments() {
@@ -430,81 +417,6 @@ public class LichHenService {
             return lichHenRepository.countByNgayHen(today);
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi đếm lịch hẹn hôm nay: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Đếm số lượng lịch hẹn của bác sĩ trong ngày
-     */
-    public long countAppointmentsByDoctorAndDate(Integer maBacSi, LocalDate date) {
-        try {
-            return lichHenRepository.countByBacSi_MaBacSiAndNgayHen(maBacSi, date);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi đếm lịch hẹn của bác sĩ: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Lấy lịch hẹn theo ID
-     */
-    public LichHenDTO getAppointmentById(Integer maLichHen) {
-        try {
-            return lichHenRepository.findById(maLichHen)
-                    .map(LichHenDTO::new)
-                    .orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi lấy lịch hẹn theo ID: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Lấy lịch hẹn sắp tới của bác sĩ
-     */
-    public List<LichHenDTO> getUpcomingAppointmentsByDoctor(Integer maBacSi, int limit) {
-        try {
-            LocalDateTime now = LocalDateTime.now();
-            List<LichHen> lichHenList = lichHenRepository.findUpcomingAppointmentsByDoctor(maBacSi, now.toLocalDate(), now.toLocalTime(), limit);
-            return lichHenList.stream()
-                    .map(LichHenDTO::new)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi lấy lịch hẹn sắp tới: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Lấy lịch hẹn theo trạng thái
-     */
-    public List<LichHenDTO> getAppointmentsByStatus(Integer maTrangThai) {
-        try {
-            List<LichHen> lichHenList = lichHenRepository.findByTrangThai_MaTrangThaiOrderByNgayHenDescGioBatDauDesc(maTrangThai);
-            return lichHenList.stream()
-                    .map(LichHenDTO::new)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi lấy lịch hẹn theo trạng thái: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Đếm lịch hẹn theo trạng thái
-     */
-    public long countAppointmentsByStatus(Integer maTrangThai) {
-        try {
-            return lichHenRepository.countByTrangThai_MaTrangThai(maTrangThai);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi đếm lịch hẹn theo trạng thái: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Lấy thống kê lịch hẹn theo tháng
-     */
-    public List<Object[]> getMonthlyAppointmentStats(int year, int month) {
-        try {
-            return lichHenRepository.getMonthlyAppointmentStats(year, month);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi lấy thống kê lịch hẹn theo tháng: " + e.getMessage());
         }
     }
 }
