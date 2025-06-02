@@ -7,6 +7,7 @@ import com.example.ClinicDentail.Enity.BenhNhan;
 import com.example.ClinicDentail.Service.ThamKhamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,7 +18,16 @@ public class ThamKhamController {
     @Autowired
     private ThamKhamService thamKhamService;
 
-    @PostMapping("/thuc-hien")
+    /**
+     * Thực hiện thăm khám cho bệnh nhân.
+     * - Nếu có mã lịch hẹn: kiểm tra lịch hẹn có thể thăm khám hay không.
+     * - Nếu không có lịch hẹn (khách vãng lai): kiểm tra họ tên và số điện thoại.
+     * @param request DTO chứa thông tin yêu cầu thăm khám:
+     *
+     * @return 200 OK nếu thăm khám thành công; 400 Bad Request nếu dữ liệu không hợp lệ hoặc có lỗi.
+     */
+    @PostMapping("/kham-benh")
+    @PreAuthorize("hasRole('BACSI')")
     public ResponseEntity<?> thucHienThamKham(@RequestBody ThamKhamRequestDTO request) {
         try {
             // Validate dữ liệu đầu vào
@@ -52,7 +62,14 @@ public class ThamKhamController {
         }
     }
 
+    /**
+     * Tìm kiếm thông tin bệnh nhân theo số điện thoại.
+     * @param soDienThoai Số điện thoại của bệnh nhân.
+     * @return 200 OK với thông tin bệnh nhân nếu tìm thấy; 404 Not Found nếu không có dữ liệu;
+     *         400 Bad Request nếu có lỗi trong quá trình xử lý.
+     */
     @GetMapping("/benh-nhan/sdt/{soDienThoai}")
+    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
     public ResponseEntity<?> getBenhNhanBySoDienThoai(@PathVariable String soDienThoai) {
         try {
             UserDTO benhNhanDTO = thamKhamService.getBenhNhanDTOBySoDienThoai(soDienThoai);
@@ -66,7 +83,12 @@ public class ThamKhamController {
         }
     }
 
-
+    /**
+     * Kiểm tra xem lịch hẹn có thể thăm khám được hay không.
+     * @param maLichHen Mã lịch hẹn cần kiểm tra.
+     * @return 200 OK với kết quả {@code { "coTheKham": true/false }};
+     *         400 Bad Request nếu có lỗi xử lý.
+     */
     @GetMapping("/lich-hen/{maLichHen}/kiem-tra")
     public ResponseEntity<?> kiemTraLichHen(@PathVariable Integer maLichHen) {
         try {
