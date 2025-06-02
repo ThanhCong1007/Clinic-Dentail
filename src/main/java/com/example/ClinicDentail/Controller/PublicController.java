@@ -4,7 +4,7 @@ import com.example.ClinicDentail.DTO.UserDTO;
 import com.example.ClinicDentail.DTO.LichHenDTO;
 import com.example.ClinicDentail.DTO.TimeSlotDTO;
 import com.example.ClinicDentail.Service.BacSiService;
-import com.example.ClinicDentail.Service.AppointmentService;
+import com.example.ClinicDentail.Service.LichHenService;
 import com.example.ClinicDentail.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class PublicController {
     private BacSiService bacSiService;
 
     @Autowired
-    private AppointmentService appointmentService;
+    private LichHenService lichHenService;
 
     @Autowired
     private UserService userService;
@@ -152,7 +152,7 @@ public class PublicController {
             @RequestParam String ngayHen) {
         try {
             LocalDate date = LocalDate.parse(ngayHen);
-            List<LichHenDTO> appointments = appointmentService.getAppointmentsByDoctorAndDate(maBacSi, date);
+            List<LichHenDTO> appointments = lichHenService.getAppointmentsByDoctorAndDate(maBacSi, date);
             return ResponseEntity.ok(appointments);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -168,7 +168,7 @@ public class PublicController {
             Map<String, Object> stats = new HashMap<>();
             stats.put("tongSoBacSi", bacSiService.countActiveDoctors());
             stats.put("soChuyenKhoa", bacSiService.countSpecialties());
-            stats.put("lichHenHomNay", appointmentService.countTodayAppointments());
+            stats.put("lichHenHomNay", lichHenService.countTodayAppointments());
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -184,7 +184,7 @@ public class PublicController {
         List<TimeSlotDTO> availableSlots = new ArrayList<>();
 
         // Lấy danh sách lịch hẹn đã đặt trong ngày
-        List<LichHenDTO> bookedAppointments = appointmentService.getAppointmentsByDoctorAndDate(maBacSi, date);
+        List<LichHenDTO> bookedAppointments = lichHenService.getAppointmentsByDoctorAndDate(maBacSi, date);
 
         // Khung giờ làm việc (8:00 - 17:00, mỗi slot 30 phút)
         LocalTime startWork = LocalTime.of(8, 0);
@@ -243,7 +243,7 @@ public class PublicController {
      * Kiểm tra khung giờ có khả dụng không
      */
     private boolean isTimeSlotAvailable(Integer maBacSi, LocalDate date, LocalTime startTime, LocalTime endTime) {
-        List<LichHenDTO> bookedAppointments = appointmentService.getAppointmentsByDoctorAndDate(maBacSi, date);
+        List<LichHenDTO> bookedAppointments = lichHenService.getAppointmentsByDoctorAndDate(maBacSi, date);
 
         return bookedAppointments.stream()
                 .noneMatch(app ->

@@ -24,7 +24,7 @@ public class ThamKhamService {
     private LichHenRepository lichHenRepository;
 
     @Autowired
-    private BenhAnrepository benhAnRepository;
+    private BenhAnRepository benhAnRepository;
 
     @Autowired
     private TrangThaiLichHenRepository trangThaiLichHenRepository;

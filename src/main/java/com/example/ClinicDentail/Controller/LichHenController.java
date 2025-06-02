@@ -1,7 +1,7 @@
 package com.example.ClinicDentail.Controller;
 
 import com.example.ClinicDentail.DTO.LichHenDTO;
-import com.example.ClinicDentail.Service.AppointmentService;
+import com.example.ClinicDentail.Service.LichHenService;
 import com.example.ClinicDentail.payload.request.AppointmentRequest;
 import com.example.ClinicDentail.payload.request.MessageResponse;
 import org.slf4j.Logger;
@@ -16,12 +16,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/appointments")
-public class AppointmentController {
+public class LichHenController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AppointmentController.class);
+    private static final Logger logger = LoggerFactory.getLogger(LichHenController.class);
 
     @Autowired
-    private AppointmentService appointmentService;
+    private LichHenService lichHenService;
 
     /**
      * API đăng ký lịch hẹn mới
@@ -32,7 +32,7 @@ public class AppointmentController {
 //    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<?> registerAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) {
         try {
-            LichHenDTO result = appointmentService.registerAppointment(appointmentRequest);
+            LichHenDTO result = lichHenService.registerAppointment(appointmentRequest);
             return ResponseEntity.ok(new MessageResponse("Đăng ký lịch hẹn thành công!"));
         } catch (RuntimeException e) {
             logger.error("Appointment registration error: " + e.getMessage(), e);
@@ -53,7 +53,7 @@ public class AppointmentController {
     @GetMapping("/patient/{maBenhNhan}")
     public ResponseEntity<?> getAppointmentsByPatient(@PathVariable Integer maBenhNhan) {
         try {
-            List<LichHenDTO> appointments = appointmentService.getAppointmentsByPatient(maBenhNhan);
+            List<LichHenDTO> appointments = lichHenService.getAppointmentsByPatient(maBenhNhan);
             return ResponseEntity.ok(appointments);
         } catch (RuntimeException e) {
             logger.error("Get appointments by patient error: " + e.getMessage(), e);
@@ -74,7 +74,7 @@ public class AppointmentController {
     @GetMapping("/{maLichHen}")
     public ResponseEntity<?> getAppointmentDetail(@PathVariable Integer maLichHen) {
         try {
-            LichHenDTO appointment = appointmentService.getAppointmentDetail(maLichHen);
+            LichHenDTO appointment = lichHenService.getAppointmentDetail(maLichHen);
             return ResponseEntity.ok(appointment);
         } catch (RuntimeException e) {
             logger.error("Get appointment detail error: " + e.getMessage(), e);
@@ -101,7 +101,7 @@ public class AppointmentController {
     public ResponseEntity<?> updateAppointment(@PathVariable Integer maLichHen,
                                                @Valid @RequestBody AppointmentRequest appointmentRequest) {
         try {
-            LichHenDTO updatedAppointment = appointmentService.updateAppointment(maLichHen, appointmentRequest);
+            LichHenDTO updatedAppointment = lichHenService.updateAppointment(maLichHen, appointmentRequest);
             return ResponseEntity.ok(updatedAppointment);
         } catch (RuntimeException e) {
             logger.error("Update appointment error: " + e.getMessage(), e);
@@ -128,7 +128,7 @@ public class AppointmentController {
     public ResponseEntity<?> cancelAppointment(@PathVariable Integer maLichHen,
                                                @RequestBody(required = false) String lyDo) {
         try {
-            LichHenDTO cancelledAppointment = appointmentService.cancelAppointment(maLichHen, lyDo);
+            LichHenDTO cancelledAppointment = lichHenService.cancelAppointment(maLichHen, lyDo);
             return ResponseEntity.ok(cancelledAppointment);
         } catch (RuntimeException e) {
             logger.error("Cancel appointment error: " + e.getMessage(), e);

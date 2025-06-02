@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 
 @Service
 @EnableScheduling
-public class AppointmentService {
+public class LichHenService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AppointmentService.class);
+    private static final Logger logger = LoggerFactory.getLogger(LichHenService.class);
 
     @Autowired
     private LichHenRepository lichHenRepository;
