@@ -78,37 +78,6 @@ public class PublicController {
     }
 
     /**
-     * Lấy lịch làm việc của bác sĩ trong khoảng thời gian
-     */
-    @GetMapping("/bac-si/{maBacSi}/lich-lam-viec")
-    public ResponseEntity<Map<String, List<TimeSlotDTO>>> getDoctorSchedule(
-            @PathVariable Integer maBacSi,
-            @RequestParam String tuNgay,
-            @RequestParam String denNgay) {
-        try {
-            LocalDate fromDate = LocalDate.parse(tuNgay);
-            LocalDate toDate = LocalDate.parse(denNgay);
-            Map<String, List<TimeSlotDTO>> schedule = getDoctorScheduleInRange(maBacSi, fromDate, toDate);
-            return ResponseEntity.ok(schedule);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * Lấy danh sách chuyên khoa có sẵn
-     */
-    @GetMapping("/chuyen-khoa")
-    public ResponseEntity<List<String>> getAllSpecialties() {
-        try {
-            List<String> chuyenKhoaList = bacSiService.getAllSpecialties();
-            return ResponseEntity.ok(chuyenKhoaList);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    /**
      * Kiểm tra tính khả dụng của khung giờ cụ thể
      */
     @GetMapping("/bac-si/{maBacSi}/kiem-tra-lich")

@@ -82,31 +82,6 @@ public class LichHenService {
     }
 
     /**
-     * Kiểm tra thủ công số lượng lịch hẹn quá hạn
-     */
-    public int kiemTraLichHenQuaHan() {
-        return lichHenRepository.demLichHenQuaHan();
-    }
-
-    /**
-     * Hủy thủ công lịch hẹn quá hạn (nếu cần)
-     */
-    @Transactional
-    public int huyThuCongLichHenQuaHan() {
-        String lyDo = "Hủy thủ công do quá hạn khám bệnh";
-        int soLuong = lichHenRepository.huyLichHenQuaHan(lyDo);
-        logger.info("Đã hủy thủ công {} lịch hẹn quá hạn.", soLuong);
-        return soLuong;
-    }
-
-    /**
-     * Lấy danh sách chi tiết lịch hẹn quá hạn
-     */
-    public List<LichHen> getDanhSachLichHenQuaHan() {
-        return lichHenRepository.findLichHenQuaHan();
-    }
-
-    /**
      * Đăng ký lịch hẹn mới
      */
     public LichHenDTO registerAppointment(AppointmentRequest appointmentRequest) {
@@ -495,15 +470,4 @@ public class LichHenService {
         }
     }
 
-    /**
-     * Đếm số lượng lịch hẹn hôm nay
-     */
-    public long countTodayAppointments() {
-        try {
-            LocalDate today = LocalDate.now();
-            return lichHenRepository.countByNgayHen(today);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi đếm lịch hẹn hôm nay: " + e.getMessage());
-        }
-    }
 }

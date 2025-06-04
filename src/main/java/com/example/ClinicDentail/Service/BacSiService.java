@@ -36,40 +36,6 @@ public class BacSiService {
     private UserDTOConverter userDTOConverter;
 
     /**
-     * Lấy danh sách tất cả bệnh nhân với phân trang và sắp xếp
-     * @param page số trang
-     * @param size kích thước trang
-     * @param sortBy trường sắp xếp
-     * @param sortDir hướng sắp xếp (asc/desc)
-     * @return Map chứa danh sách bệnh nhân và thông tin phân trang
-     */
-    public Map<String, Object> getAllPatients(int page, int size, String sortBy, String sortDir) {
-        logger.info("Getting all patients - page: {}, size: {}, sortBy: {}, sortDir: {}",
-                page, size, sortBy, sortDir);
-
-        try {
-            Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                    Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-
-            Pageable pageable = PageRequest.of(page, size, sort);
-            Page<BenhNhan> patientsPage = benhNhanRepository.findAll(pageable);
-            Page<UserDTO> patientDTOPage = userDTOConverter.convertBenhNhanToDTO(patientsPage);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("patients", patientDTOPage.getContent());
-            response.put("currentPage", patientDTOPage.getNumber());
-            response.put("totalItems", patientDTOPage.getTotalElements());
-            response.put("totalPages", patientDTOPage.getTotalPages());
-
-            return response;
-
-        } catch (Exception e) {
-            logger.error("Error getting all patients: {}", e.getMessage());
-            throw new RuntimeException("Không thể lấy danh sách bệnh nhân: " + e.getMessage());
-        }
-    }
-
-    /**
      * Lấy thông tin chi tiết bệnh nhân theo ID với kiểm tra quyền truy cập
      * @param id ID của bệnh nhân
      * @param authentication thông tin xác thực của người dùng hiện tại
@@ -160,20 +126,6 @@ public class BacSiService {
     }
 
     /**
-     * Lấy danh sách bác sĩ theo chuyên khoa
-     */
-    public List<UserDTO> getDoctorsBySpecialty(String chuyenKhoa) {
-        try {
-            List<BacSi> bacSiList = bacSiRepository.findByChuyenKhoaContainingIgnoreCaseAndTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue(chuyenKhoa);
-            return bacSiList.stream()
-                    .map(UserDTO::new)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi lấy bác sĩ theo chuyên khoa: " + e.getMessage());
-        }
-    }
-
-    /**
      * Lấy danh sách tất cả chuyên khoa
      */
     public List<String> getAllSpecialties() {
@@ -181,28 +133,6 @@ public class BacSiService {
             return bacSiRepository.findDistinctChuyenKhoaByTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue();
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi lấy danh sách chuyên khoa: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Đếm số lượng bác sĩ đang hoạt động
-     */
-    public long countActiveDoctors() {
-        try {
-            return bacSiRepository.countByTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue();
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi đếm số bác sĩ: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Đếm số lượng chuyên khoa
-     */
-    public long countSpecialties() {
-        try {
-            return bacSiRepository.countDistinctChuyenKhoaByTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue();
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi đếm số chuyên khoa: " + e.getMessage());
         }
     }
 

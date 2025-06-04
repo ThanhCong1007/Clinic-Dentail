@@ -27,16 +27,6 @@ public class AuthController {
     private AuthService authService;
 
     /**
-     * Endpoint kiểm tra trạng thái hoạt động của API auth
-     * @return thông báo trạng thái
-     */
-    @GetMapping("/status")
-    public ResponseEntity<MessageResponse> getStatus() {
-        logger.info("Auth API status check");
-        return ResponseEntity.ok(new MessageResponse("Auth API is running"));
-    }
-
-    /**
      * Xử lý yêu cầu đăng nhập
      * @param loginRequest Thông tin đăng nhập
      * @return JWT token và thông tin người dùng
