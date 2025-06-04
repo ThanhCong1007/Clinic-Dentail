@@ -67,6 +67,14 @@ CREATE TABLE trang_thai_lich_hen (
     ma_mau VARCHAR(10) -- Mã màu để hiển thị trên giao diện
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Thêm dữ liệu mẫu cho bảng trạng thái lịch hẹn
+INSERT INTO trang_thai_lich_hen (ten_trang_thai, mo_ta, ma_mau) VALUES
+                                                                    ('Đã đặt', 'Lịch hẹn đã được đặt thành công', '#3498db'),
+                                                                    ('Đã xác nhận', 'Lịch hẹn đã được xác nhận', '#2ecc71'),
+                                                                    ('Đang thực hiện', 'Bệnh nhân đang được khám', '#f39c12'),
+                                                                    ('Hoàn thành', 'Lịch hẹn đã hoàn thành', '#27ae60'),
+                                                                    ('Đã hủy', 'Lịch hẹn đã bị hủy', '#e74c3c');
+
 -- Bảng lịch hẹn
 CREATE TABLE lich_hen (
     ma_lich_hen INT AUTO_INCREMENT PRIMARY KEY,
@@ -176,23 +184,9 @@ CREATE TABLE thanh_toan (
     FOREIGN KEY (nguoi_tao) REFERENCES nguoi_dung(ma_nguoi_dung)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Thêm dữ liệu mẫu cho bảng vai trò
-INSERT INTO vai_tro (ten_vai_tro, mo_ta) VALUES 
-('Quản trị', 'Quản trị viên hệ thống'),
-('Bác sĩ', 'Bác sĩ nha khoa'),
-('Lễ tân', 'Nhân viên lễ tân'),
-('Bệnh nhân', 'Bệnh nhân');
-
--- Thêm dữ liệu mẫu cho bảng trạng thái lịch hẹn
-INSERT INTO trang_thai_lich_hen (ten_trang_thai, mo_ta, ma_mau) VALUES 
-('Đã đặt', 'Lịch hẹn đã được đặt thành công', '#3498db'),
-('Đã xác nhận', 'Lịch hẹn đã được xác nhận', '#2ecc71'),
-('Đang thực hiện', 'Bệnh nhân đang được khám', '#f39c12'),
-('Hoàn thành', 'Lịch hẹn đã hoàn thành', '#27ae60'),
-('Đã hủy', 'Lịch hẹn đã bị hủy', '#e74c3c');
 
 -- Thêm dữ liệu mẫu cho bảng phương thức thanh toán
-INSERT INTO phuong_thuc_thanh_toan (ten_phuong_thuc, mo_ta) VALUES 
+INSERT INTO phuong_thuc_thanh_toan (ten_phuong_thuc, mo_ta) VALUES
 ('Tiền mặt', 'Thanh toán bằng tiền mặt tại quầy'),
 ('Thẻ tín dụng/ghi nợ', 'Thanh toán bằng thẻ tín dụng hoặc thẻ ghi nợ'),
 ('Chuyển khoản ngân hàng', 'Thanh toán bằng chuyển khoản ngân hàng');

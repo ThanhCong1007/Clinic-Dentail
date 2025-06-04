@@ -148,29 +148,4 @@ public class LichHenController {
         }
     }
 
-//    /**
-//     * API để xóa lịch hẹn
-//     */
-//    @DeleteMapping("/{maLichHen}")
-//    public ResponseEntity<?> deleteAppointment(@PathVariable Integer maLichHen) {
-//        try {
-//            LichHenDTO deletedAppointment = appointmentService.deleteAppointment(maLichHen);
-//            return ResponseEntity.ok(deletedAppointment);
-//        } catch (RuntimeException e) {
-//            logger.error("Delete appointment error: " + e.getMessage(), e);
-//            if (e.getMessage().contains("Không tìm thấy lịch hẹn")) {
-//                return ResponseEntity
-//                        .status(HttpStatus.NOT_FOUND)
-//                        .body(new MessageResponse(e.getMessage()));
-//            }
-//            return ResponseEntity
-//                    .badRequest()
-//                    .body(new MessageResponse(e.getMessage()));
-//        } catch (Exception e) {
-//            logger.error("Unexpected delete appointment error: " + e.getMessage(), e);
-//            return ResponseEntity
-//                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new MessageResponse("Lỗi khi xóa lịch hẹn: " + e.getMessage()));
-//        }
-//    }
 }

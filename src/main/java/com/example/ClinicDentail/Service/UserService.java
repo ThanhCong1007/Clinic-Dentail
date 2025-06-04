@@ -265,21 +265,31 @@ public class UserService {
     }
 
     /**
-     * Cập nhật thông tin bệnh nhân
+     * Cập nhật thông tin bệnh nhân và đồng bộ các trường chung
      */
     private void updatePatientInfo(NguoiDung nguoiDung, UserDTO userDTO) {
         try {
+            BenhNhan benhNhan;
             Optional<BenhNhan> benhNhanOpt = benhNhanRepository.findByNguoiDung(nguoiDung);
-            if (!benhNhanOpt.isPresent()) {
-                logger.warn("No patient info found for user: {}", nguoiDung.getMaNguoiDung());
-                return;
+            if (benhNhanOpt.isPresent()) {
+                benhNhan = benhNhanOpt.get();
+            } else {
+                logger.info("No patient info found for user: {}. Creating new patient record.", nguoiDung.getMaNguoiDung());
+                benhNhan = new BenhNhan();
+                benhNhan.setNguoiDung(nguoiDung);
+                // Thiết lập các trường bắt buộc
+                benhNhan.setHoTen(nguoiDung.getHoTen());
+                benhNhan.setSoDienThoai(nguoiDung.getSoDienThoai() != null ? nguoiDung.getSoDienThoai() : "");
+                benhNhan.setEmail(nguoiDung.getEmail());
             }
 
-            BenhNhan benhNhan = benhNhanOpt.get();
+            // Đồng bộ các trường chung từ nguoiDung (hoặc từ userDTO nếu đã cập nhật nguoiDung trước đó)
+            benhNhan.setHoTen(nguoiDung.getHoTen());
+            benhNhan.setSoDienThoai(nguoiDung.getSoDienThoai() != null ? nguoiDung.getSoDienThoai() : "");
+            benhNhan.setEmail(nguoiDung.getEmail());
 
-            // Cập nhật thông tin bệnh nhân
+            // Cập nhật các trường đặc thù của bệnh nhân từ userDTO
             if (userDTO.getNgaySinh() != null) {
-                // Validate ngày sinh
                 if (userDTO.getNgaySinh().isAfter(LocalDate.now())) {
                     throw new RuntimeException("Ngày sinh không thể là ngày trong tương lai");
                 }
@@ -288,7 +298,6 @@ public class UserService {
 
             if (userDTO.getGioiTinh() != null && !userDTO.getGioiTinh().trim().isEmpty()) {
                 try {
-                    // Giả sử GioiTinh là enum, cần convert string thành enum
                     benhNhan.setGioiTinh(convertStringToGender(userDTO.getGioiTinh()));
                 } catch (Exception e) {
                     throw new RuntimeException("Giới tính không hợp lệ");

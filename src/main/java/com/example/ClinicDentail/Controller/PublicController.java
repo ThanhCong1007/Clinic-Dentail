@@ -46,20 +46,6 @@ public class PublicController {
     }
 
     /**
-     * Lấy danh sách bác sĩ theo chuyên khoa
-     */
-    @GetMapping("/bac-si/chuyen-khoa/{chuyenKhoa}")
-    public ResponseEntity<List<UserDTO>> getDoctorsBySpecialty(
-            @PathVariable String chuyenKhoa) {
-        try {
-            List<UserDTO> bacSiList = bacSiService.getDoctorsBySpecialty(chuyenKhoa);
-            return ResponseEntity.ok(bacSiList);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    /**
      * Lấy thông tin chi tiết bác sĩ
      */
     @GetMapping("/bac-si/{maBacSi}")
@@ -156,22 +142,6 @@ public class PublicController {
             return ResponseEntity.ok(appointments);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * Lấy thống kê tổng quan
-     */
-    @GetMapping("/thong-ke")
-    public ResponseEntity<Map<String, Object>> getPublicStatistics() {
-        try {
-            Map<String, Object> stats = new HashMap<>();
-            stats.put("tongSoBacSi", bacSiService.countActiveDoctors());
-            stats.put("soChuyenKhoa", bacSiService.countSpecialties());
-            stats.put("lichHenHomNay", lichHenService.countTodayAppointments());
-            return ResponseEntity.ok(stats);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
         }
     }
 
