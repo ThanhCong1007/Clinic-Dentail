@@ -7,15 +7,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ke_thuoc")
+@Table(name = "don_thuoc")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class KeThuoc {
+public class DonThuoc {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ma_ke_thuoc")
-    private Integer maKeThuoc;
+    @Column(name = "ma_don_thuoc")
+    private Integer maDonThuoc;
 
     @ManyToOne
     @JoinColumn(name = "ma_benh_an", nullable = false)

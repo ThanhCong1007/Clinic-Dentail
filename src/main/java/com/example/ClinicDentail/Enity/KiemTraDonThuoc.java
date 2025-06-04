@@ -7,19 +7,19 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "kiem_tra_ke_don")
+@Table(name = "kiem_tra_don_thuoc")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class KiemTraKeDon {
+public class KiemTraDonThuoc {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ma_kiem_tra")
     private Integer maKiemTra;
 
     @ManyToOne
-    @JoinColumn(name = "ma_ke_thuoc", nullable = false)
-    private KeThuoc keThuoc;
+    @JoinColumn(name = "ma_don_thuoc", nullable = false)
+    private DonThuoc donThuoc;
 
     @Column(name = "thoi_gian_kiem_tra")
     private LocalDateTime thoiGianKiemTra;

@@ -1,6 +1,5 @@
 package com.example.ClinicDentail.Enity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -73,7 +72,7 @@ public class BenhNhan {
     private List<HoaDon> hoaDons;
 
     @OneToMany(mappedBy = "benhNhan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<KeThuoc> keThuocs;
+    private List<DonThuoc> donThuocs;
 
     public enum GioiTinh {
         Nam, Nữ, Khác

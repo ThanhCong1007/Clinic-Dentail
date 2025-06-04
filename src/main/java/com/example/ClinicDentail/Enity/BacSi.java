@@ -47,5 +47,5 @@ public class BacSi {
     private List<BenhAn> benhAns;
 
     @OneToMany(mappedBy = "bacSi", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<KeThuoc> keThuocs;
+    private List<DonThuoc> donThuocs;
 }

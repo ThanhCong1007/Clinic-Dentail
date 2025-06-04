@@ -53,5 +53,5 @@ public class BenhAn {
     }
 
     @OneToMany(mappedBy = "benhAn", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<KeThuoc> keThuocs;
+    private List<DonThuoc> donThuocs;
 }

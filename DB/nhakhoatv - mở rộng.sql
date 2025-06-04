@@ -234,7 +234,7 @@ CREATE TABLE thuoc (
     cach_bao_quan TEXT,          -- Thông tin bảo quản
     
     -- Thông tin phân loại và cảnh báo
-    phan_loai_ke_don ENUM('Không kê đơn', 'Kê đơn', 'Kiểm soát đặc biệt') DEFAULT 'Kê đơn',
+    phan_loai_don_thuoc ENUM('Không kê đơn', 'Kê đơn', 'Kiểm soát đặc biệt') DEFAULT 'Kê đơn',
     chong_chi_dinh TEXT,         -- Chống chỉ định
     tac_dung_phu TEXT,           -- Tác dụng phụ
     tuong_tac_thuoc TEXT,        -- Tương tác thuốc
@@ -302,8 +302,8 @@ CREATE TABLE chi_tiet_nhap_thuoc (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Bảng kê thuốc (toa thuốc)
-CREATE TABLE ke_thuoc (
-    ma_ke_thuoc INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE don_thuoc (
+    ma_don_thuoc INT AUTO_INCREMENT PRIMARY KEY,
     ma_benh_an INT NOT NULL,
     ma_benh_nhan INT NOT NULL,
     ma_bac_si INT NOT NULL,
@@ -340,9 +340,9 @@ CREATE TABLE ke_thuoc (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Bảng chi tiết kê thuốc
-CREATE TABLE chi_tiet_ke_thuoc (
+CREATE TABLE chi_tiet_don_thuoc (
     ma_chi_tiet INT AUTO_INCREMENT PRIMARY KEY,
-    ma_ke_thuoc INT NOT NULL,
+    ma_don_thuoc INT NOT NULL,
     ma_thuoc INT NOT NULL,
     
     -- Thông tin kê đơn chi tiết theo tiêu chuẩn quốc tế
@@ -360,13 +360,13 @@ CREATE TABLE chi_tiet_ke_thuoc (
     -- Thông tin kiểm tra và cảnh báo
     canh_bao_tuong_tac TEXT,               -- Cảnh báo tương tác thuốc (nếu có)
     canh_bao_lieu_dung TEXT,               -- Cảnh báo liều dùng (nếu có)
-    ly_do_ke_don TEXT,                     -- Lý do kê đơn (chỉ định)
+    ly_do_don_thuoc TEXT,                     -- Lý do kê đơn (chỉ định)
     
     -- Ghi chú và thông tin bổ sung
     ghi_chu TEXT,
     
     -- Khóa ngoại
-    FOREIGN KEY (ma_ke_thuoc) REFERENCES ke_thuoc(ma_ke_thuoc),
+    FOREIGN KEY (ma_don_thuoc) REFERENCES don_thuoc(ma_don_thuoc),
     FOREIGN KEY (ma_thuoc) REFERENCES thuoc(ma_thuoc)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -395,16 +395,16 @@ CREATE TABLE tuong_tac_thuoc (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Bảng kiểm tra kê đơn (lưu log kết quả từ API kiểm tra toa thuốc)
-CREATE TABLE kiem_tra_ke_don (
+CREATE TABLE kiem_tra_don_thuoc (
     ma_kiem_tra INT AUTO_INCREMENT PRIMARY KEY,
-    ma_ke_thuoc INT NOT NULL,
+    ma_don_thuoc INT NOT NULL,
     thoi_gian_kiem_tra TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ma_api_ref VARCHAR(100),  -- Mã tham chiếu từ API
     ket_qua JSON,            -- Kết quả kiểm tra dạng JSON
     trang_thai ENUM('Đạt', 'Cảnh báo', 'Không đạt') NOT NULL,
     mo_ta TEXT,
     nguoi_kiem_tra INT,
-    FOREIGN KEY (ma_ke_thuoc) REFERENCES ke_thuoc(ma_ke_thuoc),
+    FOREIGN KEY (ma_don_thuoc) REFERENCES don_thuoc(ma_don_thuoc),
     FOREIGN KEY (nguoi_kiem_tra) REFERENCES nguoi_dung(ma_nguoi_dung)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

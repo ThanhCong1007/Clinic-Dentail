@@ -6,19 +6,19 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "chi_tiet_ke_thuoc")
+@Table(name = "chi_tiet_don_thuoc")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChiTietKeThuoc {
+public class ChiTietDonThuoc {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ma_chi_tiet")
     private Integer maChiTiet;
 
     @ManyToOne
-    @JoinColumn(name = "ma_ke_thuoc", nullable = false)
-    private KeThuoc keThuoc;
+    @JoinColumn(name = "ma_don_thuoc", nullable = false)
+    private DonThuoc donThuoc;
 
     @ManyToOne
     @JoinColumn(name = "ma_thuoc", nullable = false)
