@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -49,6 +50,13 @@ public class BenhAnDTO {
     private LocalTime gioKetThucMoi;
     private String ghiChuLichHen;
     private Integer maLichHenMoi;
+
+    // *** THÊM THÔNG TIN ĐON THUỐC ***
+    private String maIcd;
+    private String moTaChanDoan;
+    private String ghiChuDonThuoc;
+    private List<ChiTietDonThuocDTO> danhSachThuoc;
+    private Integer maDonThuoc; // Mã đơn thuốc được tạo (response)
 
     // Thông báo kết quả xử lý nếu cần
     private String thongBao;

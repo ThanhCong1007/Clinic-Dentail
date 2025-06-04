@@ -19,7 +19,7 @@ public class ThamKhamController {
     private ThamKhamService thamKhamService;
 
     /**
-     * ENDPOINT 1: Thực hiện thăm khám (dành cho bác sĩ khi khám bệnh nhân)
+     * Thực hiện thăm khám (dành cho bác sĩ khi khám bệnh nhân)
      * - Xử lý cả khách hẹn trước và khách vãng lai
      * - Tạo bệnh án tự động sau khi khám
      * - Có thể tạo lịch hẹn mới nếu cần
