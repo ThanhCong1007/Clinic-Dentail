@@ -1,17 +1,19 @@
 package com.example.ClinicDentail.Enity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "benh_nhan")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class BenhNhan {
@@ -23,6 +25,7 @@ public class BenhNhan {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_nguoi_dung")
+    @JsonManagedReference
     private NguoiDung nguoiDung;
 
     @Column(name = "ho_ten", nullable = false, length = 100)
@@ -63,6 +66,7 @@ public class BenhNhan {
     private List<LichHen> lichHens;
 
     @OneToMany(mappedBy = "benhNhan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<BenhAn> benhAns;
 
     @OneToMany(mappedBy = "benhNhan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

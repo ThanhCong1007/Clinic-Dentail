@@ -1,6 +1,7 @@
 package com.example.ClinicDentail.Repository;
 
 import com.example.ClinicDentail.Enity.LichHen;
+import com.example.ClinicDentail.Enity.TrangThaiLichHen;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -179,4 +180,6 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
     List<LichHen> findLichHenQuaHan();
 
     List<LichHen> findByBacSi_MaBacSiOrderByNgayTaoDesc(Integer bacSiMaBacSi);
+
+
 }

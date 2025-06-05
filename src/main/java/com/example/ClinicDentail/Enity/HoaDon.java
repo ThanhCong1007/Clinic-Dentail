@@ -39,7 +39,7 @@ public class HoaDon {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
-    private TrangThaiHoaDon trangThai = TrangThaiHoaDon.CHUA_THANH_TOAN;
+    private TrangThaiHoaDon trangThai;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nguoi_tao")

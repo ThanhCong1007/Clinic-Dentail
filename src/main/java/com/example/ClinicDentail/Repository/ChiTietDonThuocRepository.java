@@ -1,6 +1,7 @@
 package com.example.ClinicDentail.Repository;
 
 import com.example.ClinicDentail.Enity.ChiTietDonThuoc;
+import com.example.ClinicDentail.Enity.DonThuoc;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,6 @@ public interface ChiTietDonThuocRepository extends JpaRepository<ChiTietDonThuoc
             "GROUP BY ct.thuoc.maThuoc, ct.thuoc.tenThuoc " +
             "ORDER BY tongSoLuong DESC")
     List<Object[]> thongKeThuocKhaNhieu();
+
+    List<ChiTietDonThuoc> findByDonThuoc(DonThuoc donThuoc);
 }

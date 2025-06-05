@@ -2,16 +2,21 @@ package com.example.ClinicDentail.DTO;
 
 import com.example.ClinicDentail.Enity.BenhAn;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class BenhAnDTO {
+
+    private Integer nguoiDung;
     // Thông tin bệnh án
     private Integer maBenhAn;
     private LocalDateTime ngayTao;
@@ -70,19 +75,28 @@ public class BenhAnDTO {
             this.maLichHen = benhAn.getLichHen().getMaLichHen();
         }
 
+        // Bệnh nhân
         if (benhAn.getBenhNhan() != null) {
-            this.maBenhNhan = benhAn.getBenhNhan().getMaBenhNhan();
-            this.tenBenhNhan = benhAn.getBenhNhan().getHoTen();
-            this.soDienThoai = benhAn.getBenhNhan().getSoDienThoai();
+            var bn = benhAn.getBenhNhan();
+            this.maBenhNhan = bn.getMaBenhNhan();
+            this.tenBenhNhan = bn.getHoTen();  // Tên rút gọn
+            this.hoTen = bn.getHoTen();        // Họ tên đầy đủ (cùng dữ liệu nếu không tách)
+            this.soDienThoai = bn.getSoDienThoai();
+            this.ngaySinh = bn.getNgaySinh();
+            this.gioiTinh = (bn.getGioiTinh() != null) ? bn.getGioiTinh().toString() : null;
+            this.email = bn.getEmail();
+            this.diaChi = bn.getDiaChi();
+            this.tienSuBenh = bn.getTienSuBenh();
+            this.diUng = bn.getDiUng();
         }
 
-        if (benhAn.getBacSi() != null) {
+        // Bác sĩ
+        if (benhAn.getBacSi() != null && benhAn.getBacSi().getNguoiDung() != null) {
             this.maBacSi = benhAn.getBacSi().getMaBacSi();
-            if (benhAn.getBacSi().getNguoiDung() != null) {
-                this.tenBacSi = benhAn.getBacSi().getNguoiDung().getHoTen();
-            }
+            this.tenBacSi = benhAn.getBacSi().getNguoiDung().getHoTen();
         }
 
+        // Khám bệnh
         this.lyDoKham = benhAn.getLyDoKham();
         this.chanDoan = benhAn.getChanDoan();
         this.ghiChuDieuTri = benhAn.getGhiChuDieuTri();

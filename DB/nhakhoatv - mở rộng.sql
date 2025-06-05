@@ -147,7 +147,7 @@ CREATE TABLE hoa_don (
     tong_tien DECIMAL(12, 2) NOT NULL,
     thanh_tien DECIMAL(12, 2) NOT NULL,
     ngay_hoa_don TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    trang_thai ENUM('Chưa thanh toán', 'Đã thanh toán', 'Hủy bỏ') DEFAULT 'Chưa thanh toán',
+    trang_thai ENUM('Chưa thanh toán', 'Đã thanh toán', 'Hủy bỏ') DEFAULT 'Chưa thanh toán' VARCHAR(20),
     nguoi_tao INT,
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ma_benh_nhan) REFERENCES benh_nhan(ma_benh_nhan),

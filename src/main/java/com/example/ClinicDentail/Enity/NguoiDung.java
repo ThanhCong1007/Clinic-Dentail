@@ -1,14 +1,18 @@
 package com.example.ClinicDentail.Enity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "nguoi_dung")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NguoiDung {
 
     @Id
@@ -47,6 +51,7 @@ public class NguoiDung {
     }
 
     @OneToMany(mappedBy = "nguoiDung", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference
     private List<BenhNhan> benhNhans;
 
     @OneToOne(mappedBy = "nguoiDung", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -58,22 +63,5 @@ public class NguoiDung {
     @OneToMany(mappedBy = "nguoiTao", fetch = FetchType.LAZY)
     private List<ThanhToan> thanhToans;
 
-    public NguoiDung() {
-    }
 
-    public NguoiDung(Integer maNguoiDung, VaiTro vaiTro, String tenDangNhap, String matKhau, String email, String hoTen, String soDienThoai, Boolean trangThaiHoatDong, LocalDateTime ngayTao, List<BenhNhan> benhNhans, BacSi bacSi, List<HoaDon> hoaDons, List<ThanhToan> thanhToans) {
-        this.maNguoiDung = maNguoiDung;
-        this.vaiTro = vaiTro;
-        this.tenDangNhap = tenDangNhap;
-        this.matKhau = matKhau;
-        this.email = email;
-        this.hoTen = hoTen;
-        this.soDienThoai = soDienThoai;
-        this.trangThaiHoatDong = trangThaiHoatDong;
-        this.ngayTao = ngayTao;
-        this.benhNhans = benhNhans;
-        this.bacSi = bacSi;
-        this.hoaDons = hoaDons;
-        this.thanhToans = thanhToans;
-    }
 }
