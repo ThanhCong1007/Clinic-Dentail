@@ -1,12 +1,17 @@
 package com.example.ClinicDentail.Controller;
 
-import com.example.ClinicDentail.DTO.UserDTO;
-import com.example.ClinicDentail.DTO.LichHenDTO;
-import com.example.ClinicDentail.DTO.TimeSlotDTO;
+import com.example.ClinicDentail.DTO.*;
+import com.example.ClinicDentail.Enity.DichVu;
+import com.example.ClinicDentail.Enity.Thuoc;
+import com.example.ClinicDentail.Repository.DichVuRepository;
+import com.example.ClinicDentail.Repository.ThuocRepository;
 import com.example.ClinicDentail.Service.BacSiService;
 import com.example.ClinicDentail.Service.LichHenService;
 import com.example.ClinicDentail.Service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/public")
 @CrossOrigin(origins = "*")
 public class PublicController {
+    private final static Logger log = LoggerFactory.getLogger(PublicController.class);
 
     @Autowired
     private BacSiService bacSiService;
@@ -31,6 +38,10 @@ public class PublicController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private DichVuRepository dichVuRepository;
+    @Autowired
+    private ThuocRepository thuocRepository;
 
     /**
      * Lấy danh sách tất cả bác sĩ đang hoạt động
@@ -112,6 +123,62 @@ public class PublicController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/dichvu")
+    public ResponseEntity<List<DichVuDTO>> getDichVu() {
+        try {
+            List<DichVu> dvList = dichVuRepository.findAll();
+            List<DichVuDTO> dtoList = new ArrayList<>();
+
+            for (DichVu dv : dvList) {
+                DichVuDTO dto = new DichVuDTO();
+                dto.setMaDichVu(dv.getMaDichVu());
+                dto.setTenDichVu(dv.getTenDichVu());
+                dto.setMoTa(dv.getMoTa());
+                dto.setGia(dv.getGia().toString());
+                dtoList.add(dto);
+            }
+
+            return ResponseEntity.ok(dtoList);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/Thuoc")
+    public ResponseEntity<List<KhamBenhDTO.ChiTietThuocDTO>> getThuoc() {
+        try {
+            List<Thuoc> thuocList = thuocRepository.findAll();
+            List<KhamBenhDTO.ChiTietThuocDTO> dtoList = thuocList.stream()
+                    .map(this::convertToChiTietThuocDTO)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(dtoList);
+        } catch (Exception e) {
+            log.error("Lỗi khi lấy danh sách thuốc: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Phương thức helper để convert Entity sang ChiTietThuocDTO
+    private KhamBenhDTO.ChiTietThuocDTO convertToChiTietThuocDTO(Thuoc thuoc) {
+        KhamBenhDTO.ChiTietThuocDTO dto = new KhamBenhDTO.ChiTietThuocDTO();
+        dto.setMaThuoc(thuoc.getMaThuoc());
+        dto.setTenThuoc(thuoc.getTenThuoc());
+        dto.setDonGia(thuoc.getGia());
+        dto.setDonViDung(thuoc.getDonViTinh());
+
+        // Các field khác sẽ để null hoặc giá trị mặc định vì không có trong Entity Thuoc
+        dto.setLieuDung(null);
+        dto.setTanSuat(null);
+        dto.setThoiDiem(null);
+        dto.setThoiGianDieuTri(null);
+        dto.setSoLuong(null);
+        dto.setGhiChu(thuoc.getHuongDanSuDung()); // Có thể map thành ghi chú
+        dto.setLyDoDonThuoc(null);
+
+        return dto;
     }
 
     // ====== HELPER METHODS ======

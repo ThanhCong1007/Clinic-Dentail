@@ -1,5 +1,6 @@
 package com.example.ClinicDentail.Enity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -73,8 +74,8 @@ public class Thuoc {
     private String cachBaoQuan;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "phan_loai_ke_don", columnDefinition = "ENUM('Không kê đơn', 'Kê đơn', 'Kiểm soát đặc biệt') DEFAULT 'Kê đơn'")
-    private PhanLoaiKeDon phanLoaiKeDon;
+    @Column(name = "phan_loai_don_thuoc", length = 50)
+    private PhanLoaiDonThuoc phanLoaiDonThuoc;
 
     @Column(name = "chong_chi_dinh", columnDefinition = "TEXT")
     private String chongChiDinh;
@@ -116,9 +117,20 @@ public class Thuoc {
         this.ngayCapNhat = LocalDateTime.now();
     }
 
-    public enum PhanLoaiKeDon {
-        Không_kê_đơn,
-        Kê_đơn,
-        Kiểm_soát_đặc_biệt
+    public enum PhanLoaiDonThuoc {
+        KHONG_KE_DON("Không kê đơn"),
+        KE_DON("Kê đơn"),
+        KIEM_SOAT_DAC_BIET("Kiểm soát đặc biệt");
+
+        private final String value;
+
+        PhanLoaiDonThuoc(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
     }
+
 }
