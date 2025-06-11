@@ -147,11 +147,11 @@ public class PublicController {
     }
 
     @GetMapping("/Thuoc")
-    public ResponseEntity<List<KhamBenhDTO.ChiTietThuocDTO>> getThuoc() {
+    public ResponseEntity<List<ThuocDTO>> getThuoc() {
         try {
             List<Thuoc> thuocList = thuocRepository.findAll();
-            List<KhamBenhDTO.ChiTietThuocDTO> dtoList = thuocList.stream()
-                    .map(this::convertToChiTietThuocDTO)
+            List<ThuocDTO> dtoList = thuocList.stream()
+                    .map(this::convertToThuocDTO)
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(dtoList);
@@ -162,21 +162,32 @@ public class PublicController {
     }
 
     // Phương thức helper để convert Entity sang ChiTietThuocDTO
-    private KhamBenhDTO.ChiTietThuocDTO convertToChiTietThuocDTO(Thuoc thuoc) {
-        KhamBenhDTO.ChiTietThuocDTO dto = new KhamBenhDTO.ChiTietThuocDTO();
+    // Phương thức helper để convert Entity sang ThuocDTO
+    private ThuocDTO convertToThuocDTO(Thuoc thuoc) {
+        ThuocDTO dto = new ThuocDTO();
         dto.setMaThuoc(thuoc.getMaThuoc());
+        dto.setMaLoaiThuoc(thuoc.getLoaiThuoc() != null ? thuoc.getLoaiThuoc().getMaLoaiThuoc() : null);
         dto.setTenThuoc(thuoc.getTenThuoc());
-        dto.setDonGia(thuoc.getGia());
-        dto.setDonViDung(thuoc.getDonViTinh());
-
-        // Các field khác sẽ để null hoặc giá trị mặc định vì không có trong Entity Thuoc
-        dto.setLieuDung(null);
-        dto.setTanSuat(null);
-        dto.setThoiDiem(null);
-        dto.setThoiGianDieuTri(null);
-        dto.setSoLuong(null);
-        dto.setGhiChu(thuoc.getHuongDanSuDung()); // Có thể map thành ghi chú
-        dto.setLyDoDonThuoc(null);
+        dto.setHoatChat(thuoc.getHoatChat());
+        dto.setHamLuong(thuoc.getHamLuong());
+        dto.setNhaSanXuat(thuoc.getNhaSanXuat());
+        dto.setNuocSanXuat(thuoc.getNuocSanXuat());
+        dto.setDangBaoChe(thuoc.getDangBaoChe());
+        dto.setDonViTinh(thuoc.getDonViTinh());
+        dto.setDuongDung(thuoc.getDuongDung());
+        dto.setHuongDanSuDung(thuoc.getHuongDanSuDung());
+        dto.setCachBaoQuan(thuoc.getCachBaoQuan());
+        dto.setPhanLoaiDonThuoc(thuoc.getPhanLoaiDonThuoc() != null ? thuoc.getPhanLoaiDonThuoc().name() : null);
+        dto.setChongChiDinh(thuoc.getChongChiDinh());
+        dto.setTacDungPhu(thuoc.getTacDungPhu());
+        dto.setTuongTacThuoc(thuoc.getTuongTacThuoc());
+        dto.setNhomThuocThaiKy(thuoc.getNhomThuocThaiKy());
+        dto.setGia(thuoc.getGia());
+        dto.setSoLuongTon(thuoc.getSoLuongTon());
+        dto.setNguongCanhBao(thuoc.getNguongCanhBao());
+        dto.setTrangThaiHoatDong(thuoc.getTrangThaiHoatDong());
+        dto.setNgayTao(thuoc.getNgayTao());
+        dto.setNgayCapNhat(thuoc.getNgayCapNhat());
 
         return dto;
     }
