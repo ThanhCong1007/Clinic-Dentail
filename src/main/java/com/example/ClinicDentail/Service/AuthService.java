@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,6 +116,30 @@ public class AuthService {
             logger.warn("Registration failed: Email {} is already in use", signupRequest.getEmail());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Email đã được sử dụng!");
         }
+
+        // Kiểm tra số điện thoại trong bảng bệnh nhân
+        validatePhoneNumber(signupRequest.getSoDienThoai());
+    }
+    /**
+     * Kiểm tra số điện thoại trong bảng bệnh nhân
+     */
+    private void validatePhoneNumber(String soDienThoai) {
+        Optional<BenhNhan> existingBenhNhan = benhNhanRepository.findBySoDienThoai(soDienThoai);
+
+        if (existingBenhNhan.isPresent()) {
+            BenhNhan benhNhan = existingBenhNhan.get();
+
+            // Trường hợp 1: Số điện thoại đã có người dùng (mã người dùng != null)
+            if (benhNhan.getNguoiDung() != null) {
+                logger.warn("Registration failed: Phone number {} is already associated with a user account", soDienThoai);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Số điện thoại đã được sử dụng cho tài khoản khác!");
+            }
+
+            // Trường hợp 2: Số điện thoại có trong bệnh nhân nhưng chưa có tài khoản (mã người dùng = null)
+            logger.info("Phone number {} found in patient records without user account, will be linked", soDienThoai);
+        }
+
+        // Trường hợp 3: Số điện thoại chưa tồn tại - không cần làm gì thêm
     }
 
     /**
@@ -140,8 +165,8 @@ public class AuthService {
         NguoiDung savedNguoiDung = nguoiDungRepository.save(nguoiDung);
         logger.info("User registered successfully: {}", signupRequest.getTenDangNhap());
 
-        // Tạo thông tin bệnh nhân
-        createBenhNhan(signupRequest, savedNguoiDung);
+        // Xử lý thông tin bệnh nhân
+        handleBenhNhanInfo(signupRequest, savedNguoiDung);
     }
 
     /**
@@ -157,6 +182,63 @@ public class AuthService {
         nguoiDung.setTrangThaiHoatDong(true);
         nguoiDung.setVaiTro(vaiTro);
         return nguoiDung;
+    }
+    /**
+     * Xử lý thông tin bệnh nhân cho người dùng mới
+     */
+    private void handleBenhNhanInfo(SignupRequest signupRequest, NguoiDung nguoiDung) {
+        try {
+            Optional<BenhNhan> existingBenhNhan = benhNhanRepository.findBySoDienThoai(signupRequest.getSoDienThoai());
+
+            if (existingBenhNhan.isPresent() && existingBenhNhan.get().getNguoiDung() == null) {
+                // Trường hợp 2: Cập nhật thông tin bệnh nhân đã có
+                updateExistingBenhNhan(existingBenhNhan.get(), signupRequest, nguoiDung);
+            } else {
+                // Trường hợp 3: Tạo mới thông tin bệnh nhân
+                createNewBenhNhan(signupRequest, nguoiDung);
+            }
+        } catch (Exception ex) {
+            // Log lỗi nhưng vẫn tiếp tục vì người dùng đã được tạo thành công
+            logger.warn("Error handling patient record: " + ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Cập nhật thông tin bệnh nhân đã có (trường hợp 2)
+     */
+    private void updateExistingBenhNhan(BenhNhan benhNhan, SignupRequest signupRequest, NguoiDung nguoiDung) {
+        // Gán người dùng cho bệnh nhân
+        benhNhan.setNguoiDung(nguoiDung);
+
+        // Cập nhật thông tin từ đăng ký (nếu cần)
+        if (signupRequest.getHoTen() != null && !signupRequest.getHoTen().trim().isEmpty()) {
+            benhNhan.setHoTen(signupRequest.getHoTen());
+        }
+
+        if (signupRequest.getEmail() != null && !signupRequest.getEmail().trim().isEmpty()) {
+            benhNhan.setEmail(signupRequest.getEmail());
+        }
+
+        if (signupRequest.getNgaySinh() != null) {
+            benhNhan.setNgaySinh(signupRequest.getNgaySinh());
+        }
+
+        benhNhanRepository.save(benhNhan);
+        logger.info("Existing patient record updated and linked to user: {}", signupRequest.getTenDangNhap());
+    }
+
+    /**
+     * Tạo thông tin bệnh nhân mới (trường hợp 3)
+     */
+    private void createNewBenhNhan(SignupRequest signupRequest, NguoiDung nguoiDung) {
+        BenhNhan benhNhan = new BenhNhan();
+        benhNhan.setNguoiDung(nguoiDung);
+        benhNhan.setHoTen(signupRequest.getHoTen());
+        benhNhan.setSoDienThoai(signupRequest.getSoDienThoai());
+        benhNhan.setEmail(signupRequest.getEmail());
+        benhNhan.setNgaySinh(signupRequest.getNgaySinh());
+        benhNhanRepository.save(benhNhan);
+        logger.info("New patient record created for user: {}", signupRequest.getTenDangNhap());
     }
 
     /**

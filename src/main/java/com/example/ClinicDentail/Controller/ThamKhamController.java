@@ -95,9 +95,10 @@ public class ThamKhamController {
     @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
     public ResponseEntity<?> getBenhNhanBySoDienThoai(@PathVariable String soDienThoai) {
         try {
-            UserDTO benhNhanDTO = thamKhamService.getBenhNhanDTOBySoDienThoai(soDienThoai);
-            if (benhNhanDTO != null) {
-                return ResponseEntity.ok(benhNhanDTO);
+            List<UserDTO> benhNhanList = thamKhamService.searchBenhNhanBySoDienThoai(soDienThoai);
+
+            if (!benhNhanList.isEmpty()) {
+                return ResponseEntity.ok(benhNhanList);
             } else {
                 return ResponseEntity.notFound().build();
             }

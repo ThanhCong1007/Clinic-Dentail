@@ -609,11 +609,13 @@ public class ThamKhamService {
     }
 
     // Lấy thông tin bệnh nhân theo số điện thoại (cho khách vãng lai)
-    public UserDTO getBenhNhanDTOBySoDienThoai(String soDienThoai) {
-        return benhNhanRepository.findBySoDienThoai(soDienThoai)
+    public List<UserDTO> searchBenhNhanBySoDienThoai(String soDienThoai) {
+        List<BenhNhan> benhNhanList = benhNhanRepository.findBySoDienThoaiContaining(soDienThoai);
+        return benhNhanList.stream()
                 .map(UserDTO::new)
-                .orElse(null);
+                .collect(Collectors.toList());
     }
+
 
     public List<LichHenBenhAnDTO> getLichHenBenhAnByBacSi(Integer maBacSi) {
         // Validate bác sĩ
