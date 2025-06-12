@@ -241,22 +241,4 @@ public class AuthService {
         logger.info("New patient record created for user: {}", signupRequest.getTenDangNhap());
     }
 
-    /**
-     * Tạo thông tin bệnh nhân cho người dùng mới
-     */
-    private void createBenhNhan(SignupRequest signupRequest, NguoiDung nguoiDung) {
-        try {
-            BenhNhan benhNhan = new BenhNhan();
-            benhNhan.setNguoiDung(nguoiDung);
-            benhNhan.setHoTen(signupRequest.getHoTen());
-            benhNhan.setSoDienThoai(signupRequest.getSoDienThoai());
-            benhNhan.setEmail(signupRequest.getEmail());
-            benhNhan.setNgaySinh(signupRequest.getNgaySinh());
-            benhNhanRepository.save(benhNhan);
-            logger.info("Basic patient information created for user: {}", signupRequest.getTenDangNhap());
-        } catch (Exception ex) {
-            // Log lỗi nhưng vẫn tiếp tục vì người dùng đã được tạo thành công
-            logger.warn("Error creating patient record: " + ex.getMessage(), ex);
-        }
-    }
 }
