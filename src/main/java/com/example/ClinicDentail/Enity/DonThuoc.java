@@ -92,12 +92,12 @@ public class DonThuoc {
     }
 
     public enum TrangThaiToa {
-        MOI("Mới"),
-        DA_PHAT_HANH("Đã phát hành"),
-        DA_PHAT_THUOC("Đã phát thuốc"),
-        HUY("Hủy");
+        MOI("MOI"),
+        DA_PHAT_HANH("DA_PHAT_HANH"),
+        DA_PHAT_THUOC("DA_PHAT_THUOC"),
+        HUY("HUY");
 
-        private String value;
+        private final String value;
 
         TrangThaiToa(String value) {
             this.value = value;
@@ -107,4 +107,5 @@ public class DonThuoc {
             return value;
         }
     }
+
 }
