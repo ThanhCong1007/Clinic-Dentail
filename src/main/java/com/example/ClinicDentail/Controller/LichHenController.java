@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -126,8 +127,10 @@ public class LichHenController {
      */
     @PutMapping("/{maLichHen}/cancel")
     public ResponseEntity<?> cancelAppointment(@PathVariable Integer maLichHen,
-                                               @RequestBody(required = false) String lyDo) {
+                                               @RequestBody(required = false) Map<String, Object> body) {
         try {
+            String lyDo = body != null && body.containsKey("lyDo") ? (String) body.get("lyDo") : null;
+
             LichHenDTO cancelledAppointment = lichHenService.cancelAppointment(maLichHen, lyDo);
             return ResponseEntity.ok(cancelledAppointment);
         } catch (RuntimeException e) {
