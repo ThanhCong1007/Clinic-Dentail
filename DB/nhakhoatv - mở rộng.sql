@@ -316,7 +316,7 @@ CREATE TABLE don_thuoc (
     ma_kiem_tra VARCHAR(100),      -- Mã kiểm tra từ API
     
     -- Thông tin phát hành và xác nhận
-    trang_thai_toa ENUM('Mới', 'Đã phát hành', 'Đã phát thuốc', 'Hủy') DEFAULT 'Mới',
+    trang_thai_toa ENUM('MOI', 'DA_PHAT_HANH', 'DA_PHAT_THUOC', 'HUY') DEFAULT 'MOI',
     ngay_phat_hanh DATETIME,       -- Ngày phát hành toa thuốc
     ngay_het_han DATE,             -- Ngày hết hạn toa thuốc
     nguoi_phat_thuoc INT,          -- Người phát thuốc
