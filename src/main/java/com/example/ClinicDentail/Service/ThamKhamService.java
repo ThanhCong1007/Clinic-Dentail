@@ -651,4 +651,363 @@ public class ThamKhamService {
         return new BenhAnDTO(benhAn);
     }
 
+    @Transactional
+    public BenhAnDTO capNhatBenhAn(Integer maBenhAn, BenhAnDTO dto) {
+        logger.info("Bắt đầu quá trình cập nhật bệnh án mã: {}", maBenhAn);
+
+        try {
+            // 1. Kiểm tra và lấy bệnh án hiện tại
+            logger.debug("Bước 1: Kiểm tra bệnh án mã: {}", maBenhAn);
+            BenhAn benhAn = layBenhAnHienTai(maBenhAn);
+
+            // 2. Cập nhật thông tin khám bệnh
+            logger.debug("Bước 2: Cập nhật thông tin khám bệnh");
+            capNhatThongTinKhamBenh(benhAn, dto);
+
+            // 3. Cập nhật thông tin bệnh nhân nếu có
+            logger.debug("Bước 3: Cập nhật thông tin bệnh nhân");
+            capNhatThongTinBenhNhan(benhAn, dto);
+
+            // 4. Xử lý đơn thuốc nếu có thay đổi
+            DonThuoc donThuoc = null;
+            if (dto.getDanhSachThuoc() != null && !dto.getDanhSachThuoc().isEmpty()) {
+                logger.debug("Bước 4: Cập nhật đơn thuốc với {} loại thuốc", dto.getDanhSachThuoc().size());
+                donThuoc = capNhatDonThuoc(benhAn, dto);
+            }
+
+            // 5. Tạo lịch hẹn mới nếu có
+            LichHen lichHenMoi = null;
+            if (dto.getNgayHenMoi() != null && dto.getGioBatDauMoi() != null) {
+                logger.debug("Bước 5: Tạo lịch hẹn mới cho ngày: {}", dto.getNgayHenMoi());
+                lichHenMoi = taoLichHenMoi(benhAn, dto);
+            }
+
+            // 6. Lưu bệnh án đã cập nhật
+            logger.debug("Bước 6: Lưu bệnh án đã cập nhật");
+            BenhAn benhAnDaCapNhat = benhAnRepository.save(benhAn);
+
+            // 7. Trả về kết quả
+            logger.info("Hoàn thành cập nhật bệnh án mã: {}", maBenhAn);
+            return taoKetQuaCapNhat(benhAnDaCapNhat, donThuoc, lichHenMoi);
+
+        } catch (RuntimeException e) {
+            logger.error("Lỗi trong quá trình cập nhật bệnh án mã: {} - Chi tiết: {}", maBenhAn, e.getMessage(), e);
+            throw e; // Re-throw để Controller xử lý
+        } catch (Exception e) {
+            logger.error("Lỗi không xác định trong quá trình cập nhật bệnh án mã: {} - Chi tiết: {}", maBenhAn, e.getMessage(), e);
+            throw new RuntimeException("Lỗi hệ thống: " + e.getMessage(), e);
+        }
+    }
+
+    private BenhAn layBenhAnHienTai(Integer maBenhAn) {
+        logger.debug("Tìm kiếm bệnh án với mã: {}", maBenhAn);
+
+        try {
+            Optional<BenhAn> optBenhAn = benhAnRepository.findById(maBenhAn);
+
+            if (!optBenhAn.isPresent()) {
+                logger.error("Không tìm thấy bệnh án với mã: {}", maBenhAn);
+                throw new RuntimeException("Không tìm thấy bệnh án với mã: " + maBenhAn);
+            }
+
+            BenhAn benhAn = optBenhAn.get();
+            logger.debug("Đã tìm thấy bệnh án cho bệnh nhân: {}",
+                    benhAn.getBenhNhan() != null ? benhAn.getBenhNhan().getHoTen() : "Unknown");
+
+            return benhAn;
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi truy vấn bệnh án mã: {} - Chi tiết: {}", maBenhAn, e.getMessage(), e);
+            throw new RuntimeException("Lỗi truy vấn cơ sở dữ liệu khi tìm bệnh án: " + e.getMessage(), e);
+        }
+    }
+
+    private void capNhatThongTinKhamBenh(BenhAn benhAn, BenhAnDTO dto) {
+        try {
+            // Cập nhật thông tin khám bệnh
+            if (dto.getLyDoKham() != null && !dto.getLyDoKham().trim().isEmpty()) {
+                benhAn.setLyDoKham(dto.getLyDoKham().trim());
+            }
+
+            if (dto.getChanDoan() != null && !dto.getChanDoan().trim().isEmpty()) {
+                benhAn.setChanDoan(dto.getChanDoan().trim());
+            }
+
+            if (dto.getGhiChuDieuTri() != null && !dto.getGhiChuDieuTri().trim().isEmpty()) {
+                benhAn.setGhiChuDieuTri(dto.getGhiChuDieuTri().trim());
+            }
+
+            if (dto.getNgayTaiKham() != null) {
+                benhAn.setNgayTaiKham(dto.getNgayTaiKham());
+            }
+
+            logger.debug("Đã cập nhật thông tin khám bệnh cho bệnh án mã: {}", benhAn.getMaBenhAn());
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi cập nhật thông tin khám bệnh: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi cập nhật thông tin khám bệnh: " + e.getMessage(), e);
+        }
+    }
+
+    private void capNhatThongTinBenhNhan(BenhAn benhAn, BenhAnDTO dto) {
+        try {
+            BenhNhan benhNhan = benhAn.getBenhNhan();
+            if (benhNhan == null) {
+                logger.warn("Không có thông tin bệnh nhân để cập nhật cho bệnh án mã: {}", benhAn.getMaBenhAn());
+                return;
+            }
+
+            boolean coThayDoi = false;
+
+            // Cập nhật các thông tin bệnh nhân nếu có
+            if (dto.getHoTen() != null && !dto.getHoTen().trim().isEmpty()
+                    && !dto.getHoTen().equals(benhNhan.getHoTen())) {
+                benhNhan.setHoTen(dto.getHoTen().trim());
+                coThayDoi = true;
+            }
+
+            if (dto.getSoDienThoai() != null && !dto.getSoDienThoai().trim().isEmpty()
+                    && !dto.getSoDienThoai().equals(benhNhan.getSoDienThoai())) {
+                benhNhan.setSoDienThoai(dto.getSoDienThoai().trim());
+                coThayDoi = true;
+            }
+
+            if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()
+                    && !dto.getEmail().equals(benhNhan.getEmail())) {
+                benhNhan.setEmail(dto.getEmail().trim());
+                coThayDoi = true;
+            }
+
+            if (dto.getDiaChi() != null && !dto.getDiaChi().trim().isEmpty()
+                    && !dto.getDiaChi().equals(benhNhan.getDiaChi())) {
+                benhNhan.setDiaChi(dto.getDiaChi().trim());
+                coThayDoi = true;
+            }
+
+            if (dto.getNgaySinh() != null && !dto.getNgaySinh().equals(benhNhan.getNgaySinh())) {
+                benhNhan.setNgaySinh(dto.getNgaySinh());
+                coThayDoi = true;
+            }
+
+            if (dto.getGioiTinh() != null && !dto.getGioiTinh().trim().isEmpty()) {
+                try {
+                    BenhNhan.GioiTinh gioiTinhMoi = BenhNhan.GioiTinh.valueOf(dto.getGioiTinh().toUpperCase());
+                    if (!gioiTinhMoi.equals(benhNhan.getGioiTinh())) {
+                        benhNhan.setGioiTinh(gioiTinhMoi);
+                        coThayDoi = true;
+                    }
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Giới tính không hợp lệ: {}", dto.getGioiTinh());
+                }
+            }
+
+            if (dto.getTienSuBenh() != null && !dto.getTienSuBenh().equals(benhNhan.getTienSuBenh())) {
+                benhNhan.setTienSuBenh(dto.getTienSuBenh().trim());
+                coThayDoi = true;
+            }
+
+            if (dto.getDiUng() != null && !dto.getDiUng().equals(benhNhan.getDiUng())) {
+                benhNhan.setDiUng(dto.getDiUng().trim());
+                coThayDoi = true;
+            }
+
+            if (coThayDoi) {
+                benhNhanRepository.save(benhNhan);
+                logger.debug("Đã cập nhật thông tin bệnh nhân mã: {}", benhNhan.getMaBenhNhan());
+            } else {
+                logger.debug("Không có thay đổi thông tin bệnh nhân mã: {}", benhNhan.getMaBenhNhan());
+            }
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi cập nhật thông tin bệnh nhân: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi cập nhật thông tin bệnh nhân: " + e.getMessage(), e);
+        }
+    }
+
+    private DonThuoc capNhatDonThuoc(BenhAn benhAn, BenhAnDTO dto) {
+        try {
+            // Tìm đơn thuốc hiện tại (nếu có)
+            List<DonThuoc> donThuocHienTai = donThuocRepository.findByBenhAn(benhAn);
+            DonThuoc donThuoc = null;
+
+            if (!donThuocHienTai.isEmpty()) {
+                // Cập nhật đơn thuốc đầu tiên (giả sử mỗi bệnh án có 1 đơn thuốc chính)
+                donThuoc = donThuocHienTai.get(0);
+
+                // Xóa chi tiết đơn thuốc cũ
+                List<ChiTietDonThuoc> chiTietCu = chiTietDonThuocRepository.findByDonThuoc(donThuoc);
+                chiTietDonThuocRepository.deleteAll(chiTietCu);
+                logger.debug("Đã xóa {} chi tiết đơn thuốc cũ", chiTietCu.size());
+
+            } else {
+                // Tạo đơn thuốc mới
+                donThuoc = new DonThuoc();
+                donThuoc.setBenhAn(benhAn);
+                donThuoc.setBenhNhan(benhAn.getBenhNhan());
+                donThuoc.setBacSi(benhAn.getBacSi());
+                donThuoc.setNgayKe(LocalDate.now());
+                donThuoc.setTrangThaiToa(DonThuoc.TrangThaiToa.MOI);
+                donThuoc.setNgayTao(LocalDateTime.now());
+            }
+
+            // Cập nhật thông tin đơn thuốc
+            if (dto.getMoTaChanDoan() != null) {
+                donThuoc.setMoTaChanDoan(dto.getMoTaChanDoan());
+            } else if (dto.getChanDoan() != null) {
+                donThuoc.setMoTaChanDoan(dto.getChanDoan());
+            }
+
+            if (dto.getGhiChuDonThuoc() != null) {
+                donThuoc.setGhiChu(dto.getGhiChuDonThuoc());
+            }
+
+            // Lưu đơn thuốc
+            donThuoc = donThuocRepository.save(donThuoc);
+            logger.debug("Đã lưu đơn thuốc mã: {}", donThuoc.getMaDonThuoc());
+
+            // Thêm chi tiết thuốc mới
+            int thuocThanhCong = 0;
+            int thuocLoi = 0;
+
+            for (ChiTietDonThuocDTO thuocDTO : dto.getDanhSachThuoc()) {
+                try {
+                    Optional<Thuoc> optThuoc = thuocRepository.findById(thuocDTO.getMaThuoc());
+                    if (optThuoc.isPresent()) {
+                        Thuoc thuoc = optThuoc.get();
+
+                        ChiTietDonThuoc chiTiet = new ChiTietDonThuoc();
+                        chiTiet.setDonThuoc(donThuoc);
+                        chiTiet.setThuoc(thuoc);
+                        chiTiet.setLieuDung(thuocDTO.getLieudung());
+                        chiTiet.setTanSuat(thuocDTO.getTanSuat());
+                        chiTiet.setThoiDiem(thuocDTO.getThoiDiem());
+                        chiTiet.setThoiGianDieuTri(thuocDTO.getThoiGianDieuTri());
+                        chiTiet.setSoLuong(thuocDTO.getSoLuong());
+                        chiTiet.setDonViDung(thuocDTO.getDonViDung());
+                        chiTiet.setDonGia(thuoc.getGia());
+                        chiTiet.setThanhTien(thuoc.getGia().multiply(BigDecimal.valueOf(thuocDTO.getSoLuong())));
+                        chiTiet.setGhiChu(thuocDTO.getGhiChu());
+                        chiTiet.setLyDoKeDon(thuocDTO.getLyDoDonThuoc());
+
+                        chiTietDonThuocRepository.save(chiTiet);
+                        thuocThanhCong++;
+
+                        logger.debug("Đã thêm thuốc: {} - Số lượng: {}", thuoc.getTenThuoc(), thuocDTO.getSoLuong());
+
+                    } else {
+                        logger.warn("Không tìm thấy thuốc với mã: {}", thuocDTO.getMaThuoc());
+                        thuocLoi++;
+                    }
+                } catch (Exception e) {
+                    logger.error("Lỗi khi thêm thuốc mã: {} - Chi tiết: {}", thuocDTO.getMaThuoc(), e.getMessage(), e);
+                    thuocLoi++;
+                }
+            }
+
+            logger.info("Hoàn thành cập nhật đơn thuốc mã: {} - Thành công: {}, Lỗi: {}",
+                    donThuoc.getMaDonThuoc(), thuocThanhCong, thuocLoi);
+
+            return donThuoc;
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi cập nhật đơn thuốc: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi cập nhật đơn thuốc: " + e.getMessage(), e);
+        }
+    }
+
+    private LichHen taoLichHenMoi(BenhAn benhAn, BenhAnDTO dto) {
+        try {
+            // Kiểm tra các thông tin bắt buộc
+            if (dto.getMaDichVu() == null) {
+                throw new RuntimeException("Mã dịch vụ là bắt buộc khi tạo lịch hẹn mới");
+            }
+
+            if (dto.getGioKetThucMoi() == null) {
+                throw new RuntimeException("Giờ kết thúc là bắt buộc khi tạo lịch hẹn mới");
+            }
+
+            // Tạo lịch hẹn mới
+            LichHen lichHenMoi = new LichHen();
+            lichHenMoi.setBenhNhan(benhAn.getBenhNhan());
+            lichHenMoi.setBacSi(benhAn.getBacSi());
+            lichHenMoi.setNgayHen(dto.getNgayHenMoi());
+            lichHenMoi.setGioBatDau(dto.getGioBatDauMoi());
+            lichHenMoi.setGioKetThuc(dto.getGioKetThucMoi());
+
+            // Lý do khám (từ ghi chú hoặc chẩn đoán)
+            if (dto.getGhiChuLichHen() != null && !dto.getGhiChuLichHen().trim().isEmpty()) {
+                lichHenMoi.setLydo(dto.getGhiChuLichHen().trim());
+            } else if (dto.getChanDoan() != null && !dto.getChanDoan().trim().isEmpty()) {
+                lichHenMoi.setLydo("Tái khám: " + dto.getChanDoan().trim());
+            } else {
+                lichHenMoi.setLydo("Lịch hẹn tái khám");
+            }
+
+            // Dịch vụ
+            Optional<DichVu> optDichVu = dichVuRepository.findById(dto.getMaDichVu());
+            if (optDichVu.isPresent()) {
+                lichHenMoi.setDichVu(optDichVu.get());
+            } else {
+                logger.warn("Không tìm thấy dịch vụ mã: {}, sử dụng dịch vụ mặc định", dto.getMaDichVu());
+                // Sử dụng dịch vụ khám tổng quát mặc định
+                Optional<DichVu> dichVuMacDinh = dichVuRepository.findById(1);
+                if (dichVuMacDinh.isPresent()) {
+                    lichHenMoi.setDichVu(dichVuMacDinh.get());
+                }
+            }
+
+            // Trạng thái mặc định là "Đã đặt lịch" (ID = 1)
+            Optional<TrangThaiLichHen> optTrangThai = trangThaiLichHenRepository.findById(1);
+            if (optTrangThai.isPresent()) {
+                lichHenMoi.setTrangThai(optTrangThai.get());
+            }
+
+            lichHenMoi.setNgayTao(LocalDateTime.now());
+
+            // Lưu lịch hẹn mới
+            LichHen lichHenDaLuu = lichHenRepository.save(lichHenMoi);
+            logger.info("Đã tạo lịch hẹn mới mã: {} cho ngày: {}",
+                    lichHenDaLuu.getMaLichHen(), dto.getNgayHenMoi());
+
+            return lichHenDaLuu;
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi tạo lịch hẹn mới: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi tạo lịch hẹn mới: " + e.getMessage(), e);
+        }
+    }
+
+    private BenhAnDTO taoKetQuaCapNhat(BenhAn benhAn, DonThuoc donThuoc, LichHen lichHenMoi) {
+        try {
+            BenhAnDTO result = new BenhAnDTO(benhAn);
+
+            // Thêm thông tin đơn thuốc nếu có
+            if (donThuoc != null) {
+                result.setMaDonThuoc(donThuoc.getMaDonThuoc());
+                result.setMoTaChanDoan(donThuoc.getMoTaChanDoan());
+                result.setGhiChuDonThuoc(donThuoc.getGhiChu());
+            }
+
+            // Thêm thông tin lịch hẹn mới nếu có
+            if (lichHenMoi != null) {
+                result.setMaLichHenMoi(lichHenMoi.getMaLichHen());
+                result.setNgayHenMoi(lichHenMoi.getNgayHen());
+                result.setGioBatDauMoi(lichHenMoi.getGioBatDau());
+                result.setGioKetThucMoi(lichHenMoi.getGioKetThuc());
+                result.setGhiChuLichHen(lichHenMoi.getLydo());
+                if (lichHenMoi.getDichVu() != null) {
+                    result.setMaDichVu(lichHenMoi.getDichVu().getMaDichVu());
+                }
+            }
+
+            result.setThongBao("Cập nhật bệnh án thành công");
+
+            logger.debug("Đã tạo kết quả cập nhật bệnh án thành công");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi tạo kết quả cập nhật: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi tạo kết quả cập nhật: " + e.getMessage(), e);
+        }
+    }
 }

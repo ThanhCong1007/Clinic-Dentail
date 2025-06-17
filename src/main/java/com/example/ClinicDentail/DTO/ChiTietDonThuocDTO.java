@@ -26,5 +26,5 @@ public class ChiTietDonThuocDTO {
     private BigDecimal donGia;
     private BigDecimal thanhTien;
     private String ghiChu;
-    private String lyDonThuoc;
+    private String lyDoDonThuoc;
 }

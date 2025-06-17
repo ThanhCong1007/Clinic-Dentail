@@ -57,6 +57,38 @@ public class ThamKhamController {
         }
     }
 
+    /**
+     * Cập nhật bệnh án
+     */
+    @PutMapping("/benh-an/{maBenhAn}")
+    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
+    public ResponseEntity<?> capNhatBenhAn(@PathVariable Integer maBenhAn, @RequestBody BenhAnDTO dto) {
+        try {
+            logger.info("Bắt đầu cập nhật bệnh án mã: {}", maBenhAn);
+
+            BenhAnDTO result = thamKhamService.capNhatBenhAn(maBenhAn, dto);
+
+            logger.info("Cập nhật bệnh án thành công mã: {}", maBenhAn);
+            return ResponseEntity.ok(result);
+
+        } catch (RuntimeException e) {
+            logger.error("Lỗi khi cập nhật bệnh án mã: {} - Chi tiết: {}", maBenhAn, e.getMessage(), e);
+
+            String errorMessage = e.getMessage();
+            if (errorMessage == null || errorMessage.trim().isEmpty()) {
+                errorMessage = "Lỗi: Có lỗi không xác định trong quá trình cập nhật bệnh án!";
+            }
+
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(errorMessage));
+
+        } catch (Exception e) {
+            logger.error("Lỗi hệ thống khi cập nhật bệnh án mã: {} - Chi tiết: {}", maBenhAn, e.getMessage(), e);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Lỗi hệ thống: Không thể kết nối cơ sở dữ liệu! Vui lòng thử lại sau."));
+        }
+    }
 
     /** Lấy thông tin bệnh nhân
      *
