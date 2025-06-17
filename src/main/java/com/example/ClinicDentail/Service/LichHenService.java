@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -84,20 +83,20 @@ public class LichHenService {
     /**
      * Đăng ký lịch hẹn mới
      */
-    public LichHenDTO registerAppointment(AppointmentRequest appointmentRequest) {
+    public LichHenDTO dangKyLichHen(AppointmentRequest appointmentRequest) {
         logger.info("Processing appointment registration for patient ID: {}", appointmentRequest.getMaBenhNhan());
 
         // Validate patient
-        BenhNhan benhNhan = validatePatient(appointmentRequest.getMaBenhNhan());
+        BenhNhan benhNhan = kiemTraBenhNhanTonTai(appointmentRequest.getMaBenhNhan());
 
         // Validate doctor
-        BacSi bacSi = validateDoctor(appointmentRequest.getMaBacSi());
+        BacSi bacSi = kiemTraBacSiTonTai(appointmentRequest.getMaBacSi());
 
         // Validate service (optional)
-        DichVu dichVu = validateService(appointmentRequest.getMaDichVu());
+        DichVu dichVu = kiemTraDichVu(appointmentRequest.getMaDichVu());
 
         // Validate appointment status
-        TrangThaiLichHen trangThai = validateAppointmentStatus(appointmentRequest.getMaTrangThai());
+        TrangThaiLichHen trangThai = kiemTraTranngThaiLichHen(appointmentRequest.getMaTrangThai());
 
         // Validate appointment time
         validateAppointmentTime(appointmentRequest.getNgayHen(),
@@ -125,11 +124,11 @@ public class LichHenService {
     /**
      * Lấy danh sách lịch hẹn theo mã bệnh nhân
      */
-    public List<LichHenDTO> getAppointmentsByPatient(Integer maBenhNhan) {
+    public List<LichHenDTO> getDanhSachBenhNhan(Integer maBenhNhan) {
         logger.info("Retrieving appointments for patient ID: {}", maBenhNhan);
 
         // Validate patient exists
-        validatePatient(maBenhNhan);
+        kiemTraBenhNhanTonTai(maBenhNhan);
 
         List<LichHen> appointments = lichHenRepository.findByBenhNhan_MaBenhNhanOrderByNgayHenDescGioBatDauDesc(maBenhNhan);
         logger.info("Found {} appointments for patient ID {}", appointments.size(), maBenhNhan);
@@ -142,7 +141,7 @@ public class LichHenService {
     /**
      * Lấy thông tin chi tiết của một lịch hẹn
      */
-    public LichHenDTO getAppointmentDetail(Integer maLichHen) {
+    public LichHenDTO getChiTietLichHen(Integer maLichHen) {
         logger.info("Retrieving appointment details for ID: {}", maLichHen);
 
         Optional<LichHen> lichHenOpt = lichHenRepository.findById(maLichHen);
@@ -158,7 +157,7 @@ public class LichHenService {
     /**
      * Cập nhật lịch hẹn
      */
-    public LichHenDTO updateAppointment(Integer maLichHen, AppointmentRequest appointmentRequest) {
+    public LichHenDTO capNhapLichHen(Integer maLichHen, AppointmentRequest appointmentRequest) {
         logger.info("Updating appointment ID: {}", maLichHen);
 
         Optional<LichHen> lichHenOpt = lichHenRepository.findById(maLichHen);
@@ -170,13 +169,13 @@ public class LichHenService {
         LichHen lichHen = lichHenOpt.get();
 
         // Validate doctor
-        BacSi bacSi = validateDoctor(appointmentRequest.getMaBacSi());
+        BacSi bacSi = kiemTraBacSiTonTai(appointmentRequest.getMaBacSi());
 
         // Validate service (optional)
-        DichVu dichVu = validateService(appointmentRequest.getMaDichVu());
+        DichVu dichVu = kiemTraDichVu(appointmentRequest.getMaDichVu());
 
         // Validate appointment status
-        TrangThaiLichHen trangThai = validateAppointmentStatus(appointmentRequest.getMaTrangThai());
+        TrangThaiLichHen trangThai = kiemTraTranngThaiLichHen(appointmentRequest.getMaTrangThai());
 
         // Validate appointment time
         validateAppointmentTime(appointmentRequest.getNgayHen(),
@@ -207,7 +206,7 @@ public class LichHenService {
      * @return Thông tin lịch hẹn đã được cập nhật trạng thái
      * @throws RuntimeException nếu không tìm thấy lịch hẹn, trạng thái "Đã hủy" hoặc không hợp lệ để hủy
      */
-    public LichHenDTO cancelAppointment(Integer maLichHen, String lyDo) {
+    public LichHenDTO huyLichHen(Integer maLichHen, String lyDo) {
         logger.info("Cancelling appointment ID: {}", maLichHen);
 
         Optional<LichHen> lichHenOpt = lichHenRepository.findById(maLichHen);
@@ -247,7 +246,7 @@ public class LichHenService {
      * @return Thực thể BenhNhan tương ứng
      * @throws RuntimeException nếu không tìm thấy bệnh nhân
      */
-    private BenhNhan validatePatient(Integer maBenhNhan) {
+    private BenhNhan kiemTraBenhNhanTonTai(Integer maBenhNhan) {
         Optional<BenhNhan> benhNhanOpt = benhNhanRepository.findById(maBenhNhan);
         if (!benhNhanOpt.isPresent()) {
             logger.warn("Patient ID {} not found", maBenhNhan);
@@ -263,7 +262,7 @@ public class LichHenService {
      * @return Thực thể BacSi nếu tồn tại và đang làm việc
      * @throws RuntimeException nếu không tìm thấy hoặc bác sĩ đã nghỉ làm
      */
-    private BacSi validateDoctor(Integer maBacSi) {
+    private BacSi kiemTraBacSiTonTai(Integer maBacSi) {
         Optional<BacSi> bacSiOpt = bacSiRepository.findById(maBacSi);
         if (!bacSiOpt.isPresent()) {
             logger.warn("Doctor ID {} not found", maBacSi);
@@ -286,7 +285,7 @@ public class LichHenService {
      * @return Thực thể DichVu hoặc null nếu mã là null
      * @throws RuntimeException nếu không tìm thấy hoặc dịch vụ đã ngừng hoạt động
      */
-    private DichVu validateService(Integer maDichVu) {
+    private DichVu kiemTraDichVu(Integer maDichVu) {
         if (maDichVu == null) {
             return null;
         }
@@ -314,7 +313,7 @@ public class LichHenService {
      * @return Thực thể TrangThaiLichHen
      * @throws RuntimeException nếu không tìm thấy trạng thái hợp lệ
      */
-    private TrangThaiLichHen validateAppointmentStatus(Integer maTrangThai) {
+    private TrangThaiLichHen kiemTraTranngThaiLichHen(Integer maTrangThai) {
         Optional<TrangThaiLichHen> trangThaiOpt = trangThaiLichHenRepository.findById(maTrangThai);
         if (!trangThaiOpt.isPresent()) {
             logger.warn("Status ID {} not found", maTrangThai);

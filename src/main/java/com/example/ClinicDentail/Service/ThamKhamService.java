@@ -644,4 +644,11 @@ public class ThamKhamService {
                 .map(BenhAnDTO::new)
                 .collect(Collectors.toList());
     }
+    public BenhAnDTO getChiTietBenhAn(Integer maBenhAn) {
+        BenhAn benhAn = benhAnRepository.findById(maBenhAn)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bệnh án với mã: " + maBenhAn));
+
+        return new BenhAnDTO(benhAn);
+    }
+
 }

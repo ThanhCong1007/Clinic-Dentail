@@ -148,4 +148,16 @@ public class ThamKhamController {
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         }
     }
+    @GetMapping("/benh-an/{maBenhAn}")
+    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
+    public ResponseEntity<?> getChiTietBenhAn(@PathVariable Integer maBenhAn) {
+        try {
+            BenhAnDTO result = thamKhamService.getChiTietBenhAn(maBenhAn);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+//            e.printStackTrace(); // log lỗi rõ
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
 }

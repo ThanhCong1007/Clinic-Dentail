@@ -23,4 +23,6 @@ public interface BenhAnRepository extends JpaRepository<BenhAn,Integer> {
             "WHERE ba.benhNhan.maBenhNhan = :maBenhNhan " +
             "ORDER BY ba.ngayTao DESC")
     List<BenhAn> findByBenhNhan_MaBenhNhanOrderByNgayTaoDesc(@Param("maBenhNhan") Integer maBenhNhan);
+
+
 }

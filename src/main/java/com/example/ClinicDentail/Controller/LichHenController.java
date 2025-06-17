@@ -33,7 +33,7 @@ public class LichHenController {
 //    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<?> registerAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) {
         try {
-            LichHenDTO result = lichHenService.registerAppointment(appointmentRequest);
+            LichHenDTO result = lichHenService.dangKyLichHen(appointmentRequest);
             return ResponseEntity.ok(new MessageResponse("Đăng ký lịch hẹn thành công!"));
         } catch (RuntimeException e) {
             logger.error("Appointment registration error: " + e.getMessage(), e);
@@ -54,7 +54,7 @@ public class LichHenController {
     @GetMapping("/patient/{maBenhNhan}")
     public ResponseEntity<?> getAppointmentsByPatient(@PathVariable Integer maBenhNhan) {
         try {
-            List<LichHenDTO> appointments = lichHenService.getAppointmentsByPatient(maBenhNhan);
+            List<LichHenDTO> appointments = lichHenService.getDanhSachBenhNhan(maBenhNhan);
             return ResponseEntity.ok(appointments);
         } catch (RuntimeException e) {
             logger.error("Get appointments by patient error: " + e.getMessage(), e);
@@ -75,7 +75,7 @@ public class LichHenController {
     @GetMapping("/{maLichHen}")
     public ResponseEntity<?> getAppointmentDetail(@PathVariable Integer maLichHen) {
         try {
-            LichHenDTO appointment = lichHenService.getAppointmentDetail(maLichHen);
+            LichHenDTO appointment = lichHenService.getChiTietLichHen(maLichHen);
             return ResponseEntity.ok(appointment);
         } catch (RuntimeException e) {
             logger.error("Get appointment detail error: " + e.getMessage(), e);
@@ -102,7 +102,7 @@ public class LichHenController {
     public ResponseEntity<?> updateAppointment(@PathVariable Integer maLichHen,
                                                @Valid @RequestBody AppointmentRequest appointmentRequest) {
         try {
-            LichHenDTO updatedAppointment = lichHenService.updateAppointment(maLichHen, appointmentRequest);
+            LichHenDTO updatedAppointment = lichHenService.capNhapLichHen(maLichHen, appointmentRequest);
             return ResponseEntity.ok(updatedAppointment);
         } catch (RuntimeException e) {
             logger.error("Update appointment error: " + e.getMessage(), e);
@@ -131,7 +131,7 @@ public class LichHenController {
         try {
             String lyDo = body != null && body.containsKey("lyDo") ? (String) body.get("lyDo") : null;
 
-            LichHenDTO cancelledAppointment = lichHenService.cancelAppointment(maLichHen, lyDo);
+            LichHenDTO cancelledAppointment = lichHenService.huyLichHen(maLichHen, lyDo);
             return ResponseEntity.ok(cancelledAppointment);
         } catch (RuntimeException e) {
             logger.error("Cancel appointment error: " + e.getMessage(), e);

@@ -21,7 +21,7 @@ public class BenhAn {
     private Integer maBenhAn;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ma_lich_hen", nullable = false)
+    @JoinColumn(name = "ma_lich_hen", nullable = true)
     private LichHen lichHen;
 
     @ManyToOne(fetch = FetchType.EAGER)
