@@ -1,6 +1,7 @@
 package com.example.ClinicDentail.DTO;
 
 import com.example.ClinicDentail.Enity.BenhAn;
+import com.example.ClinicDentail.Enity.BenhNhan;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -70,13 +71,17 @@ public class BenhAnDTO {
     public BenhAnDTO(BenhAn benhAn) {
         this.maBenhAn = benhAn.getMaBenhAn();
         this.ngayTao = benhAn.getNgayTao();
-
+//        this.nguoiDung = benhAn.getNguoiDung();
         if (benhAn.getLichHen() != null) {
             this.maLichHen = benhAn.getLichHen().getMaLichHen();
         }
 
         // Bệnh nhân
         if (benhAn.getBenhNhan() != null) {
+            BenhNhan benhNhan = benhAn.getBenhNhan();
+            if (benhNhan.getNguoiDung() != null) {
+                this.nguoiDung = benhNhan.getNguoiDung().getMaNguoiDung();
+            }
             var bn = benhAn.getBenhNhan();
             this.maBenhNhan = bn.getMaBenhNhan();
             this.tenBenhNhan = bn.getHoTen();  // Tên rút gọn

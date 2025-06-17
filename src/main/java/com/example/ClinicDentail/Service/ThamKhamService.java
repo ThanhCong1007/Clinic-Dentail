@@ -636,11 +636,10 @@ public class ThamKhamService {
 
         return new LichHenBenhAnDTO(lichHen);
     }
-    
+
     public List<BenhAnDTO> getBenhAnByBenhNhan(Integer maBenhNhan) {
         List<BenhAn> benhAns = benhAnRepository
                 .findByBenhNhan_MaBenhNhanOrderByNgayTaoDesc(maBenhNhan);
-
         return benhAns.stream()
                 .map(BenhAnDTO::new)
                 .collect(Collectors.toList());
