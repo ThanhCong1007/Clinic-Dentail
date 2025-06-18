@@ -10,12 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -113,7 +108,7 @@ public class ThamKhamService {
             }
             // 7. Trả về kết quả
             try {
-                return taoKetQuaTraVe(dto, benhAn, donThuoc, hoaDon);
+                return taoKetQuaTraVe( benhAn, donThuoc, hoaDon);
             } catch (Exception e) {
                 throw new RuntimeException("Lỗi  - Tạo kết quả trả về: " + e.getMessage(), e);
             }
@@ -172,44 +167,10 @@ public class ThamKhamService {
         }
     }
 
-    private KhamBenhDTO taoKetQuaTraVe(KhamBenhDTO dto, BenhAn benhAn, DonThuoc donThuoc, HoaDon hoaDon) {
+    private KhamBenhDTO taoKetQuaTraVe(BenhAn benhAn, DonThuoc donThuoc, HoaDon hoaDon) {
         logger.debug("Tạo kết quả trả về cho quá trình khám bệnh");
         try {
-            // Set thông tin cơ bản
-            dto.setMaBenhAn(benhAn.getMaBenhAn());
-            dto.setMaDonThuoc(donThuoc != null ? donThuoc.getMaDonThuoc() : null);
-            dto.setMaHoaDon(hoaDon.getMaHoaDon());
-            dto.setTongTien(hoaDon.getTongTien());
-            dto.setTrangThaiKham("Hoàn thành");
-            dto.setNgayKham(LocalDateTime.now());
-
-            // *** THÊM: Set lại thông tin bệnh nhân từ BenhAn ***
-            if (benhAn.getBenhNhan() != null) {
-                var benhNhan = benhAn.getBenhNhan();
-                dto.setHoTen(benhNhan.getHoTen());
-                dto.setHoTen(benhNhan.getHoTen());
-                dto.setSoDienThoai(benhNhan.getSoDienThoai());
-                dto.setEmail(benhNhan.getEmail());
-                dto.setDiaChi(benhNhan.getDiaChi());
-                dto.setNgaySinh(benhNhan.getNgaySinh());
-                dto.setGioiTinh(benhNhan.getGioiTinh() != null ? benhNhan.getGioiTinh().toString() : null);
-                dto.setTienSuBenh(benhNhan.getTienSuBenh());
-                dto.setDiUng(benhNhan.getDiUng());
-            }
-
-            // *** THÊM: Set lại thông tin bác sĩ từ BenhAn ***
-            if (benhAn.getBacSi() != null && benhAn.getBacSi().getNguoiDung() != null) {
-                dto.setHoTen(benhAn.getBacSi().getNguoiDung().getHoTen());
-            }
-
-            // *** THÊM: Set lại thông tin lịch hẹn từ BenhAn ***
-            if (benhAn.getLichHen() != null) {
-                dto.setMaLichHen(benhAn.getLichHen().getMaLichHen());
-            }
-
-            logger.debug("Đã tạo kết quả trả về thành công");
-            return dto;
-
+            return new KhamBenhDTO(benhAn, donThuoc, hoaDon);
         } catch (Exception e) {
             logger.error("Lỗi khi tạo kết quả trả về - Chi tiết: {}", e.getMessage(), e);
             throw e;
@@ -260,29 +221,8 @@ public class ThamKhamService {
 
     private BenhAnDTO taoKetQuaCapNhat(BenhAn benhAn, DonThuoc donThuoc, LichHen lichHenMoi) {
         try {
-            BenhAnDTO result = new BenhAnDTO(benhAn);
-
-            // Thêm thông tin đơn thuốc nếu có
-            if (donThuoc != null) {
-                result.setMaDonThuoc(donThuoc.getMaDonThuoc());
-                result.setMoTaChanDoan(donThuoc.getMoTaChanDoan());
-                result.setGhiChuDonThuoc(donThuoc.getGhiChu());
-            }
-
-            // Thêm thông tin lịch hẹn mới nếu có
-            if (lichHenMoi != null) {
-                result.setMaLichHenMoi(lichHenMoi.getMaLichHen());
-                result.setNgayHenMoi(lichHenMoi.getNgayHen());
-                result.setGioBatDauMoi(lichHenMoi.getGioBatDau());
-                result.setGioKetThucMoi(lichHenMoi.getGioKetThuc());
-                result.setGhiChuLichHen(lichHenMoi.getLydo());
-                if (lichHenMoi.getDichVu() != null) {
-                    result.setMaDichVu(lichHenMoi.getDichVu().getMaDichVu());
-                }
-            }
-
+            BenhAnDTO result = new BenhAnDTO(benhAn, donThuoc, lichHenMoi);
             result.setThongBao("Cập nhật bệnh án thành công");
-
             logger.debug("Đã tạo kết quả cập nhật bệnh án thành công");
             return result;
 
@@ -291,4 +231,5 @@ public class ThamKhamService {
             throw new RuntimeException("Lỗi tạo kết quả cập nhật: " + e.getMessage(), e);
         }
     }
+
 }

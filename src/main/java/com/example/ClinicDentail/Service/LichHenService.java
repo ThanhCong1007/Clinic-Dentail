@@ -43,9 +43,6 @@ public class LichHenService {
     @Autowired
     private TrangThaiLichHenRepository trangThaiLichHenRepository;
 
-    @Autowired
-    private BacSiService bacSiService;
-
     /**
      * Tự động hủy lịch hẹn quá hạn - chạy mỗi 30 phút
      */
@@ -472,67 +469,27 @@ public class LichHenService {
             throw new RuntimeException("Lỗi khi lấy lịch hẹn theo bác sĩ và ngày: " + e.getMessage());
         }
     }
+
     public LichHen taoLichHenMoi(BenhAn benhAn, BenhAnDTO dto) {
         try {
-            // Kiểm tra các thông tin bắt buộc
-            if (dto.getMaDichVu() == null) {
-                throw new RuntimeException("Mã dịch vụ là bắt buộc khi tạo lịch hẹn mới");
+            if (dto.getMaDichVu() == null || dto.getGioKetThucMoi() == null) {
+                throw new RuntimeException("Thiếu thông tin bắt buộc: mã dịch vụ hoặc giờ kết thúc");
             }
 
-            if (dto.getGioKetThucMoi() == null) {
-                throw new RuntimeException("Giờ kết thúc là bắt buộc khi tạo lịch hẹn mới");
-            }
+            DichVu dichVu = dichVuRepository.findById(dto.getMaDichVu())
+                    .orElseGet(() -> dichVuRepository.findById(1)
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ mặc định")));
 
-            // Tạo lịch hẹn mới
-            LichHen lichHenMoi = new LichHen();
-            lichHenMoi.setBenhNhan(benhAn.getBenhNhan());
-            lichHenMoi.setBacSi(benhAn.getBacSi());
-            lichHenMoi.setNgayHen(dto.getNgayHenMoi());
-            lichHenMoi.setGioBatDau(dto.getGioBatDauMoi());
-            lichHenMoi.setGioKetThuc(dto.getGioKetThucMoi());
+            TrangThaiLichHen trangThai = trangThaiLichHenRepository.findById(1)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái mặc định"));
 
-            // Lý do khám (từ ghi chú hoặc chẩn đoán)
-            if (dto.getGhiChuLichHen() != null && !dto.getGhiChuLichHen().trim().isEmpty()) {
-                lichHenMoi.setLydo(dto.getGhiChuLichHen().trim());
-            } else if (dto.getChanDoan() != null && !dto.getChanDoan().trim().isEmpty()) {
-                lichHenMoi.setLydo("Tái khám: " + dto.getChanDoan().trim());
-            } else {
-                lichHenMoi.setLydo("Lịch hẹn tái khám");
-            }
-
-            // Dịch vụ
-            Optional<DichVu> optDichVu = dichVuRepository.findById(dto.getMaDichVu());
-            if (optDichVu.isPresent()) {
-                lichHenMoi.setDichVu(optDichVu.get());
-            } else {
-                logger.warn("Không tìm thấy dịch vụ mã: {}, sử dụng dịch vụ mặc định", dto.getMaDichVu());
-                // Sử dụng dịch vụ khám tổng quát mặc định
-                Optional<DichVu> dichVuMacDinh = dichVuRepository.findById(1);
-                if (dichVuMacDinh.isPresent()) {
-                    lichHenMoi.setDichVu(dichVuMacDinh.get());
-                }
-            }
-
-            // Trạng thái mặc định là "Đã đặt lịch" (ID = 1)
-            Optional<TrangThaiLichHen> optTrangThai = trangThaiLichHenRepository.findById(1);
-            if (optTrangThai.isPresent()) {
-                lichHenMoi.setTrangThai(optTrangThai.get());
-            }
-
-            lichHenMoi.setNgayTao(LocalDateTime.now());
-
-            // Lưu lịch hẹn mới
-            LichHen lichHenDaLuu = lichHenRepository.save(lichHenMoi);
-            logger.info("Đã tạo lịch hẹn mới mã: {} cho ngày: {}",
-                    lichHenDaLuu.getMaLichHen(), dto.getNgayHenMoi());
-
-            return lichHenDaLuu;
-
+            return lichHenRepository.save(new LichHen(benhAn, dto, dichVu, trangThai));
         } catch (Exception e) {
             logger.error("Lỗi khi tạo lịch hẹn mới: {}", e.getMessage(), e);
             throw new RuntimeException("Lỗi tạo lịch hẹn mới: " + e.getMessage(), e);
         }
     }
+
     public void capNhatTrangThaiHoanThanh(LichHen lichHen) {
         // Cập nhật trạng thái thành "Hoàn thành" (ma_trang_thai = 4)
         Optional<TrangThaiLichHen> optTrangThai = trangThaiLichHenRepository.findById(4);
@@ -542,65 +499,23 @@ public class LichHenService {
         }
     }
     public LichHen capNhatTrangThaiLichHen(Integer maLichHen) {
-        logger.debug("Cập nhật trạng thái lịch hẹn mã: {}", maLichHen);
-        try {
-            Optional<LichHen> optLichHen = lichHenRepository.findById(maLichHen);
-            if (!optLichHen.isPresent()) {
-                logger.error("Không tìm thấy lịch hẹn với mã: {}", maLichHen);
-                throw new RuntimeException("Không tìm thấy lịch hẹn với mã: " + maLichHen);
-            }
+        LichHen lichHen = lichHenRepository.findById(maLichHen)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn với mã: " + maLichHen));
 
-            LichHen lichHen = optLichHen.get();
-            logger.debug("Tìm thấy lịch hẹn: {} - Bác sĩ: {}", lichHen.getMaLichHen(), lichHen.getBacSi().getNguoiDung().getHoTen());
+        logger.debug("Cập nhật trạng thái lịch hẹn mã: {}, Bác sĩ: {}", maLichHen,
+                lichHen.getBacSi().getNguoiDung().getHoTen());
 
-            // Cập nhật trạng thái thành "Đang thực hiện" (ma_trang_thai = 3)
-            Optional<TrangThaiLichHen> optTrangThai = trangThaiLichHenRepository.findById(3);
-            if (!optTrangThai.isPresent()) {
-                logger.error("Không tìm thấy trạng thái 'Đang thực hiện' (ID=3) để cập nhật lịch hẹn mã: {}", maLichHen);
-                throw new RuntimeException("Không tìm thấy trạng thái lịch hẹn trong hệ thống");
-            }
+        TrangThaiLichHen trangThai = trangThaiLichHenRepository.findById(3)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái lịch hẹn ID = 3"));
 
-            lichHen.setTrangThai(optTrangThai.get());
-            lichHenRepository.save(lichHen);
-            logger.debug("Đã cập nhật trạng thái lịch hẹn mã: {} thành 'Đang thực hiện'", maLichHen);
-
-            return lichHen;
-        } catch (Exception e) {
-            logger.error("Lỗi khi cập nhật trạng thái lịch hẹn mã: {} - Chi tiết: {}", maLichHen, e.getMessage(), e);
-            throw new RuntimeException("Lỗi cập nhật trạng thái lịch hẹn: " + e.getMessage(), e);
-        }
+        lichHen.setTrangThai(trangThai);
+        return lichHenRepository.save(lichHen);
     }
+
+
     public KhamBenhDTO layThongTinLichHen(Integer maLichHen) {
-        Optional<LichHen> optLichHen = lichHenRepository.findById(maLichHen);
-        if (!optLichHen.isPresent()) {
-            throw new RuntimeException("Không tìm thấy lịch hẹn với mã: " + maLichHen);
-        }
-
-        LichHen lichHen = optLichHen.get();
-        KhamBenhDTO dto = new KhamBenhDTO();
-
-        // Ánh xạ thông tin từ lịch hẹn
-        dto.setMaLichHen(lichHen.getMaLichHen());
-        dto.setMaBacSi(lichHen.getBacSi().getMaBacSi());
-        dto.setLyDoKham(lichHen.getLydo());
-
-        // Ánh xạ thông tin bệnh nhân
-        BenhNhan benhNhan = lichHen.getBenhNhan();
-        dto.setMaBenhNhan(benhNhan.getMaBenhNhan());
-        dto.setHoTen(benhNhan.getHoTen());
-        dto.setSoDienThoai(benhNhan.getSoDienThoai());
-        dto.setEmail(benhNhan.getEmail());
-        dto.setDiaChi(benhNhan.getDiaChi());
-        dto.setNgaySinh(benhNhan.getNgaySinh());
-        dto.setGioiTinh(benhNhan.getGioiTinh().toString());
-        dto.setTienSuBenh(benhNhan.getTienSuBenh());
-        dto.setDiUng(benhNhan.getDiUng());
-
-        // Ánh xạ thông tin dịch vụ nếu có
-        if (lichHen.getDichVu() != null) {
-            dto.setMaDichVu(Arrays.asList(lichHen.getDichVu().getMaDichVu()));
-        }
-
-        return dto;
+        return lichHenRepository.findById(maLichHen)
+                .map(KhamBenhDTO::new)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn với mã: " + maLichHen));
     }
 }

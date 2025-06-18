@@ -1,5 +1,6 @@
 package com.example.ClinicDentail.Enity;
 
+import com.example.ClinicDentail.DTO.BenhAnDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -75,5 +76,23 @@ public class LichHen {
     @Transient
     public long getThoiLuong() {
         return ChronoUnit.MINUTES.between(gioBatDau, gioKetThuc);
+    }
+    public LichHen(BenhAn benhAn, BenhAnDTO dto, DichVu dichVu, TrangThaiLichHen trangThai) {
+        this.benhNhan = benhAn.getBenhNhan();
+        this.bacSi = benhAn.getBacSi();
+        this.ngayHen = dto.getNgayHenMoi();
+        this.gioBatDau = dto.getGioBatDauMoi();
+        this.gioKetThuc = dto.getGioKetThucMoi();
+        this.dichVu = dichVu;
+        this.trangThai = trangThai;
+        this.ngayTao = LocalDateTime.now();
+
+        if (dto.getGhiChuLichHen() != null && !dto.getGhiChuLichHen().isBlank()) {
+            this.lydo = dto.getGhiChuLichHen().trim();
+        } else if (dto.getChanDoan() != null && !dto.getChanDoan().isBlank()) {
+            this.lydo = "Tái khám: " + dto.getChanDoan().trim();
+        } else {
+            this.lydo = "Lịch hẹn tái khám";
+        }
     }
 }

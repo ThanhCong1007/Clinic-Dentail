@@ -1,8 +1,13 @@
 package com.example.ClinicDentail.DTO;
 
+import com.example.ClinicDentail.Enity.BenhAn;
+import com.example.ClinicDentail.Enity.DichVu;
+import com.example.ClinicDentail.Enity.LichHen;
+import com.example.ClinicDentail.Enity.TrangThaiLichHen;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 @Data
 public class LichHenDTO {
@@ -28,7 +33,7 @@ public class LichHenDTO {
     }
 
     // Constructor từ entity
-    public LichHenDTO(com.example.ClinicDentail.Enity.LichHen lichHen) {
+    public LichHenDTO(LichHen lichHen) {
         this.maLichHen = lichHen.getMaLichHen();
 
         if (lichHen.getBenhNhan() != null) {
@@ -62,5 +67,46 @@ public class LichHenDTO {
         this.lydo = lichHen.getLydo();
         this.thoiGian = lichHen.getThoiLuong();
     }
+    public LichHenDTO(BenhAn benhAn, BenhAnDTO dto, DichVu dichVu, TrangThaiLichHen trangThai) {
+        if (benhAn.getBenhNhan() != null) {
+            this.maBenhNhan = benhAn.getBenhNhan().getMaBenhNhan();
+            this.tenBenhNhan = benhAn.getBenhNhan().getHoTen();
+            this.soDienThoaiBenhNhan = benhAn.getBenhNhan().getSoDienThoai();
+        }
+
+        if (benhAn.getBacSi() != null) {
+            this.maBacSi = benhAn.getBacSi().getMaBacSi();
+            if (benhAn.getBacSi().getNguoiDung() != null) {
+                this.tenBacSi = benhAn.getBacSi().getNguoiDung().getHoTen();
+            }
+        }
+
+        if (dichVu != null) {
+            this.maDichVu = dichVu.getMaDichVu();
+            this.tenDichVu = dichVu.getTenDichVu();
+        }
+
+        if (trangThai != null) {
+            this.maTrangThai = trangThai.getMaTrangThai();
+            this.tenTrangThai = trangThai.getTenTrangThai();
+        }
+
+        this.ngayHen = dto.getNgayHenMoi();
+        this.gioBatDau = dto.getGioBatDauMoi();
+        this.gioKetThuc = dto.getGioKetThucMoi();
+
+        if (dto.getGhiChuLichHen() != null && !dto.getGhiChuLichHen().isBlank()) {
+            this.lydo = dto.getGhiChuLichHen().trim();
+        } else if (dto.getChanDoan() != null && !dto.getChanDoan().isBlank()) {
+            this.lydo = "Tái khám: " + dto.getChanDoan().trim();
+        } else {
+            this.lydo = "Lịch hẹn tái khám";
+        }
+
+        if (gioBatDau != null && gioKetThuc != null) {
+            this.thoiGian = java.time.Duration.between(gioBatDau, gioKetThuc).toMinutes();
+        }
+    }
+
 
 }

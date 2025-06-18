@@ -2,6 +2,8 @@ package com.example.ClinicDentail.DTO;
 
 import com.example.ClinicDentail.Enity.BenhAn;
 import com.example.ClinicDentail.Enity.BenhNhan;
+import com.example.ClinicDentail.Enity.DonThuoc;
+import com.example.ClinicDentail.Enity.LichHen;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -107,4 +109,71 @@ public class BenhAnDTO {
         this.ghiChuDieuTri = benhAn.getGhiChuDieuTri();
         this.ngayTaiKham = benhAn.getNgayTaiKham();
     }
+    public BenhAnDTO(BenhAn benhAn, DonThuoc donThuoc, LichHen lichHenMoi) {
+        // Thông tin bệnh án
+        this.maBenhAn = benhAn.getMaBenhAn();
+        this.ngayTao = benhAn.getNgayTao();
+
+        // Lịch hẹn gốc
+        if (benhAn.getLichHen() != null) {
+            this.maLichHen = benhAn.getLichHen().getMaLichHen();
+        }
+
+        // Thông tin bệnh nhân
+        if (benhAn.getBenhNhan() != null) {
+            BenhNhan bn = benhAn.getBenhNhan();
+            this.maBenhNhan = bn.getMaBenhNhan();
+            this.tenBenhNhan = bn.getHoTen();
+            this.hoTen = bn.getHoTen();
+            this.soDienThoai = bn.getSoDienThoai();
+            this.ngaySinh = bn.getNgaySinh();
+            this.gioiTinh = bn.getGioiTinh() != null ? bn.getGioiTinh().toString() : null;
+            this.email = bn.getEmail();
+            this.diaChi = bn.getDiaChi();
+            this.tienSuBenh = bn.getTienSuBenh();
+            this.diUng = bn.getDiUng();
+
+            if (bn.getNguoiDung() != null) {
+                this.nguoiDung = bn.getNguoiDung().getMaNguoiDung();
+            }
+        }
+
+        // Thông tin bác sĩ
+        if (benhAn.getBacSi() != null) {
+            this.maBacSi = benhAn.getBacSi().getMaBacSi();
+            if (benhAn.getBacSi().getNguoiDung() != null) {
+                this.tenBacSi = benhAn.getBacSi().getNguoiDung().getHoTen();
+            }
+        }
+
+        // Thông tin khám bệnh
+        this.lyDoKham = benhAn.getLyDoKham();
+        this.chanDoan = benhAn.getChanDoan();
+        this.ghiChuDieuTri = benhAn.getGhiChuDieuTri();
+        this.ngayTaiKham = benhAn.getNgayTaiKham();
+
+        // Đơn thuốc nếu có
+        if (donThuoc != null) {
+            this.maDonThuoc = donThuoc.getMaDonThuoc();
+            this.moTaChanDoan = donThuoc.getMoTaChanDoan();
+            this.ghiChuDonThuoc = donThuoc.getGhiChu();
+            this.maIcd = donThuoc.getMaIcd();
+        }
+
+        // Lịch hẹn mới sau khám nếu có
+        if (lichHenMoi != null) {
+            this.maLichHenMoi = lichHenMoi.getMaLichHen();
+            this.ngayHenMoi = lichHenMoi.getNgayHen();
+            this.gioBatDauMoi = lichHenMoi.getGioBatDau();
+            this.gioKetThucMoi = lichHenMoi.getGioKetThuc();
+            this.ghiChuLichHen = lichHenMoi.getLydo();
+            if (lichHenMoi.getDichVu() != null) {
+                this.maDichVu = lichHenMoi.getDichVu().getMaDichVu();
+            }
+        }
+
+        // Tùy chọn: gán thông báo mặc định
+        this.thongBao = "Lấy thông tin bệnh án thành công";
+    }
+
 }

@@ -95,31 +95,4 @@ public class UserDTO {
         }
     }
 
-
-    // Method để tạo DTO từ NguoiDung với thông tin mở rộng
-    public static UserDTO fromNguoiDungWithDetails(NguoiDung nguoiDung, BacSi bacSi, BenhNhan benhNhan) {
-        UserDTO dto = new UserDTO(nguoiDung);
-
-        if (bacSi != null) {
-            dto.setMaBacSi(bacSi.getMaBacSi());
-            dto.setChuyenKhoa(bacSi.getChuyenKhoa());
-            dto.setSoNamKinhNghiem(bacSi.getSoNamKinhNghiem());
-            dto.setTrangThaiLamViec(bacSi.getTrangThaiLamViec());
-        }
-
-        if (benhNhan != null) {
-            dto.setMaBenhNhan(benhNhan.getMaBenhNhan());
-            dto.setNgaySinh(benhNhan.getNgaySinh());
-            dto.setGioiTinh(benhNhan.getGioiTinh().toString());
-            dto.setDiaChi(benhNhan.getDiaChi());
-            dto.setTienSuBenh(benhNhan.getTienSuBenh());
-            dto.setDiUng(benhNhan.getDiUng());
-
-            if (benhNhan.getNgaySinh() != null) {
-                dto.setTuoi(Period.between(benhNhan.getNgaySinh(), LocalDate.now()).getYears());
-            }
-        }
-
-        return dto;
-    }
 }

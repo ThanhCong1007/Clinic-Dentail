@@ -1,5 +1,6 @@
 package com.example.ClinicDentail.DTO;
 
+import com.example.ClinicDentail.Enity.Thuoc;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,4 +41,44 @@ public class ThuocDTO {
 
     private LocalDateTime ngayTao;
     private LocalDateTime ngayCapNhat;
+
+    public ThuocDTO(Thuoc thuoc) {
+        if (thuoc == null) return;
+
+        this.maThuoc = thuoc.getMaThuoc();
+
+        if (thuoc.getLoaiThuoc() != null) {
+            this.maLoaiThuoc = thuoc.getLoaiThuoc().getMaLoaiThuoc();
+        }
+
+        this.tenThuoc = thuoc.getTenThuoc();
+        this.hoatChat = thuoc.getHoatChat();
+        this.hamLuong = thuoc.getHamLuong();
+        this.nhaSanXuat = thuoc.getNhaSanXuat();
+        this.nuocSanXuat = thuoc.getNuocSanXuat();
+        this.dangBaoChe = thuoc.getDangBaoChe();
+        this.donViTinh = thuoc.getDonViTinh();
+        this.duongDung = thuoc.getDuongDung();
+        this.huongDanSuDung = thuoc.getHuongDanSuDung();
+        this.cachBaoQuan = thuoc.getCachBaoQuan();
+
+        // Enum phân loại đơn thuốc ánh xạ sang String
+        this.phanLoaiDonThuoc = thuoc.getPhanLoaiDonThuoc() != null
+                ? thuoc.getPhanLoaiDonThuoc().toString()
+                : null;
+
+        this.chongChiDinh = thuoc.getChongChiDinh();
+        this.tacDungPhu = thuoc.getTacDungPhu();
+        this.tuongTacThuoc = thuoc.getTuongTacThuoc();
+        this.nhomThuocThaiKy = thuoc.getNhomThuocThaiKy();
+
+        this.gia = thuoc.getGia();
+        this.soLuongTon = thuoc.getSoLuongTon();
+        this.nguongCanhBao = thuoc.getNguongCanhBao();
+        this.trangThaiHoatDong = thuoc.getTrangThaiHoatDong();
+
+        this.ngayTao = thuoc.getNgayTao();
+        this.ngayCapNhat = thuoc.getNgayCapNhat();
+    }
+
 }
