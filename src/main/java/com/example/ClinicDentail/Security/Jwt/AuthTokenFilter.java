@@ -16,6 +16,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
@@ -26,18 +28,27 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
+    // Danh sách các đường dẫn được bỏ qua
+    private static final List<String> EXCLUDED_PATHS = Arrays.asList(
+            "/api/auth/",
+            "/auth/",
+            "/api/public/",
+            "/swagger-ui/",
+            "/v3/api-docs/",
+            "/swagger-resources/",
+            "/webjars/"
+    );
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Kiểm tra nếu đường dẫn thuộc diện được bỏ qua
         String requestPath = request.getServletPath();
         logger.info("Request path: {}", requestPath);
-        if (requestPath.startsWith("/api/auth/") ||
-                requestPath.startsWith("/auth/") ||
-                requestPath.startsWith("/api/public/") ||
-                requestPath.startsWith("/swagger-ui/") ||
-                requestPath.startsWith("/v3/api-docs/")) {
+
+        // Kiểm tra nếu đường dẫn thuộc diện được bỏ qua
+        if (isExcludedPath(requestPath)) {
+            logger.info("Skipping JWT validation for path: {}", requestPath);
             filterChain.doFilter(request, response);
             return;
         }
@@ -58,10 +69,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e);
+            logger.error("Cannot set user authentication: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isExcludedPath(String requestPath) {
+        return EXCLUDED_PATHS.stream().anyMatch(requestPath::startsWith);
     }
 
     private String parseJwt(HttpServletRequest request) {

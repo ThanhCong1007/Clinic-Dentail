@@ -17,35 +17,8 @@ public class ChiTietHoaDonService {
     private static final Logger logger = LoggerFactory.getLogger(ChiTietHoaDonService.class);
 
     @Autowired
-    private BenhNhanRepository benhNhanRepository;
-
-    @Autowired
-    private BacSiRepository bacSiRepository;
-
-    @Autowired
-    private LichHenRepository lichHenRepository;
-
-    @Autowired
-    private BenhAnRepository benhAnRepository;
-
-    @Autowired
-    private TrangThaiLichHenRepository trangThaiLichHenRepository;
-
-    @Autowired
-    private DichVuRepository dichVuRepository;
-
-    @Autowired
-    private LichHenService lichHenService;
-    @Autowired
-    private DonThuocRepository donThuocRepository;
-    @Autowired
-    private ChiTietDonThuocRepository chiTietDonThuocRepository;
-    @Autowired
     private ChiTietHoaDonRepository chiTietHoaDonRepository;
-    @Autowired
-    private HoaDonRepository hoaDonRepository;
-    @Autowired
-    private ThuocRepository thuocRepository;
+
 
     public BigDecimal taoChiTietHoaDon(HoaDon hoaDon, DichVu dichVu) {
         ChiTietHoaDon chiTiet = new ChiTietHoaDon();
