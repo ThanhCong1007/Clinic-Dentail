@@ -2,6 +2,8 @@ package com.example.ClinicDentail.Controller;
 
 import com.example.ClinicDentail.DTO.*;
 import com.example.ClinicDentail.Enity.BenhNhan;
+import com.example.ClinicDentail.Service.BenhNhanService;
+import com.example.ClinicDentail.Service.LichHenService;
 import com.example.ClinicDentail.Service.ThamKhamService;
 import com.example.ClinicDentail.payload.request.MessageResponse;
 import org.slf4j.Logger;
@@ -22,6 +24,10 @@ public class ThamKhamController {
 
     @Autowired
     private ThamKhamService thamKhamService;
+    @Autowired
+    private BenhNhanService benhNhanService;
+    @Autowired
+    private LichHenService lichHenService;
 
     /**
      * Thực hiện khám bệnh
@@ -98,7 +104,7 @@ public class ThamKhamController {
     @GetMapping("/benh-nhan/{maBenhNhan}")
     public ResponseEntity<KhamBenhDTO> layThongTinBenhNhan(@PathVariable Integer maBenhNhan) {
         try {
-            KhamBenhDTO result = thamKhamService.layThongTinBenhNhan(maBenhNhan);
+            KhamBenhDTO result = benhNhanService.layThongTinBenhNhan(maBenhNhan);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);
@@ -114,7 +120,7 @@ public class ThamKhamController {
         @GetMapping("/lich-hen/{maLichHen}")
     public ResponseEntity<KhamBenhDTO> layThongTinLichHen(@PathVariable Integer maLichHen) {
         try {
-            KhamBenhDTO result = thamKhamService.layThongTinLichHen(maLichHen);
+            KhamBenhDTO result = lichHenService.layThongTinLichHen(maLichHen);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);

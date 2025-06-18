@@ -1,7 +1,10 @@
 package com.example.ClinicDentail.DTO;
 
+import com.example.ClinicDentail.Enity.BenhAn;
 import com.example.ClinicDentail.Enity.BenhNhan;
+import com.example.ClinicDentail.Enity.DonThuoc;
 import com.example.ClinicDentail.Enity.LichHen;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -18,6 +21,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KhamBenhDTO {
+
     // Thông tin bệnh nhân
     private Integer maBenhNhan;
     private String hoTen;
@@ -36,7 +40,7 @@ public class KhamBenhDTO {
     private String chanDoan;
     private String ghiChuDieuTri;
     private LocalDate ngayTaiKham;
-    private List<Integer> maDichVu; // Danh sách mã dịch vụ
+    private List<Integer> maDichVu;
 
     // Thông tin đơn thuốc
     private List<ChiTietThuocDTO> danhSachThuoc;
@@ -50,9 +54,11 @@ public class KhamBenhDTO {
     private String trangThaiKham;
     private LocalDateTime ngayKham;
 
+    // DTO lồng bên trong
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @Builder
     public static class ChiTietThuocDTO {
         private Integer maThuoc;
         private String tenThuoc;
@@ -66,4 +72,6 @@ public class KhamBenhDTO {
         private String ghiChu;
         private String lyDoDonThuoc;
     }
+
+
 }
