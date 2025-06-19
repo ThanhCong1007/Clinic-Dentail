@@ -104,13 +104,11 @@ public class DonThuocService {
     public DonThuoc capNhatDonThuoc(BenhAn benhAn, BenhAnDTO dto) {
         try {
             // Tìm đơn thuốc hiện tại (nếu có)
-            List<DonThuoc> donThuocHienTai = donThuocRepository.findByBenhAn(benhAn);
+            DonThuoc donThuocHienTai = donThuocRepository.findByBenhAn(benhAn);
             DonThuoc donThuoc = null;
 
-            if (!donThuocHienTai.isEmpty()) {
-                // Cập nhật đơn thuốc đầu tiên (giả sử mỗi bệnh án có 1 đơn thuốc chính)
-                donThuoc = donThuocHienTai.get(0);
-
+            if (donThuocHienTai != null) {
+                donThuoc = donThuocHienTai;
                 // Xóa chi tiết đơn thuốc cũ
                 List<ChiTietDonThuoc> chiTietCu = chiTietDonThuocRepository.findByDonThuoc(donThuoc);
                 chiTietDonThuocRepository.deleteAll(chiTietCu);

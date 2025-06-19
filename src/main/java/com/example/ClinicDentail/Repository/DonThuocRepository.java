@@ -12,5 +12,5 @@ import java.util.Optional;
 @Repository
 public interface DonThuocRepository extends JpaRepository<DonThuoc, Integer> {
 
-    List<DonThuoc> findByBenhAn(BenhAn benhAn);
+    DonThuoc findByBenhAn(BenhAn benhAn);
 }

@@ -29,13 +29,13 @@ public class ChiTietDonThuocDTO {
     private String ghiChu;
     private String lyDoDonThuoc;
 
-    public ChiTietDonThuocDTO(ChiTietDonThuoc chiTiet, Thuoc thuoc) {
+    public ChiTietDonThuocDTO(ChiTietDonThuoc chiTiet) {
         this.maChiTiet = chiTiet.getMaChiTiet();
-        this.maThuoc = thuoc.getMaThuoc();
-        this.tenThuoc = thuoc.getTenThuoc();
-        this.hoatChat = thuoc.getHoatChat();
-        this.hamLuong = thuoc.getHamLuong();
-        this.dangBaoChe = thuoc.getDangBaoChe();
+        this.maThuoc = chiTiet.getThuoc().getMaThuoc();
+        this.tenThuoc = chiTiet.getThuoc().getTenThuoc();
+        this.hoatChat = chiTiet.getThuoc().getHoatChat();
+        this.hamLuong = chiTiet.getThuoc().getHamLuong();
+        this.dangBaoChe = chiTiet.getThuoc().getDangBaoChe();
 
         this.lieudung = chiTiet.getLieuDung();
         this.tanSuat = chiTiet.getTanSuat();

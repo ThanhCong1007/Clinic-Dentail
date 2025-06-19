@@ -42,6 +42,12 @@ public class ThamKhamService {
 
     @Autowired
     private HoaDonService hoaDonService;
+    @Autowired
+    private BenhAnDichVuRepository benhAnDichVuRepository;
+    @Autowired
+    private DonThuocRepository donThuocRepository;
+    @Autowired
+    private ChiTietDonThuocRepository chiTietDonThuocRepository;
 
     @Transactional
     public KhamBenhDTO khamBenh(KhamBenhDTO dto) {
@@ -216,8 +222,10 @@ public class ThamKhamService {
     public BenhAnDTO getChiTietBenhAn(Integer maBenhAn) {
         BenhAn benhAn = benhAnRepository.findById(maBenhAn)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bệnh án với mã: " + maBenhAn));
-
-        return new BenhAnDTO(benhAn);
+        List<BenhAnDichVu> benhAnDichVu= benhAnDichVuRepository.findByBenhAn(benhAn);
+        DonThuoc donThuoc= donThuocRepository.findByBenhAn(benhAn);
+        List<ChiTietDonThuoc> chiTietDonThuoc= chiTietDonThuocRepository.findByDonThuoc(donThuoc);
+        return new BenhAnDTO(benhAn,benhAnDichVu,donThuoc,chiTietDonThuoc);
     }
 
     private BenhAnDTO taoKetQuaCapNhat(BenhAn benhAn, DonThuoc donThuoc, LichHen lichHenMoi) {
