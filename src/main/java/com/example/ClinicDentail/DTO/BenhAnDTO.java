@@ -52,7 +52,7 @@ public class BenhAnDTO {
     private LocalDate ngayTaiKham;
 
     // Lịch hẹn mới (sau khám nếu có)
-    private Integer maDichVu;
+    private List<DichVuDTO> danhSachDichVu;
     private LocalDate ngayHenMoi;
     private LocalTime gioBatDauMoi;
     private LocalTime gioKetThucMoi;
@@ -73,6 +73,7 @@ public class BenhAnDTO {
     public BenhAnDTO(BenhAn benhAn) {
         this.maBenhAn = benhAn.getMaBenhAn();
         this.ngayTao = benhAn.getNgayTao();
+        this.chanDoan = benhAn.getChanDoan();
 //        this.nguoiDung = benhAn.getNguoiDung();
         if (benhAn.getLichHen() != null) {
             this.maLichHen = benhAn.getLichHen().getMaLichHen();
@@ -100,7 +101,7 @@ public class BenhAnDTO {
         // Bác sĩ
         if (benhAn.getBacSi() != null && benhAn.getBacSi().getNguoiDung() != null) {
             this.maBacSi = benhAn.getBacSi().getMaBacSi();
-            this.tenBacSi = benhAn.getBacSi().getNguoiDung().getHoTen();
+            this.tenBacSi = benhAn.getBacSi().getNguoiDung().getHoTen().toString();
         }
 
         // Khám bệnh
@@ -167,9 +168,6 @@ public class BenhAnDTO {
             this.gioBatDauMoi = lichHenMoi.getGioBatDau();
             this.gioKetThucMoi = lichHenMoi.getGioKetThuc();
             this.ghiChuLichHen = lichHenMoi.getLydo();
-            if (lichHenMoi.getDichVu() != null) {
-                this.maDichVu = lichHenMoi.getDichVu().getMaDichVu();
-            }
         }
 
         // Tùy chọn: gán thông báo mặc định

@@ -37,9 +37,6 @@ public class DichVu {
     @OneToMany(mappedBy = "dichVu", fetch = FetchType.LAZY)
     private List<LichHen> lichHens;
 
-    @OneToMany(mappedBy = "dichVu", fetch = FetchType.LAZY)
-    private List<ChiTietHoaDon> chiTietHoaDons;
-
     @OneToMany(mappedBy = "dichVu", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BenhAnDichVu> benhAnDichVus;
 }

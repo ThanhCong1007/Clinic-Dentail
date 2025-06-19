@@ -1,6 +1,6 @@
 package com.example.ClinicDentail.Service;
 
-import com.example.ClinicDentail.DTO.ChiTietDichVuDTO;
+import com.example.ClinicDentail.DTO.DichVuDTO;
 import com.example.ClinicDentail.DTO.KhamBenhDTO;
 import com.example.ClinicDentail.Enity.*;
 import com.example.ClinicDentail.Repository.*;
@@ -35,8 +35,10 @@ public class HoaDonService {
     private ChiTietDonThuocService chiTietDonThuocService;
     @Autowired
     private NguoiDungRepository nguoiDungRepository;
+    @Autowired
+    private BenhAnDichVuRepository benhAnDichVuRepository;
 
-    public HoaDon taoHoaDon(KhamBenhDTO dto, BenhNhan benhNhan, LichHen lichHen, DonThuoc donThuoc) {
+    public HoaDon taoHoaDon(KhamBenhDTO dto, BenhNhan benhNhan, LichHen lichHen, DonThuoc donThuoc, BenhAn benhAn) {
         try {
             HoaDon hoaDon = new HoaDon();
             hoaDon.setBenhNhan(benhNhan);
@@ -52,38 +54,30 @@ public class HoaDonService {
             hoaDon = hoaDonRepository.save(hoaDon);
             BigDecimal tongTien = BigDecimal.ZERO;
 
-
-            // Thêm dịch vụ "Khám tổng quát" nếu chưa có
-            if (dto.getDanhSachDichVu() == null || !dto.getDanhSachDichVu().contains(1)) {
-                Optional<DichVu> optDichVu = dichVuRepository.findById(1);
-                if (optDichVu.isPresent()) {
-                    BigDecimal giaDV = chiTietHoaDonService.taoChiTietHoaDon(hoaDon, optDichVu.get());
-                    if (giaDV != null) {
-                        tongTien = tongTien.add(giaDV);
-                    }
-                }
-            }
-
             // Thêm các dịch vụ khác
             if (dto.getDanhSachDichVu() != null) {
-                for ( ChiTietDichVuDTO ctDV : dto.getDanhSachDichVu()) {
-                    Optional<DichVu> optDichVu = dichVuRepository.findById(ctDV.getMaDichVu());
+                for (DichVuDTO ctDV : dto.getDanhSachDichVu()) {
+
+                    Optional<BenhAnDichVu> optDichVu = benhAnDichVuRepository
+                            .findByBenhAn_MaBenhAnAndDichVu_MaDichVu(benhAn.getMaBenhAn(), ctDV.getMaDichVu());
+
                     if (optDichVu.isPresent()) {
-                        BigDecimal giaDV = chiTietHoaDonService.taoChiTietHoaDon(hoaDon, optDichVu.get());
+                        BigDecimal giaDV = chiTietHoaDonService.taoChiTietHoaDon(hoaDon.getMaHoaDon(), optDichVu.get());
                         if (giaDV != null) {
                             tongTien = tongTien.add(giaDV);
                         }
                     } else {
-                        logger.warn("Không tìm thấy dịch vụ với mã: {} để thêm vào hóa đơn", ctDV.getMaDichVu());
+                        logger.warn("Không tìm thấy dịch vụ [{}] trong bệnh án [{}]", ctDV.getMaDichVu(), benhAn.getMaBenhAn());
                     }
                 }
             }
+
 
             // Thêm thuốc từ đơn thuốc
             if (donThuoc != null) {
                 for (ChiTietDonThuoc ct : chiTietDonThuocRepository.findByDonThuoc(donThuoc)) {
                     tongTien = tongTien.add(
-                            chiTietDonThuocService.taoChiTietHoaThuoc(hoaDon, ct)
+                            chiTietDonThuocService.taoChiTietDonThuoc(hoaDon.getMaHoaDon(), ct)
                     );
                 }
             }

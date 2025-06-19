@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,6 +40,8 @@ public class LichHenService {
 
     @Autowired
     private TrangThaiLichHenRepository trangThaiLichHenRepository;
+    @Autowired
+    private BenhAnDichVuRepository benhAnDichVuRepository;
 
     /**
      * Tự động hủy lịch hẹn quá hạn - chạy mỗi 30 phút
@@ -472,18 +472,12 @@ public class LichHenService {
 
     public LichHen taoLichHenMoi(BenhAn benhAn, BenhAnDTO dto) {
         try {
-            if (dto.getMaDichVu() == null || dto.getGioKetThucMoi() == null) {
+            if (dto.getDanhSachDichVu() == null || dto.getGioKetThucMoi() == null) {
                 throw new RuntimeException("Thiếu thông tin bắt buộc: mã dịch vụ hoặc giờ kết thúc");
             }
-
-            DichVu dichVu = dichVuRepository.findById(dto.getMaDichVu())
-                    .orElseGet(() -> dichVuRepository.findById(1)
-                            .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ mặc định")));
-
             TrangThaiLichHen trangThai = trangThaiLichHenRepository.findById(1)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái mặc định"));
-
-            return lichHenRepository.save(new LichHen(benhAn, dto, dichVu, trangThai));
+            return lichHenRepository.save(new LichHen(benhAn, dto, trangThai));
         } catch (Exception e) {
             logger.error("Lỗi khi tạo lịch hẹn mới: {}", e.getMessage(), e);
             throw new RuntimeException("Lỗi tạo lịch hẹn mới: " + e.getMessage(), e);

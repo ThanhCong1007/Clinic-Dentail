@@ -5,14 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -24,6 +22,11 @@ public class KhamBenhDTO {
     private String hoTen;
     private String soDienThoai;
     private String email;
+    private String diaChi;
+    private LocalDate ngaySinh;
+    private String gioiTinh;
+    private String tienSuBenh;
+    private String diUng;
 
     public KhamBenhDTO(BenhNhan benhNhan) {
         this.maBenhNhan = benhNhan.getMaBenhNhan();
@@ -36,14 +39,6 @@ public class KhamBenhDTO {
         this.tienSuBenh = benhNhan.getTienSuBenh();
         this.diUng = benhNhan.getDiUng();
     }
-
-
-    private String diaChi;
-    private LocalDate ngaySinh;
-    private String gioiTinh;
-    private String tienSuBenh;
-    private String diUng;
-
     // Thông tin khám bệnh
     private Integer maLichHen;
     private Integer maBacSi;
@@ -52,7 +47,7 @@ public class KhamBenhDTO {
     private String chanDoan;
     private String ghiChuDieuTri;
     private LocalDate ngayTaiKham;
-    private List<ChiTietDichVuDTO> danhSachDichVu;
+    private List<DichVuDTO> danhSachDichVu;
 
     // Thông tin đơn thuốc
     private List<ChiTietThuocDTO> danhSachThuoc;
@@ -84,6 +79,47 @@ public class KhamBenhDTO {
         private String ghiChu;
         private String lyDoDonThuoc;
     }
+
+    public KhamBenhDTO(BenhAn benhAn, DonThuoc donThuoc, HoaDon hoaDon) {
+        this.maBenhAn = benhAn.getMaBenhAn();
+        this.lyDoKham = benhAn.getLyDoKham();
+        this.chanDoan = benhAn.getChanDoan();
+        this.ghiChuDieuTri = benhAn.getGhiChuDieuTri();
+        this.ngayTaiKham = benhAn.getNgayTaiKham();
+
+        if (benhAn.getBenhNhan() != null) {
+            var bn = benhAn.getBenhNhan();
+            this.maBenhNhan = bn.getMaBenhNhan();
+            this.hoTen = bn.getHoTen();
+            this.soDienThoai = bn.getSoDienThoai();
+            this.email = bn.getEmail();
+            this.diaChi = bn.getDiaChi();
+            this.ngaySinh = bn.getNgaySinh();
+            this.gioiTinh = (bn.getGioiTinh() != null) ? bn.getGioiTinh().toString() : null;
+            this.tienSuBenh = bn.getTienSuBenh();
+            this.diUng = bn.getDiUng();
+        }
+
+        if (benhAn.getBacSi() != null) {
+            this.maBacSi = benhAn.getBacSi().getMaBacSi();
+            if (benhAn.getBacSi().getNguoiDung() != null) {
+                this.tenBacSi = benhAn.getBacSi().getNguoiDung().getHoTen();
+            }
+        }
+
+        if (benhAn.getLichHen() != null) {
+            this.maLichHen = benhAn.getLichHen().getMaLichHen();
+        }
+
+        this.maDonThuoc = (donThuoc != null) ? donThuoc.getMaDonThuoc() : null;
+        this.ghiChuDonThuoc = (donThuoc != null) ? donThuoc.getGhiChu() : null;
+        this.maHoaDon = (hoaDon != null) ? hoaDon.getMaHoaDon() : null;
+        this.tongTien = (hoaDon != null) ? hoaDon.getTongTien() : null;
+        this.trangThaiKham = "Hoàn thành";
+        this.ngayKham = LocalDateTime.now();
+
+    }
+
     public KhamBenhDTO(LichHen lichHen) {
         this.maLichHen = lichHen.getMaLichHen();
         this.maBacSi = lichHen.getBacSi() != null ? lichHen.getBacSi().getMaBacSi() : null;
@@ -103,98 +139,4 @@ public class KhamBenhDTO {
         }
     }
 
-    public KhamBenhDTO(BenhAn benhAn, DonThuoc donThuoc, List<ChiTietDonThuoc> chiTietDonThuocs, HoaDon hoaDon) {
-        // Thông tin bệnh nhân
-        if (benhAn.getBenhNhan() != null) {
-            BenhNhan bn = benhAn.getBenhNhan();
-            this.maBenhNhan = bn.getMaBenhNhan();
-            this.hoTen = bn.getHoTen();
-            this.soDienThoai = bn.getSoDienThoai();
-            this.email = bn.getEmail();
-            this.diaChi = bn.getDiaChi();
-            this.ngaySinh = bn.getNgaySinh();
-            this.gioiTinh = bn.getGioiTinh() != null ? bn.getGioiTinh().toString() : null;
-            this.tienSuBenh = bn.getTienSuBenh();
-            this.diUng = bn.getDiUng();
-        }
-
-        // Thông tin lịch hẹn và bác sĩ
-        if (benhAn.getLichHen() != null) {
-            this.maLichHen = benhAn.getLichHen().getMaLichHen();
-        }
-        if (benhAn.getBacSi() != null) {
-            this.maBacSi = benhAn.getBacSi().getMaBacSi();
-        }
-
-        // Thông tin khám bệnh
-        this.lyDoKham = benhAn.getLyDoKham();
-        this.chanDoan = benhAn.getChanDoan();
-        this.ghiChuDieuTri = benhAn.getGhiChuDieuTri();
-        this.ngayTaiKham = benhAn.getNgayTaiKham();
-        this.ngayKham = benhAn.getNgayTao();
-
-        // Thông tin đơn thuốc
-        if (donThuoc != null) {
-            this.maDonThuoc = donThuoc.getMaDonThuoc();
-            this.ghiChuDonThuoc = donThuoc.getGhiChu();
-        }
-
-        // Chi tiết thuốc
-        if (chiTietDonThuocs != null) {
-            this.danhSachThuoc = chiTietDonThuocs.stream().map(ct -> {
-                Thuoc t = ct.getThuoc();
-                return ChiTietThuocDTO.builder()
-                        .maThuoc(t.getMaThuoc())
-                        .tenThuoc(t.getTenThuoc())
-                        .lieuDung(ct.getLieuDung())
-                        .tanSuat(ct.getTanSuat())
-                        .thoiDiem(ct.getThoiDiem())
-                        .thoiGianDieuTri(ct.getThoiGianDieuTri())
-                        .soLuong(ct.getSoLuong())
-                        .donViDung(ct.getDonViDung())
-                        .donGia(ct.getDonGia())
-                        .ghiChu(ct.getGhiChu())
-                        .lyDoDonThuoc(ct.getLyDoKeDon())
-                        .build();
-            }).toList();
-        }
-
-        // Thông tin hóa đơn
-        if (hoaDon != null) {
-            this.maHoaDon = hoaDon.getMaHoaDon();
-            this.tongTien = hoaDon.getTongTien();
-            this.trangThaiKham = hoaDon.getTrangThai() != null ? hoaDon.getTrangThai().toString() : null;
-        }
-
-        // Mã bệnh án
-        this.maBenhAn = benhAn.getMaBenhAn();
-    }
-    public KhamBenhDTO(BenhAn benhAn, DonThuoc donThuoc, HoaDon hoaDon) {
-        this.maBenhAn = benhAn.getMaBenhAn();
-        this.maDonThuoc = (donThuoc != null) ? donThuoc.getMaDonThuoc() : null;
-        this.maHoaDon = (hoaDon != null) ? hoaDon.getMaHoaDon() : null;
-        this.tongTien = (hoaDon != null) ? hoaDon.getTongTien() : null;
-        this.trangThaiKham = "Hoàn thành";
-        this.ngayKham = LocalDateTime.now();
-
-        if (benhAn.getBenhNhan() != null) {
-            var bn = benhAn.getBenhNhan();
-            this.hoTen = bn.getHoTen();
-            this.soDienThoai = bn.getSoDienThoai();
-            this.email = bn.getEmail();
-            this.diaChi = bn.getDiaChi();
-            this.ngaySinh = bn.getNgaySinh();
-            this.gioiTinh = (bn.getGioiTinh() != null) ? bn.getGioiTinh().toString() : null;
-            this.tienSuBenh = bn.getTienSuBenh();
-            this.diUng = bn.getDiUng();
-        }
-
-        if (benhAn.getBacSi() != null && benhAn.getBacSi().getNguoiDung() != null) {
-            this.tenBacSi = benhAn.getBacSi().getNguoiDung().getHoTen();
-        }
-
-        if (benhAn.getLichHen() != null) {
-            this.maLichHen = benhAn.getLichHen().getMaLichHen();
-        }
-    }
 }

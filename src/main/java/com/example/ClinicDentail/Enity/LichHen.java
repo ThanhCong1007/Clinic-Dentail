@@ -77,13 +77,12 @@ public class LichHen {
     public long getThoiLuong() {
         return ChronoUnit.MINUTES.between(gioBatDau, gioKetThuc);
     }
-    public LichHen(BenhAn benhAn, BenhAnDTO dto, DichVu dichVu, TrangThaiLichHen trangThai) {
+    public LichHen(BenhAn benhAn, BenhAnDTO dto, TrangThaiLichHen trangThai) {
         this.benhNhan = benhAn.getBenhNhan();
         this.bacSi = benhAn.getBacSi();
         this.ngayHen = dto.getNgayHenMoi();
         this.gioBatDau = dto.getGioBatDauMoi();
         this.gioKetThuc = dto.getGioKetThucMoi();
-        this.dichVu = dichVu;
         this.trangThai = trangThai;
         this.ngayTao = LocalDateTime.now();
 

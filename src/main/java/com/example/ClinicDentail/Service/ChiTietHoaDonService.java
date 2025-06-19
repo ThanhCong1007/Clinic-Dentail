@@ -1,9 +1,11 @@
 package com.example.ClinicDentail.Service;
 
+import com.example.ClinicDentail.Enity.BenhAnDichVu;
 import com.example.ClinicDentail.Enity.ChiTietHoaDon;
 import com.example.ClinicDentail.Enity.DichVu;
 import com.example.ClinicDentail.Enity.HoaDon;
 import com.example.ClinicDentail.Repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +20,24 @@ public class ChiTietHoaDonService {
 
     @Autowired
     private ChiTietHoaDonRepository chiTietHoaDonRepository;
+    @Autowired
+    private HoaDonRepository hoaDonRepository;
 
 
-    public BigDecimal taoChiTietHoaDon(HoaDon hoaDon, DichVu dichVu) {
+    public BigDecimal taoChiTietHoaDon(Integer maHoaDon, BenhAnDichVu benhAnDichVu) {
         ChiTietHoaDon chiTiet = new ChiTietHoaDon();
+        HoaDon hoaDon = hoaDonRepository.findById(maHoaDon)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hóa đơn với mã: " + maHoaDon));
+
         chiTiet.setHoaDon(hoaDon);
-        chiTiet.setDichVu(dichVu);
-        chiTiet.setMoTa(dichVu.getTenDichVu());
+        chiTiet.setBenhAnDichVu(benhAnDichVu);
+        chiTiet.setMoTa(benhAnDichVu.getDichVu().getMoTa());
         chiTiet.setSoLuong(1);
-        chiTiet.setDonGia(dichVu.getGia());
-        chiTiet.setThanhTien(dichVu.getGia());
+        chiTiet.setDonGia(benhAnDichVu.getGia());
+        chiTiet.setThanhTien(benhAnDichVu.getGia());
         chiTiet.setNgayTao(LocalDateTime.now());
 
         chiTietHoaDonRepository.save(chiTiet);
-        return dichVu.getGia();
+        return benhAnDichVu.getGia();
     }
 }

@@ -1,7 +1,7 @@
 package com.example.ClinicDentail.Service;
 
 import com.example.ClinicDentail.DTO.BenhAnDTO;
-import com.example.ClinicDentail.DTO.ChiTietDichVuDTO;
+import com.example.ClinicDentail.DTO.DichVuDTO;
 import com.example.ClinicDentail.DTO.KhamBenhDTO;
 import com.example.ClinicDentail.Enity.*;
 import com.example.ClinicDentail.Repository.*;
@@ -99,7 +99,10 @@ public class BenhAnService {
                 benhAn.setGhiChuDieuTri(dto.getGhiChuDieuTri());
                 benhAn.setNgayTaiKham(dto.getNgayTaiKham());
                 benhAn.setNgayTao(LocalDateTime.now());
-                for (ChiTietDichVuDTO dvDTO : dto.getDanhSachDichVu()) {
+
+                BenhAn savedBenhAn = benhAnRepository.save(benhAn);
+
+                for (DichVuDTO dvDTO : dto.getDanhSachDichVu()) {
                     DichVu dichVu = dichVuRepository.findById(dvDTO.getMaDichVu())
                             .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ"));
 
@@ -111,7 +114,6 @@ public class BenhAnService {
                     benhAnDichVuRepository.save(banDv);
                 }
 
-                BenhAn savedBenhAn = benhAnRepository.save(benhAn);
                 logger.debug("Đã lưu bệnh án mã: {} thành công", savedBenhAn.getMaBenhAn());
                 return savedBenhAn;
 

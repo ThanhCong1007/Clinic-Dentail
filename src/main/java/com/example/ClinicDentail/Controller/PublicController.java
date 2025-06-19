@@ -140,7 +140,7 @@ public class PublicController {
                 dto.setMaDichVu(dv.getMaDichVu());
                 dto.setTenDichVu(dv.getTenDichVu());
                 dto.setMoTa(dv.getMoTa());
-                dto.setGia(dv.getGia().toString());
+                dto.setGia(dv.getGia());
                 dtoList.add(dto);
             }
 

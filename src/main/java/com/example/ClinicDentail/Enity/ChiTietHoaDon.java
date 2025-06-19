@@ -23,10 +23,6 @@ public class ChiTietHoaDon {
     @JoinColumn(name = "ma_hoa_don", nullable = false)
     private HoaDon hoaDon;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ma_dich_vu")
-    private DichVu dichVu;
-
     @Column(name = "mo_ta", nullable = false)
     private String moTa;
 
@@ -41,6 +37,10 @@ public class ChiTietHoaDon {
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ma_benh_an_dich_vu")
+    private BenhAnDichVu benhAnDichVu;
 
     @PrePersist
     protected void onCreate() {

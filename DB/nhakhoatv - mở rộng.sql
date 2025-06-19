@@ -69,11 +69,11 @@ CREATE TABLE trang_thai_lich_hen (
 
 -- Thêm dữ liệu mẫu cho bảng trạng thái lịch hẹn
 INSERT INTO trang_thai_lich_hen (ten_trang_thai, mo_ta, ma_mau) VALUES
-                                                                    ('Đã đặt', 'Lịch hẹn đã được đặt thành công', '#3498db'),
-                                                                    ('Đã xác nhận', 'Lịch hẹn đã được xác nhận', '#2ecc71'),
-                                                                    ('Đang thực hiện', 'Bệnh nhân đang được khám', '#f39c12'),
-                                                                    ('Hoàn thành', 'Lịch hẹn đã hoàn thành', '#27ae60'),
-                                                                    ('Đã hủy', 'Lịch hẹn đã bị hủy', '#e74c3c');
+    ('Đã đặt', 'Lịch hẹn đã được đặt thành công', '#3498db'),
+    ('Đã xác nhận', 'Lịch hẹn đã được xác nhận', '#2ecc71'),
+    ('Đang thực hiện', 'Bệnh nhân đang được khám', '#f39c12'),
+    ('Hoàn thành', 'Lịch hẹn đã hoàn thành', '#27ae60'),
+    ('Đã hủy', 'Lịch hẹn đã bị hủy', '#e74c3c');
 
 -- Bảng lịch hẹn
 CREATE TABLE lich_hen (
@@ -110,14 +110,14 @@ CREATE TABLE benh_an (
     FOREIGN KEY (ma_bac_si) REFERENCES bac_si(ma_bac_si)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE benh_an_dich_vu (
-                                 id INT AUTO_INCREMENT PRIMARY KEY,
-                                 ma_benh_an INT NOT NULL,
-                                 ma_dich_vu INT NOT NULL,
-                                 gia DECIMAL(12, 2) NOT NULL,
-                                 UNIQUE (ma_benh_an, ma_dich_vu), -- tránh trùng lặp dịch vụ trong 1 bệnh án
-                                 FOREIGN KEY (ma_benh_an) REFERENCES benh_an(ma_benh_an) ON DELETE CASCADE,
-                                 FOREIGN KEY (ma_dich_vu) REFERENCES dich_vu(ma_dich_vu) ON DELETE CASCADE
-);
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ ma_benh_an INT NOT NULL,
+ ma_dich_vu INT NOT NULL,
+ gia DECIMAL(12, 2) NOT NULL,
+ UNIQUE (ma_benh_an, ma_dich_vu), -- tránh trùng lặp dịch vụ trong 1 bệnh án
+ FOREIGN KEY (ma_benh_an) REFERENCES benh_an(ma_benh_an) ON DELETE CASCADE,
+ FOREIGN KEY (ma_dich_vu) REFERENCES dich_vu(ma_dich_vu) ON DELETE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Bảng thông tin răng
 CREATE TABLE so_do_rang (
@@ -164,18 +164,18 @@ CREATE TABLE hoa_don (
     FOREIGN KEY (nguoi_tao) REFERENCES nguoi_dung(ma_nguoi_dung)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Bảng chi tiết hóa đơn
 CREATE TABLE chi_tiet_hoa_don (
-    ma_muc INT AUTO_INCREMENT PRIMARY KEY,
-    ma_hoa_don INT NOT NULL,
-    ma_dich_vu INT,
-    mo_ta VARCHAR(255) NOT NULL,
-    so_luong INT NOT NULL DEFAULT 1,
-    don_gia DECIMAL(12, 2) NOT NULL,
-    thanh_tien DECIMAL(12, 2) NOT NULL,
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ma_hoa_don) REFERENCES hoa_don(ma_hoa_don),
-    FOREIGN KEY (ma_dich_vu) REFERENCES dich_vu(ma_dich_vu)
+  ma_muc INT AUTO_INCREMENT PRIMARY KEY,
+  ma_hoa_don INT NOT NULL,
+  ma_benh_an_dich_vu INT, -- dùng để liên kết tới bảng trung gian
+  mo_ta VARCHAR(255) NOT NULL,
+  so_luong INT NOT NULL DEFAULT 1,
+  don_gia DECIMAL(12, 2) NOT NULL,
+  thanh_tien DECIMAL(12, 2) NOT NULL,
+  ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (ma_hoa_don) REFERENCES hoa_don(ma_hoa_don),
+  FOREIGN KEY (ma_benh_an_dich_vu) REFERENCES benh_an_dich_vu(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Bảng thanh toán

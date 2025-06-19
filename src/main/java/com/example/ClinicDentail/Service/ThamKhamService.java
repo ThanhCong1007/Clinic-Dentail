@@ -94,7 +94,7 @@ public class ThamKhamService {
             // 5. Tạo hóa đơn
             HoaDon hoaDon;
             try {
-                hoaDon = hoaDonService.taoHoaDon(dto, benhNhan, lichHen, donThuoc);
+                hoaDon = hoaDonService.taoHoaDon(dto, benhNhan, lichHen, donThuoc, benhAn);
             } catch (Exception e) {
                 throw new RuntimeException("Lỗi  - Tạo hóa đơn: " + e.getMessage(), e);
             }
@@ -212,6 +212,7 @@ public class ThamKhamService {
                 .map(BenhAnDTO::new)
                 .collect(Collectors.toList());
     }
+    @Transactional
     public BenhAnDTO getChiTietBenhAn(Integer maBenhAn) {
         BenhAn benhAn = benhAnRepository.findById(maBenhAn)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bệnh án với mã: " + maBenhAn));
