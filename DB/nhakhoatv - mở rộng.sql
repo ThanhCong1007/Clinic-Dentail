@@ -109,6 +109,15 @@ CREATE TABLE benh_an (
     FOREIGN KEY (ma_benh_nhan) REFERENCES benh_nhan(ma_benh_nhan),
     FOREIGN KEY (ma_bac_si) REFERENCES bac_si(ma_bac_si)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE benh_an_dich_vu (
+                                 id INT AUTO_INCREMENT PRIMARY KEY,
+                                 ma_benh_an INT NOT NULL,
+                                 ma_dich_vu INT NOT NULL,
+                                 gia DECIMAL(12, 2) NOT NULL,
+                                 UNIQUE (ma_benh_an, ma_dich_vu), -- tránh trùng lặp dịch vụ trong 1 bệnh án
+                                 FOREIGN KEY (ma_benh_an) REFERENCES benh_an(ma_benh_an) ON DELETE CASCADE,
+                                 FOREIGN KEY (ma_dich_vu) REFERENCES dich_vu(ma_dich_vu) ON DELETE CASCADE
+);
 
 -- Bảng thông tin răng
 CREATE TABLE so_do_rang (
@@ -228,7 +237,7 @@ CREATE TABLE thuoc (
     cach_bao_quan TEXT,          -- Thông tin bảo quản
     
     -- Thông tin phân loại và cảnh báo
-    phan_loai_don_thuoc varchar(50)
+    phan_loai_don_thuoc varchar(50),
     chong_chi_dinh TEXT,         -- Chống chỉ định
     tac_dung_phu TEXT,           -- Tác dụng phụ
     tuong_tac_thuoc TEXT,        -- Tương tác thuốc

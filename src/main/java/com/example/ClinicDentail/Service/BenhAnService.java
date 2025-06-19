@@ -1,11 +1,9 @@
 package com.example.ClinicDentail.Service;
 
 import com.example.ClinicDentail.DTO.BenhAnDTO;
+import com.example.ClinicDentail.DTO.ChiTietDichVuDTO;
 import com.example.ClinicDentail.DTO.KhamBenhDTO;
-import com.example.ClinicDentail.Enity.BacSi;
-import com.example.ClinicDentail.Enity.BenhAn;
-import com.example.ClinicDentail.Enity.BenhNhan;
-import com.example.ClinicDentail.Enity.LichHen;
+import com.example.ClinicDentail.Enity.*;
 import com.example.ClinicDentail.Repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +47,8 @@ public class BenhAnService {
     private HoaDonRepository hoaDonRepository;
     @Autowired
     private ThuocRepository thuocRepository;
+    @Autowired
+    private BenhAnDichVuRepository benhAnDichVuRepository;
 
     public BenhAn layBenhAnHienTai(Integer maBenhAn) {
         logger.debug("Tìm kiếm bệnh án với mã: {}", maBenhAn);
@@ -73,42 +73,53 @@ public class BenhAnService {
         }
     }
     public BenhAn taoBenhAn(KhamBenhDTO dto, BenhNhan benhNhan, LichHen lichHen) {
-        logger.debug("Tạo bệnh án cho bệnh nhân: {} - Bác sĩ: {}",
-                benhNhan.getHoTen(),
-                lichHen != null ? lichHen.getBacSi().getNguoiDung().getHoTen() : "Mã bác sĩ: " + dto.getMaBacSi());
-        try {
-            BenhAn benhAn = new BenhAn();
-            benhAn.setBenhNhan(benhNhan);
+            logger.debug("Tạo bệnh án cho bệnh nhân: {} - Bác sĩ: {}",
+                    benhNhan.getHoTen(),
+                    lichHen != null ? lichHen.getBacSi().getNguoiDung().getHoTen() : "Mã bác sĩ: " + dto.getMaBacSi());
+            try {
+                BenhAn benhAn = new BenhAn();
+                benhAn.setBenhNhan(benhNhan);
 
-            // Xử lý thông tin bác sĩ
-            if (lichHen != null) {
-                benhAn.setBacSi(lichHen.getBacSi());
-            } else {
-                Optional<BacSi> optBacSi = bacSiRepository.findById(dto.getMaBacSi());
-                if (optBacSi.isPresent()) {
-                    benhAn.setBacSi(optBacSi.get());
+                // Xử lý thông tin bác sĩ
+                if (lichHen != null) {
+                    benhAn.setBacSi(lichHen.getBacSi());
                 } else {
-                    logger.error("Không tìm thấy bác sĩ với mã: {}", dto.getMaBacSi());
-                    throw new RuntimeException("Không tìm thấy bác sĩ với mã: " + dto.getMaBacSi());
+                    Optional<BacSi> optBacSi = bacSiRepository.findById(dto.getMaBacSi());
+                    if (optBacSi.isPresent()) {
+                        benhAn.setBacSi(optBacSi.get());
+                    } else {
+                        logger.error("Không tìm thấy bác sĩ với mã: {}", dto.getMaBacSi());
+                        throw new RuntimeException("Không tìm thấy bác sĩ với mã: " + dto.getMaBacSi());
+                    }
                 }
+
+                benhAn.setLichHen(lichHen);
+                benhAn.setLyDoKham(dto.getLyDoKham());
+                benhAn.setChanDoan(dto.getChanDoan());
+                benhAn.setGhiChuDieuTri(dto.getGhiChuDieuTri());
+                benhAn.setNgayTaiKham(dto.getNgayTaiKham());
+                benhAn.setNgayTao(LocalDateTime.now());
+                for (ChiTietDichVuDTO dvDTO : dto.getDanhSachDichVu()) {
+                    DichVu dichVu = dichVuRepository.findById(dvDTO.getMaDichVu())
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ"));
+
+                    BenhAnDichVu banDv = new BenhAnDichVu();
+                    banDv.setBenhAn(benhAn);
+                    banDv.setDichVu(dichVu);
+                    banDv.setGia(dvDTO.getGia());
+
+                    benhAnDichVuRepository.save(banDv);
+                }
+
+                BenhAn savedBenhAn = benhAnRepository.save(benhAn);
+                logger.debug("Đã lưu bệnh án mã: {} thành công", savedBenhAn.getMaBenhAn());
+                return savedBenhAn;
+
+            } catch (Exception e) {
+                logger.error("Lỗi khi tạo bệnh án cho bệnh nhân mã: {} - Chi tiết: {}",
+                        benhNhan.getMaBenhNhan(), e.getMessage(), e);
+                throw e;
             }
-
-            benhAn.setLichHen(lichHen);
-            benhAn.setLyDoKham(dto.getLyDoKham());
-            benhAn.setChanDoan(dto.getChanDoan());
-            benhAn.setGhiChuDieuTri(dto.getGhiChuDieuTri());
-            benhAn.setNgayTaiKham(dto.getNgayTaiKham());
-            benhAn.setNgayTao(LocalDateTime.now());
-
-            BenhAn savedBenhAn = benhAnRepository.save(benhAn);
-            logger.debug("Đã lưu bệnh án mã: {} thành công", savedBenhAn.getMaBenhAn());
-            return savedBenhAn;
-
-        } catch (Exception e) {
-            logger.error("Lỗi khi tạo bệnh án cho bệnh nhân mã: {} - Chi tiết: {}",
-                    benhNhan.getMaBenhNhan(), e.getMessage(), e);
-            throw e;
-        }
     }
 
 

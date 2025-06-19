@@ -54,4 +54,7 @@ public class BenhAn {
 
     @OneToMany(mappedBy = "benhAn", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DonThuoc> donThuocs;
+
+    @OneToMany(mappedBy = "benhAn", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BenhAnDichVu> benhAnDichVus;
 }

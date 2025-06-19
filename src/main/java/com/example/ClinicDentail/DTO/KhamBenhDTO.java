@@ -24,6 +24,20 @@ public class KhamBenhDTO {
     private String hoTen;
     private String soDienThoai;
     private String email;
+
+    public KhamBenhDTO(BenhNhan benhNhan) {
+        this.maBenhNhan = benhNhan.getMaBenhNhan();
+        this.hoTen = benhNhan.getHoTen();
+        this.soDienThoai = benhNhan.getSoDienThoai();
+        this.email = benhNhan.getEmail();
+        this.diaChi = benhNhan.getDiaChi();
+        this.ngaySinh = benhNhan.getNgaySinh();
+        this.gioiTinh = benhNhan.getGioiTinh().toString();
+        this.tienSuBenh = benhNhan.getTienSuBenh();
+        this.diUng = benhNhan.getDiUng();
+    }
+
+
     private String diaChi;
     private LocalDate ngaySinh;
     private String gioiTinh;
@@ -38,7 +52,7 @@ public class KhamBenhDTO {
     private String chanDoan;
     private String ghiChuDieuTri;
     private LocalDate ngayTaiKham;
-    private List<Integer> maDichVu;
+    private List<ChiTietDichVuDTO> danhSachDichVu;
 
     // Thông tin đơn thuốc
     private List<ChiTietThuocDTO> danhSachThuoc;
@@ -86,10 +100,6 @@ public class KhamBenhDTO {
             this.gioiTinh = bn.getGioiTinh() != null ? bn.getGioiTinh().toString() : null;
             this.tienSuBenh = bn.getTienSuBenh();
             this.diUng = bn.getDiUng();
-        }
-
-        if (lichHen.getDichVu() != null) {
-            this.maDichVu = List.of(lichHen.getDichVu().getMaDichVu());
         }
     }
 

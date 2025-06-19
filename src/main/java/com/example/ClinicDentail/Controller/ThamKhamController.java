@@ -186,6 +186,12 @@ public class ThamKhamController {
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         }
     }
+
+    /**
+     * chi tiet bệnh án
+     * @param maBenhAn
+     * @return
+     */
     @GetMapping("/benh-an/{maBenhAn}")
     @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
     public ResponseEntity<?> getChiTietBenhAn(@PathVariable Integer maBenhAn) {

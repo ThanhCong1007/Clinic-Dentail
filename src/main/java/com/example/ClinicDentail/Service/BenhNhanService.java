@@ -19,89 +19,29 @@ public class BenhNhanService {
     @Autowired
     private BenhNhanRepository benhNhanRepository;
 
-    @Autowired
-    private BacSiRepository bacSiRepository;
-
-    @Autowired
-    private LichHenRepository lichHenRepository;
-
-    @Autowired
-    private BenhAnRepository benhAnRepository;
-
-    @Autowired
-    private TrangThaiLichHenRepository trangThaiLichHenRepository;
-
-    @Autowired
-    private DichVuRepository dichVuRepository;
-
-    @Autowired
-    private LichHenService lichHenService;
-    @Autowired
-    private DonThuocRepository donThuocRepository;
-    @Autowired
-    private ChiTietDonThuocRepository chiTietDonThuocRepository;
-    @Autowired
-    private ChiTietHoaDonRepository chiTietHoaDonRepository;
-    @Autowired
-    private HoaDonRepository hoaDonRepository;
-    @Autowired
-    private ThuocRepository thuocRepository;
-
     // Cập nhật các method con để có thông báo lỗi rõ ràng hơn
     public BenhNhan layThongTinBenhNhan(KhamBenhDTO dto) {
-        logger.debug("Tìm kiếm bệnh nhân với mã: {}", dto.getMaBenhNhan());
+        Integer maBenhNhan = dto.getMaBenhNhan();
+        logger.debug("Tìm kiếm bệnh nhân với mã: {}", maBenhNhan);
 
         try {
-            Optional<BenhNhan> optBenhNhan = benhNhanRepository.findById(dto.getMaBenhNhan());
-
-            if (!optBenhNhan.isPresent()) {
-                logger.error("Không tìm thấy bệnh nhân với mã: {}", dto.getMaBenhNhan());
-                throw new RuntimeException("Không tìm thấy bệnh nhân với mã: " + dto.getMaBenhNhan());
-            }
-
-            BenhNhan benhNhan = optBenhNhan.get();
-
-            // Force load các field cần thiết trong transaction
-            String hoTen = benhNhan.getHoTen();
-            String soDienThoai = benhNhan.getSoDienThoai();
-            String email = benhNhan.getEmail();
-            String diaChi = benhNhan.getDiaChi();
-
-            logger.debug("Đã load đầy đủ thông tin bệnh nhân: {} - {} - {} - {}",
-                    hoTen, soDienThoai, email, diaChi);
-
-            return benhNhan;
-
+            return benhNhanRepository.findById(maBenhNhan)
+                    .orElseThrow(() -> {
+                        logger.error("Không tìm thấy bệnh nhân với mã: {}", maBenhNhan);
+                        return new RuntimeException("Không tìm thấy bệnh nhân với mã: " + maBenhNhan);
+                    });
         } catch (Exception e) {
-            logger.error("Lỗi khi truy vấn thông tin bệnh nhân mã: {} - Chi tiết: {}",
-                    dto.getMaBenhNhan(), e.getMessage(), e);
-            throw new RuntimeException("Lỗi truy vấn cơ sở dữ liệu khi tìm bệnh nhân: " + e.getMessage(), e);
+            logger.error("Lỗi truy vấn bệnh nhân mã {} - {}", maBenhNhan, e.getMessage(), e);
+            throw new RuntimeException("Lỗi truy vấn bệnh nhân: " + e.getMessage(), e);
         }
     }
 
     public KhamBenhDTO layThongTinBenhNhan(Integer maBenhNhan) {
-        Optional<BenhNhan> optBenhNhan = benhNhanRepository.findById(maBenhNhan);
-        if (!optBenhNhan.isPresent()) {
-            throw new RuntimeException("Không tìm thấy bệnh nhân với mã: " + maBenhNhan);
-        }
+        BenhNhan benhNhan = benhNhanRepository.findById(maBenhNhan)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bệnh nhân với mã: " + maBenhNhan));
 
-        BenhNhan benhNhan = optBenhNhan.get();
-        KhamBenhDTO dto = new KhamBenhDTO();
-
-        // Ánh xạ thông tin bệnh nhân
-        dto.setMaBenhNhan(benhNhan.getMaBenhNhan());
-        dto.setHoTen(benhNhan.getHoTen());
-        dto.setSoDienThoai(benhNhan.getSoDienThoai());
-        dto.setEmail(benhNhan.getEmail());
-        dto.setDiaChi(benhNhan.getDiaChi());
-        dto.setNgaySinh(benhNhan.getNgaySinh());
-        dto.setGioiTinh(benhNhan.getGioiTinh().toString());
-        dto.setTienSuBenh(benhNhan.getTienSuBenh());
-        dto.setDiUng(benhNhan.getDiUng());
-
-        return dto;
+        return new KhamBenhDTO(benhNhan);
     }
-
 
     public BenhNhan taoBenhNhanMoi(KhamBenhDTO dto) {
         // Kiểm tra các thông tin bắt buộc
@@ -148,6 +88,7 @@ public class BenhNhanService {
             throw new RuntimeException("Không thể tạo bệnh nhân mới: " + e.getMessage(), e);
         }
     }
+
     public void capNhatThongTinBenhNhan(BenhAn benhAn, BenhAnDTO dto) {
         try {
             BenhNhan benhNhan = benhAn.getBenhNhan();
