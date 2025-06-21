@@ -1,10 +1,7 @@
 package com.example.ClinicDentail.Controller;
 
 import com.example.ClinicDentail.Service.AuthService;
-import com.example.ClinicDentail.payload.request.JwtResponse;
-import com.example.ClinicDentail.payload.request.LoginRequest;
-import com.example.ClinicDentail.payload.request.MessageResponse;
-import com.example.ClinicDentail.payload.request.SignupRequest;
+import com.example.ClinicDentail.payload.request.*;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +40,47 @@ public class AuthController {
             logger.error("Login error: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponse("Lỗi đăng nhập: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * API refresh token - tạo access token mới từ refresh token
+     * @param refreshTokenRequest chứa refresh token
+     * @return access token mới
+     */
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        try {
+            String newAccessToken = authService.refreshToken(refreshTokenRequest.getRefreshToken());
+            return ResponseEntity.ok(new RefreshTokenResponse(newAccessToken));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(new MessageResponse(e.getReason()));
+        } catch (Exception e) {
+            logger.error("Refresh token error: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Lỗi refresh token: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * API validate token - kiểm tra token còn hợp lệ không
+     * @param authHeader Authorization header chứa JWT token
+     * @return thông tin validation
+     */
+    @PostMapping("/validate-token")
+    public ResponseEntity<?> validateToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String jwt = authHeader.substring(7);
+                TokenValidationResponse validationResponse = authService.validateToken(jwt);
+                return ResponseEntity.ok(validationResponse);
+            }
+
+            return ResponseEntity.ok(new TokenValidationResponse(false, "Token không hợp lệ"));
+        } catch (Exception e) {
+            logger.error("Token validation error: " + e.getMessage(), e);
+            return ResponseEntity.ok(new TokenValidationResponse(false, "Token không hợp lệ: " + e.getMessage()));
         }
     }
 

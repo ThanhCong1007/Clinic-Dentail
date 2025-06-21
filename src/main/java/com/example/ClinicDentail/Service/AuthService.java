@@ -11,6 +11,7 @@ import com.example.ClinicDentail.Security.Service.UserDetailsImpl;
 import com.example.ClinicDentail.payload.request.JwtResponse;
 import com.example.ClinicDentail.payload.request.LoginRequest;
 import com.example.ClinicDentail.payload.request.SignupRequest;
+import com.example.ClinicDentail.payload.request.TokenValidationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -241,4 +242,71 @@ public class AuthService {
         logger.info("New patient record created for user: {}", signupRequest.getTenDangNhap());
     }
 
+    /**
+     * Refresh token - tạo access token mới từ refresh token
+     */
+    public String refreshToken(String refreshToken) {
+        logger.info("Processing refresh token request");
+
+        try {
+            // Validate refresh token
+            if (!jwtUtils.validateJwtToken(refreshToken)) {
+                logger.warn("Invalid refresh token provided");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token không hợp lệ!");
+            }
+
+            // Lấy username từ refresh token
+            String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
+
+            // Tìm user trong database
+            NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(username)
+                    .orElseThrow(() -> {
+                        logger.warn("User not found for refresh token: {}", username);
+                        return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại!");
+                    });
+
+            // Tạo access token mới
+            String newAccessToken = jwtUtils.generateTokenFromUsername(username);
+
+            logger.info("Access token refreshed successfully for user: {}", username);
+            return newAccessToken;
+
+        } catch (Exception e) {
+            logger.error("Error refreshing token: " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Lỗi refresh token!");
+        }
+    }
+
+    /**
+     * Validate token - kiểm tra token có hợp lệ không
+     */
+    public TokenValidationResponse validateToken(String token) {
+        logger.info("Processing token validation request");
+
+        try {
+            // Kiểm tra token có hợp lệ không
+            if (!jwtUtils.validateJwtToken(token)) {
+                logger.info("Token validation failed: invalid token");
+                return new TokenValidationResponse(false, "Token không hợp lệ hoặc đã hết hạn");
+            }
+
+            // Lấy username từ token
+            String username = jwtUtils.getUserNameFromJwtToken(token);
+
+            // Kiểm tra user có tồn tại trong database không
+            boolean userExists = nguoiDungRepository.existsByTenDangNhap(username);
+
+            if (!userExists) {
+                logger.warn("Token validation failed: user not found - {}", username);
+                return new TokenValidationResponse(false, "Người dùng không tồn tại");
+            }
+
+            logger.info("Token validation successful for user: {}", username);
+            return new TokenValidationResponse(true, "Token hợp lệ", username);
+
+        } catch (Exception e) {
+            logger.error("Error validating token: " + e.getMessage(), e);
+            return new TokenValidationResponse(false, "Lỗi kiểm tra token: " + e.getMessage());
+        }
+    }
 }
