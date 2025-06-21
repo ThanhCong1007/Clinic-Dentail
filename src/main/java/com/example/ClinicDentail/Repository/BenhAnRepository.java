@@ -24,5 +24,62 @@ public interface BenhAnRepository extends JpaRepository<BenhAn,Integer> {
             "ORDER BY ba.ngayTao DESC")
     List<BenhAn> findByBenhNhan_MaBenhNhanOrderByNgayTaoDesc(@Param("maBenhNhan") Integer maBenhNhan);
 
+    /**
+     * Tìm bệnh án theo mã bác sĩ
+     */
+    Page<BenhAn> findByBacSi_MaBacSi(Integer maBacSi, Pageable pageable);
 
+    /**
+     * Tìm bệnh án theo mã bệnh nhân
+     */
+    Page<BenhAn> findByBenhNhan_MaBenhNhan(Integer maBenhNhan, Pageable pageable);
+
+    /**
+     * Tìm kiếm bệnh án theo bác sĩ và từ khóa
+     */
+    @Query("SELECT ba FROM BenhAn ba " +
+            "WHERE ba.bacSi.maBacSi = :maBacSi " +
+            "AND (LOWER(ba.benhNhan.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR ba.benhNhan.soDienThoai LIKE CONCAT('%', :keyword, '%') " +
+            "OR LOWER(ba.chanDoan) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(ba.lyDoKham) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<BenhAn> findByBacSiAndKeyword(@Param("maBacSi") Integer maBacSi,
+                                       @Param("keyword") String keyword,
+                                       Pageable pageable);
+
+    /**
+     * Đếm số lượng bệnh án theo bác sĩ
+     */
+    long countByBacSi_MaBacSi(Integer maBacSi);
+
+    /**
+     * Đếm số lượng bệnh án theo bệnh nhân
+     */
+    long countByBenhNhan_MaBenhNhan(Integer maBenhNhan);
+
+    /**
+     * Tìm bệnh án gần nhất của bệnh nhân
+     */
+    Optional<BenhAn> findTopByBenhNhan_MaBenhNhanOrderByNgayTaoDesc(Integer maBenhNhan);
+
+    /**
+     * Tìm bệnh án theo khoảng thời gian
+     */
+    @Query("SELECT ba FROM BenhAn ba " +
+            "WHERE ba.ngayTao BETWEEN :tuNgay AND :denNgay " +
+            "ORDER BY ba.ngayTao DESC")
+    List<BenhAn> findByNgayTaoBetween(@Param("tuNgay") LocalDateTime tuNgay,
+                                      @Param("denNgay") LocalDateTime denNgay);
+
+    /**
+     * Tìm bệnh án theo bác sĩ và khoảng thời gian
+     */
+    @Query("SELECT ba FROM BenhAn ba " +
+            "WHERE ba.bacSi.maBacSi = :maBacSi " +
+            "AND ba.ngayTao BETWEEN :tuNgay AND :denNgay " +
+            "ORDER BY ba.ngayTao DESC")
+    Page<BenhAn> findByBacSiAndDateRange(@Param("maBacSi") Integer maBacSi,
+                                         @Param("tuNgay") LocalDateTime tuNgay,
+                                         @Param("denNgay") LocalDateTime denNgay,
+                                         Pageable pageable);
 }

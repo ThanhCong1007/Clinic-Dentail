@@ -8,9 +8,15 @@ import com.example.ClinicDentail.Repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,37 +24,25 @@ public class BenhAnService {
     private static final Logger logger = LoggerFactory.getLogger(BenhAnService.class);
 
     @Autowired
-    private BenhNhanRepository benhNhanRepository;
-
-    @Autowired
     private BacSiRepository bacSiRepository;
-
-    @Autowired
-    private LichHenRepository lichHenRepository;
 
     @Autowired
     private BenhAnRepository benhAnRepository;
 
     @Autowired
-    private TrangThaiLichHenRepository trangThaiLichHenRepository;
-
-    @Autowired
     private DichVuRepository dichVuRepository;
 
     @Autowired
-    private LichHenService lichHenService;
+    private BenhAnDichVuRepository benhAnDichVuRepository;
+
     @Autowired
     private DonThuocRepository donThuocRepository;
+
     @Autowired
     private ChiTietDonThuocRepository chiTietDonThuocRepository;
+
     @Autowired
-    private ChiTietHoaDonRepository chiTietHoaDonRepository;
-    @Autowired
-    private HoaDonRepository hoaDonRepository;
-    @Autowired
-    private ThuocRepository thuocRepository;
-    @Autowired
-    private BenhAnDichVuRepository benhAnDichVuRepository;
+    private BenhNhanRepository benhNhanRepository;
 
     public BenhAn layBenhAnHienTai(Integer maBenhAn) {
         logger.debug("Tìm kiếm bệnh án với mã: {}", maBenhAn);
@@ -150,5 +144,64 @@ public class BenhAnService {
             logger.error("Lỗi khi cập nhật thông tin khám bệnh: {}", e.getMessage(), e);
             throw new RuntimeException("Lỗi cập nhật thông tin khám bệnh: " + e.getMessage(), e);
         }
+    }
+    /**
+     * Lấy danh sách bệnh án theo mã bác sĩ (cho bác sĩ)
+     */
+    public Page<BenhAnDTO> getDanhSachBenhAnTheoBacSi(Integer maBacSi, int page, int size, String keyword) {
+        // Kiểm tra bác sĩ có tồn tại không
+        BacSi bacSi = bacSiRepository.findById(maBacSi)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bác sĩ với mã: " + maBacSi));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "ngayTao"));
+
+        Page<BenhAn> benhAnPage;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            // Tìm kiếm theo từ khóa (tên bệnh nhân, số điện thoại, chẩn đoán)
+            benhAnPage = benhAnRepository.findByBacSiAndKeyword(maBacSi, keyword.trim(), pageable);
+        } else {
+            // Lấy tất cả bệnh án của bác sĩ
+            benhAnPage = benhAnRepository.findByBacSi_MaBacSi(maBacSi, pageable);
+        }
+
+        return benhAnPage.map(BenhAnDTO::new);
+    }
+
+    /**
+     * Lấy chi tiết bệnh án cho bác sĩ
+     */
+    public BenhAnDTO getChiTietBenhAnChoBacSi(Integer maBenhAn) {
+        BenhAn benhAn = benhAnRepository.findById(maBenhAn)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bệnh án với mã: " + maBenhAn));
+
+        // Lấy danh sách dịch vụ
+        List<BenhAnDichVu> danhSachDichVu = benhAnDichVuRepository.findByBenhAn_MaBenhAn(maBenhAn);
+
+        // Lấy đơn thuốc
+        DonThuoc donThuoc = donThuocRepository.findByBenhAn_MaBenhAn(maBenhAn).orElse(null);
+
+        // Lấy chi tiết thuốc nếu có đơn thuốc
+        List<ChiTietDonThuoc> danhSachThuoc = new ArrayList<>();
+        if (donThuoc != null) {
+            danhSachThuoc = chiTietDonThuocRepository.findByDonThuoc_MaDonThuoc(donThuoc.getMaDonThuoc());
+        }
+
+        return new BenhAnDTO(benhAn, danhSachDichVu, donThuoc, danhSachThuoc);
+    }
+
+    /**
+     * Lấy danh sách bệnh án theo mã bệnh nhân (cho bệnh nhân)
+     */
+    public Page<BenhAnDTO> getDanhSachBenhAnTheoBenhNhan(Integer maBenhNhan, int page, int size) {
+        // Kiểm tra bệnh nhân có tồn tại không
+        BenhNhan benhNhan = benhNhanRepository.findById(maBenhNhan)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bệnh nhân với mã: " + maBenhNhan));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "ngayTao"));
+
+        Page<BenhAn> benhAnPage = benhAnRepository.findByBenhNhan_MaBenhNhan(maBenhNhan, pageable);
+
+        return benhAnPage.map(BenhAnDTO::new);
     }
 }

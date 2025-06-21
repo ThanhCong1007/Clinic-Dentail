@@ -34,4 +34,5 @@ public interface ChiTietDonThuocRepository extends JpaRepository<ChiTietDonThuoc
     List<Object[]> thongKeThuocKhaNhieu();
 
     List<ChiTietDonThuoc> findByDonThuoc(DonThuoc donThuoc);
+    
 }

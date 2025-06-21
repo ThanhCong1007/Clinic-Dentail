@@ -13,4 +13,9 @@ import java.util.Optional;
 public interface DonThuocRepository extends JpaRepository<DonThuoc, Integer> {
 
     DonThuoc findByBenhAn(BenhAn benhAn);
+    Optional<DonThuoc> findByBenhAn_MaBenhAn(Integer maBenhAn);
+
+    List<DonThuoc> findByBenhNhan_MaBenhNhan(Integer maBenhNhan);
+
+    List<DonThuoc> findByBacSi_MaBacSi(Integer maBacSi);
 }
