@@ -155,7 +155,7 @@ public class PublicController {
         try {
             List<Thuoc> thuocList = thuocRepository.findAll();
             List<ThuocDTO> dtoList = thuocList.stream()
-                    .map(this::convertToThuocDTO)
+                    .map(ThuocDTO::new)
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(dtoList);
@@ -163,37 +163,6 @@ public class PublicController {
             log.error("Lỗi khi lấy danh sách thuốc: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
-
-    // Phương thức helper để convert Entity sang ChiTietThuocDTO
-    // Phương thức helper để convert Entity sang ThuocDTO
-    private ThuocDTO convertToThuocDTO(Thuoc thuoc) {
-        ThuocDTO dto = new ThuocDTO();
-        dto.setMaThuoc(thuoc.getMaThuoc());
-        dto.setMaLoaiThuoc(thuoc.getLoaiThuoc() != null ? thuoc.getLoaiThuoc().getMaLoaiThuoc() : null);
-        dto.setTenThuoc(thuoc.getTenThuoc());
-        dto.setHoatChat(thuoc.getHoatChat());
-        dto.setHamLuong(thuoc.getHamLuong());
-        dto.setNhaSanXuat(thuoc.getNhaSanXuat());
-        dto.setNuocSanXuat(thuoc.getNuocSanXuat());
-        dto.setDangBaoChe(thuoc.getDangBaoChe());
-        dto.setDonViTinh(thuoc.getDonViTinh());
-        dto.setDuongDung(thuoc.getDuongDung());
-        dto.setHuongDanSuDung(thuoc.getHuongDanSuDung());
-        dto.setCachBaoQuan(thuoc.getCachBaoQuan());
-        dto.setPhanLoaiDonThuoc(thuoc.getPhanLoaiDonThuoc() != null ? thuoc.getPhanLoaiDonThuoc().name() : null);
-        dto.setChongChiDinh(thuoc.getChongChiDinh());
-        dto.setTacDungPhu(thuoc.getTacDungPhu());
-        dto.setTuongTacThuoc(thuoc.getTuongTacThuoc());
-        dto.setNhomThuocThaiKy(thuoc.getNhomThuocThaiKy());
-        dto.setGia(thuoc.getGia());
-        dto.setSoLuongTon(thuoc.getSoLuongTon());
-        dto.setNguongCanhBao(thuoc.getNguongCanhBao());
-        dto.setTrangThaiHoatDong(thuoc.getTrangThaiHoatDong());
-        dto.setNgayTao(thuoc.getNgayTao());
-        dto.setNgayCapNhat(thuoc.getNgayCapNhat());
-
-        return dto;
     }
 
     // ====== HELPER METHODS ======
@@ -239,25 +208,6 @@ public class PublicController {
         }
 
         return availableSlots;
-    }
-
-    /**
-     * Lấy lịch làm việc của bác sĩ trong khoảng thời gian
-     */
-    private Map<String, List<TimeSlotDTO>> getDoctorScheduleInRange(Integer maBacSi, LocalDate fromDate, LocalDate toDate) {
-        Map<String, List<TimeSlotDTO>> schedule = new HashMap<>();
-
-        LocalDate currentDate = fromDate;
-        while (!currentDate.isAfter(toDate)) {
-            // Chỉ lấy lịch cho các ngày trong tuần (thứ 2 - thứ 6)
-            if (currentDate.getDayOfWeek().getValue() <= 5) {
-                List<TimeSlotDTO> slots = getAvailableTimeSlotsForDoctor(maBacSi, currentDate);
-                schedule.put(currentDate.toString(), slots);
-            }
-            currentDate = currentDate.plusDays(1);
-        }
-
-        return schedule;
     }
 
     /**

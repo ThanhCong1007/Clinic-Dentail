@@ -109,6 +109,7 @@ CREATE TABLE benh_an (
     FOREIGN KEY (ma_benh_nhan) REFERENCES benh_nhan(ma_benh_nhan),
     FOREIGN KEY (ma_bac_si) REFERENCES bac_si(ma_bac_si)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE benh_an_dich_vu (
  id INT AUTO_INCREMENT PRIMARY KEY,
  ma_benh_an INT NOT NULL,
@@ -156,7 +157,7 @@ CREATE TABLE hoa_don (
     tong_tien DECIMAL(12, 2) NOT NULL,
     thanh_tien DECIMAL(12, 2) NOT NULL,
     ngay_hoa_don TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    trang_thai ENUM('Chưa thanh toán', 'Đã thanh toán', 'Hủy bỏ') DEFAULT 'Chưa thanh toán' VARCHAR(20),
+    trang_thai ENUM('Chưa thanh toán', 'Đã thanh toán', 'Hủy bỏ') DEFAULT 'Chưa thanh toán' ,
     nguoi_tao INT,
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ma_benh_nhan) REFERENCES benh_nhan(ma_benh_nhan),

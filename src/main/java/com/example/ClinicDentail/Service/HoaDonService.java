@@ -1,6 +1,7 @@
 package com.example.ClinicDentail.Service;
 
 import com.example.ClinicDentail.DTO.DichVuDTO;
+import com.example.ClinicDentail.DTO.HoaDonDTO;
 import com.example.ClinicDentail.DTO.KhamBenhDTO;
 import com.example.ClinicDentail.Enity.*;
 import com.example.ClinicDentail.Repository.*;
@@ -11,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class HoaDonService {
@@ -92,5 +95,52 @@ public class HoaDonService {
         }
     }
 
+    /**
+     * Lấy danh sách hóa đơn theo bệnh nhân (người dùng)
+     * @param maBenhNhan ID của bệnh nhân
+     * @return Danh sách hóa đơn của bệnh nhân
+     */
+    public List<HoaDonDTO> getHoaDonByBenhNhan(Integer maBenhNhan) {
+        try {
+            List<HoaDon> hoaDons = hoaDonRepository.findByBenhNhan_MaBenhNhanOrderByNgayTaoDesc(maBenhNhan);
+            return hoaDons.stream()
+                    .map(HoaDonDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Lỗi khi lấy danh sách hóa đơn của bệnh nhân với ID {}: {}", maBenhNhan, e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Lấy tất cả hóa đơn (dành cho Admin)
+     * @return Danh sách tất cả hóa đơn
+     */
+    public List<HoaDonDTO> getAllHoaDon() {
+        try {
+            List<HoaDon> hoaDons = hoaDonRepository.findAllByOrderByNgayTaoDesc();
+            return hoaDons.stream()
+                    .map(HoaDonDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Lỗi khi lấy tất cả hóa đơn: {}", e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Xem chi tiết hóa đơn theo ID
+     * @param maHoaDon ID của hóa đơn
+     * @return Chi tiết hóa đơn
+     */
+    public Optional<HoaDonDTO> getHoaDonById(Integer maHoaDon) {
+        try {
+            Optional<HoaDon> hoaDon = hoaDonRepository.findByIdWithDetails(maHoaDon);
+            return hoaDon.map(HoaDonDTO::new);
+        } catch (Exception e) {
+            logger.error("Lỗi khi lấy chi tiết hóa đơn với ID {}: {}", maHoaDon, e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
 
 }
