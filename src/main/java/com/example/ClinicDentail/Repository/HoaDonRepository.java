@@ -38,4 +38,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDon,Integer> {
      */
     boolean existsByMaHoaDonAndBenhNhan_MaBenhNhan(Integer maHoaDon, Integer maBenhNhan);
 
+    List<HoaDon> findByBenhNhanMaBenhNhanAndTrangThai(Integer maBenhNhan, HoaDon.TrangThaiHoaDon trangThai);
+
 }

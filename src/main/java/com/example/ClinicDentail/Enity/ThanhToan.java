@@ -1,5 +1,6 @@
 package com.example.ClinicDentail.Enity;
 
+import com.example.ClinicDentail.Convert.TrangThaiThanhToanConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,9 +34,9 @@ public class ThanhToan {
     @Column(name = "ngay_thanh_toan")
     private LocalDateTime ngayThanhToan;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = TrangThaiThanhToanConverter.class)
     @Column(name = "trang_thai_thanh_toan")
-    private TrangThaiThanhToan trangThaiThanhToan = TrangThaiThanhToan.THANH_CONG;
+    private TrangThaiThanhToan trangThaiThanhToan;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nguoi_tao")
@@ -53,7 +54,8 @@ public class ThanhToan {
     public enum TrangThaiThanhToan {
         THANH_CONG("Thành công"),
         DANG_XU_LY("Đang xử lý"),
-        THAT_BAI("Thất bại");
+        THAT_BAI("Thất bại"),
+        CHUA_THANH_TOAN("Chưa thanh toán");
 
         private final String value;
 

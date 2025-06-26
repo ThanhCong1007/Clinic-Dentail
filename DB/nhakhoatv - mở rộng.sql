@@ -186,7 +186,7 @@ CREATE TABLE thanh_toan (
     ma_phuong_thuc INT NOT NULL,
     so_tien DECIMAL(12, 2) NOT NULL,
     ngay_thanh_toan TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    trang_thai_thanh_toan ENUM('Thành công', 'Đang xử lý', 'Thất bại') DEFAULT 'Thành công',
+    trang_thai_thanh_toan ENUM('Thành công', 'Đang xử lý', 'Thất bại','Chưa thanh toán') DEFAULT 'Thành công',
     nguoi_tao INT,
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ma_hoa_don) REFERENCES hoa_don(ma_hoa_don),
@@ -199,7 +199,8 @@ CREATE TABLE thanh_toan (
 INSERT INTO phuong_thuc_thanh_toan (ten_phuong_thuc, mo_ta) VALUES
 ('Tiền mặt', 'Thanh toán bằng tiền mặt tại quầy'),
 ('Thẻ tín dụng/ghi nợ', 'Thanh toán bằng thẻ tín dụng hoặc thẻ ghi nợ'),
-('Chuyển khoản ngân hàng', 'Thanh toán bằng chuyển khoản ngân hàng');
+('Chuyển khoản ngân hàng', 'Thanh toán bằng chuyển khoản ngân hàng'),
+('VNPay', 'Thanh toán trực tuyến qua VNPay');
 
 -- Bảng loại thuốc
 CREATE TABLE loai_thuoc (
