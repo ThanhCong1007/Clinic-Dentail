@@ -42,8 +42,10 @@ public class PublicController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private DichVuRepository dichVuRepository;
+
     @Autowired
     private ThuocRepository thuocRepository;
 

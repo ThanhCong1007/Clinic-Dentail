@@ -36,7 +36,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             "/swagger-ui/",
             "/v3/api-docs/",
             "/swagger-resources/",
-            "/webjars/"
+            "/webjars/",
+            "/api/vnpay/"
     );
 
     @Override

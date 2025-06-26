@@ -97,7 +97,7 @@ public class WebSecurityConfig {
                                 // Public endpoints
                                 .requestMatchers("/api/auth/**", "/auth/**").permitAll()
                                 .requestMatchers("/api/public/**").permitAll()
-
+                                .requestMatchers("/api/vnpay/**").permitAll()
                                 // Swagger/OpenAPI endpoints - QUAN TRỌNG!
                                 .requestMatchers(
                                         "/v3/api-docs/**",
