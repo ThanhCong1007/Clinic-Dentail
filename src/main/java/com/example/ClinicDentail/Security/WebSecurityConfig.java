@@ -104,7 +104,8 @@ public class WebSecurityConfig {
                                         "/swagger-ui/**",
                                         "/swagger-ui.html",
                                         "/swagger-resources/**",
-                                        "/webjars/**"
+                                        "/webjars/**",
+                                        "/favicon.ico"
                                 ).permitAll()
 
                                 // Role-based endpoints
