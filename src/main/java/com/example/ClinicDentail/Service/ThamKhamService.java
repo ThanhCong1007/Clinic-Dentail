@@ -52,128 +52,162 @@ public class ThamKhamService {
     @Transactional
     public KhamBenhDTO khamBenh(KhamBenhDTO dto) {
         try {
-            // 1. Kiểm tra và lấy thông tin bệnh nhân hoặc tạo mới
-            BenhNhan benhNhan=new BenhNhan();
-            try {
-                if (dto.getMaBenhNhan() != null) {
-                    // Tìm kiếm bệnh nhân theo mã
-                    benhNhan = benhNhanService.layThongTinBenhNhan(dto);
-                } else {
-                    // Tạo bệnh nhân mới nếu không có mã
-                    benhNhan = benhNhanService.taoBenhNhanMoi(dto);
-                }
-            } catch (EntityNotFoundException e) {
-                // Nếu không tìm thấy bệnh nhân theo mã, tạo bệnh nhân mới
-                benhNhan = benhNhanService.taoBenhNhanMoi(dto);
-            } catch (Exception e) {
-                throw new RuntimeException("Lỗi  - Kiểm tra thông tin bệnh nhân: " + e.getMessage(), e);
-            }
+            // 1. Lấy hoặc tạo mới bệnh nhân
+            BenhNhan benhNhan = layHoacTaoBenhNhan(dto);
+
             // 2. Cập nhật trạng thái lịch hẹn nếu có
-            LichHen lichHen = null;
-            if (dto.getMaLichHen() != null) {
-                try {
-                    lichHen = lichHenService.capNhatTrangThaiLichHen(dto.getMaLichHen());
-                } catch (Exception e) {
-                    throw new RuntimeException("Lỗi - Cập nhật trạng thái lịch hẹn: " + e.getMessage(), e);
-                }
-            } else {
-                logger.debug("Bước 2: Không có lịch hẹn để cập nhật");
-            }
+            LichHen lichHen = capNhatTrangThaiLichHenNeuCo(dto.getMaLichHen());
+
             // 3. Tạo bệnh án
-            BenhAn benhAn;
-            try {
-                benhAn = benhAnService.taoBenhAn(dto, benhNhan, lichHen);
-            } catch (Exception e) {
-                throw new RuntimeException("Lỗi - Tạo bệnh án: " + e.getMessage(), e);
-            }
+            BenhAn benhAn = taoBenhAn(dto, benhNhan, lichHen);
+
             // 4. Tạo đơn thuốc nếu có
-            DonThuoc donThuoc = null;
-            if (dto.getDanhSachThuoc() != null && !dto.getDanhSachThuoc().isEmpty()) {
-                try {
-                    donThuoc = donThuocService.taoDonThuoc(dto, benhAn);
-                } catch (Exception e) {
-                    throw new RuntimeException("Lỗi  - Tạo đơn thuốc: " + e.getMessage(), e);
-                }
-            } else {
-                logger.debug("Bước 4: Không có thuốc để kê đơn");
-            }
+            DonThuoc donThuoc = taoDonThuocNeuCo(dto, benhAn);
+
             // 5. Tạo hóa đơn
-            HoaDon hoaDon;
-            try {
-                hoaDon = hoaDonService.taoHoaDon(dto, benhNhan, lichHen, donThuoc, benhAn);
-            } catch (Exception e) {
-                throw new RuntimeException("Lỗi  - Tạo hóa đơn: " + e.getMessage(), e);
-            }
-            // 6. Cập nhật trạng thái lịch hẹn thành hoàn thành
-            if (lichHen != null) {
-                try {
-                    lichHenService.capNhatTrangThaiHoanThanh(lichHen);
-                } catch (Exception e) {
-                    throw new RuntimeException("Lỗi  - Hoàn thành lịch hẹn: " + e.getMessage(), e);
-                }
-            }
-            // 7. Trả về kết quả
-            try {
-                return taoKetQuaTraVe( benhAn, donThuoc, hoaDon);
-            } catch (Exception e) {
-                throw new RuntimeException("Lỗi  - Tạo kết quả trả về: " + e.getMessage(), e);
-            }
-        } catch (RuntimeException e) {
-            throw e; // Re-throw để Controller xử lý
+            HoaDon hoaDon = taoHoaDon(dto, benhNhan, lichHen, donThuoc, benhAn);
+
+            // 6. Cập nhật trạng thái hoàn thành lịch hẹn
+            hoanThanhLichHenNeuCo(lichHen);
+
+            // 7. Trả về kết quả DTO
+            return taoKetQuaTraVe(benhAn, donThuoc, hoaDon);
+
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi hệ thống: " + e.getMessage(), e);
+            throw new RuntimeException("Lỗi hệ thống trong quá trình khám bệnh: " + e.getMessage(), e);
+        }
+    }
+
+    public BenhNhan layHoacTaoBenhNhan(KhamBenhDTO dto) {
+        BenhNhan benhNhan = null;
+
+        if (dto.getMaBenhNhan() != null) {
+            try {
+                benhNhan = benhNhanService.layThongTinBenhNhan(dto);
+            } catch (EntityNotFoundException e) {
+                logger.warn("Không tìm thấy bệnh nhân mã: {}", dto.getMaBenhNhan());
+            }
+        }
+
+        if (benhNhan == null && dto.getSoDienThoai() != null) {
+            benhNhan = benhNhanService.timBenhNhanTheoSoDienThoai(dto.getSoDienThoai());
+        }
+
+        if (benhNhan == null) {
+            benhNhan = benhNhanService.taoBenhNhanMoi(dto);
+        }
+
+        return benhNhan;
+    }
+
+    public LichHen capNhatTrangThaiLichHenNeuCo(Integer maLichHen) {
+        if (maLichHen == null) {
+            logger.debug("Không có mã lịch hẹn để cập nhật");
+            return null;
+        }
+        try {
+            return lichHenService.capNhatTrangThaiLichHen(maLichHen);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi cập nhật lịch hẹn: " + e.getMessage(), e);
+        }
+    }
+
+    public BenhAn taoBenhAn(KhamBenhDTO dto, BenhNhan benhNhan, LichHen lichHen) {
+        try {
+            return benhAnService.taoBenhAn(dto, benhNhan, lichHen);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi tạo bệnh án: " + e.getMessage(), e);
+        }
+    }
+
+    public DonThuoc taoDonThuocNeuCo(KhamBenhDTO dto, BenhAn benhAn) {
+        if (dto.getDanhSachThuoc() == null || dto.getDanhSachThuoc().isEmpty()) {
+            logger.debug("Không có thuốc để kê đơn");
+            return null;
+        }
+        try {
+            return donThuocService.taoDonThuoc(dto, benhAn);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi tạo đơn thuốc: " + e.getMessage(), e);
+        }
+    }
+
+    public HoaDon taoHoaDon(KhamBenhDTO dto, BenhNhan benhNhan, LichHen lichHen, DonThuoc donThuoc, BenhAn benhAn) {
+        try {
+            return hoaDonService.taoHoaDon(dto, benhNhan, lichHen, donThuoc, benhAn);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi tạo hóa đơn: " + e.getMessage(), e);
+        }
+    }
+
+    public void hoanThanhLichHenNeuCo(LichHen lichHen) {
+        if (lichHen == null) return;
+        try {
+            lichHenService.capNhatTrangThaiHoanThanh(lichHen);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi cập nhật trạng thái hoàn thành lịch hẹn: " + e.getMessage(), e);
         }
     }
 
     @Transactional
     public BenhAnDTO capNhatBenhAn(Integer maBenhAn, BenhAnDTO dto) {
-        logger.info("Bắt đầu quá trình cập nhật bệnh án mã: {}", maBenhAn);
+        logger.info("Bắt đầu cập nhật bệnh án mã: {}", maBenhAn);
 
         try {
-            // 1. Kiểm tra và lấy bệnh án hiện tại
-            logger.debug("Bước 1: Kiểm tra bệnh án mã: {}", maBenhAn);
-            BenhAn benhAn = benhAnService.layBenhAnHienTai(maBenhAn);
+            BenhAn benhAn = layBenhAn(maBenhAn);
 
-            // 2. Cập nhật thông tin khám bệnh
-            logger.debug("Bước 2: Cập nhật thông tin khám bệnh");
-            benhAnService.capNhatThongTinKhamBenh(benhAn, dto);
+            capNhatThongTinKhamBenh(benhAn, dto);
+            capNhatBenhNhan(benhAn, dto);
+            DonThuoc donThuoc = capNhatDonThuocNeuCo(benhAn, dto);
+            LichHen lichHenMoi = taoLichHenMoiNeuCo(benhAn, dto);
 
-            // 3. Cập nhật thông tin bệnh nhân nếu có
-            logger.debug("Bước 3: Cập nhật thông tin bệnh nhân");
-            benhNhanService.capNhatThongTinBenhNhan(benhAn, dto);
-
-            // 4. Xử lý đơn thuốc nếu có thay đổi
-            DonThuoc donThuoc = null;
-            if (dto.getDanhSachThuoc() != null && !dto.getDanhSachThuoc().isEmpty()) {
-                logger.debug("Bước 4: Cập nhật đơn thuốc với {} loại thuốc", dto.getDanhSachThuoc().size());
-                donThuoc = donThuocService.capNhatDonThuoc(benhAn, dto);
-            }
-
-            // 5. Tạo lịch hẹn mới nếu có
-            LichHen lichHenMoi = null;
-            if (dto.getNgayHenMoi() != null && dto.getGioBatDauMoi() != null) {
-                logger.debug("Bước 5: Tạo lịch hẹn mới cho ngày: {}", dto.getNgayHenMoi());
-                lichHenMoi = lichHenService.taoLichHenMoi(benhAn, dto);
-            }
-
-            // 6. Lưu bệnh án đã cập nhật
-            logger.debug("Bước 6: Lưu bệnh án đã cập nhật");
             BenhAn benhAnDaCapNhat = benhAnRepository.save(benhAn);
 
-            // 7. Trả về kết quả
-            logger.info("Hoàn thành cập nhật bệnh án mã: {}", maBenhAn);
+            logger.info("Hoàn tất cập nhật bệnh án mã: {}", maBenhAn);
             return taoKetQuaCapNhat(benhAnDaCapNhat, donThuoc, lichHenMoi);
 
         } catch (RuntimeException e) {
-            logger.error("Lỗi trong quá trình cập nhật bệnh án mã: {} - Chi tiết: {}", maBenhAn, e.getMessage(), e);
-            throw e; // Re-throw để Controller xử lý
+            logger.error("Lỗi trong quá trình cập nhật bệnh án mã: {} - {}", maBenhAn, e.getMessage(), e);
+            throw e;
         } catch (Exception e) {
-            logger.error("Lỗi không xác định trong quá trình cập nhật bệnh án mã: {} - Chi tiết: {}", maBenhAn, e.getMessage(), e);
+            logger.error("Lỗi hệ thống khi cập nhật bệnh án mã: {} - {}", maBenhAn, e.getMessage(), e);
             throw new RuntimeException("Lỗi hệ thống: " + e.getMessage(), e);
         }
     }
+    private BenhAn layBenhAn(Integer maBenhAn) {
+        logger.debug("Bước 1: Lấy bệnh án mã: {}", maBenhAn);
+        return benhAnService.layBenhAnHienTai(maBenhAn);
+    }
 
-    private KhamBenhDTO taoKetQuaTraVe(BenhAn benhAn, DonThuoc donThuoc, HoaDon hoaDon) {
+    private void capNhatThongTinKhamBenh(BenhAn benhAn, BenhAnDTO dto) {
+        logger.debug("Bước 2: Cập nhật thông tin khám bệnh");
+        benhAnService.capNhatThongTinKhamBenh(benhAn, dto);
+    }
+
+    private void capNhatBenhNhan(BenhAn benhAn, BenhAnDTO dto) {
+        logger.debug("Bước 3: Cập nhật thông tin bệnh nhân");
+        benhNhanService.capNhatThongTinBenhNhan(benhAn, dto);
+    }
+
+    private DonThuoc capNhatDonThuocNeuCo(BenhAn benhAn, BenhAnDTO dto) {
+        if (dto.getDanhSachThuoc() == null || dto.getDanhSachThuoc().isEmpty()) {
+            logger.debug("Bước 4: Không có đơn thuốc để cập nhật");
+            return null;
+        }
+        logger.debug("Bước 4: Cập nhật đơn thuốc với {} loại thuốc", dto.getDanhSachThuoc().size());
+        return donThuocService.capNhatDonThuoc(benhAn, dto);
+    }
+
+    private LichHen taoLichHenMoiNeuCo(BenhAn benhAn, BenhAnDTO dto) {
+        if (dto.getNgayHenMoi() == null || dto.getGioBatDauMoi() == null) {
+            logger.debug("Bước 5: Không có lịch hẹn mới để tạo");
+            return null;
+        }
+        logger.debug("Bước 5: Tạo lịch hẹn mới cho ngày: {}", dto.getNgayHenMoi());
+        return lichHenService.taoLichHenMoi(benhAn, dto);
+    }
+
+    public KhamBenhDTO taoKetQuaTraVe(BenhAn benhAn, DonThuoc donThuoc, HoaDon hoaDon) {
         logger.debug("Tạo kết quả trả về cho quá trình khám bệnh");
         try {
             return new KhamBenhDTO(benhAn, donThuoc, hoaDon);

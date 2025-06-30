@@ -39,6 +39,7 @@ public class KhamBenhDTO {
         this.tienSuBenh = benhNhan.getTienSuBenh();
         this.diUng = benhNhan.getDiUng();
     }
+
     // Thông tin khám bệnh
     private Integer maLichHen;
     private Integer maBacSi;
