@@ -465,3 +465,121 @@ INSERT INTO dich_vu (ten_dich_vu, mo_ta, gia, thoi_gian_du_kien, trang_thai_hoat
 
 INSERT INTO `thuoc` VALUES (101,NULL,'Paracetamol','N02BE01',NULL,NULL,NULL,NULL,NULL,'Paracetamol','500','Hoffmann-La Roche','Thụy Sĩ','Viên nén','mg','Uống','Giảm đau, hạ sốt','Nơi khô mát dưới 30°C','KE_DON','Suy gan, quá mẫn','Tăng men gan, dị ứng','Warfarin','B',10000.00,100,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(102,NULL,'Ibuprofen','M01AE01',NULL,NULL,NULL,NULL,NULL,'Ibuprofen','200','Abbott Laboratories','Mỹ','Viên nén','mg','Uống','Giảm đau, chống viêm','Nơi khô mát dưới 30°C','KE_DON','Loét tiêu hóa, suy thận nặng','Loét dạ dày, suy thận','Thuốc chống đông, ACEI','D',12000.00,50,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(103,NULL,'Aspirin','N02BA01',NULL,NULL,NULL,NULL,NULL,'Axít acetylsalicylic','325','Bayer AG','Đức','Viên nén','mg','Uống','Giảm đau, hạ sốt, kháng tiểu cầu','Nơi khô mát dưới 25°C','KE_DON','Loét dạ dày, thiếu máu, trẻ em','Xuất huyết, loét','Kháng đông','D',8000.00,80,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(104,NULL,'Amoxicillin','J01CA04',NULL,NULL,NULL,NULL,NULL,'Amoxicillin','500','GlaxoSmithKline','Anh','Viên nang','mg','Uống','Kháng sinh phổ rộng','Nơi khô mát dưới 25°C','KE_DON','Dị ứng penicillin','Tiêu chảy, dị ứng','Methotrexate','B',15000.00,30,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(105,NULL,'Azithromycin','J01FA10',NULL,NULL,NULL,NULL,NULL,'Azithromycin','250','Pfizer','Mỹ','Viên nén','mg','Uống','Kháng sinh macrolide','Nơi khô mát dưới 25°C','KE_DON','Dị ứng macrolide, bệnh tim','Tiêu chảy, buồn nôn','Warfarin','B',30000.00,20,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(106,NULL,'Ciprofloxacin','J01MA02',NULL,NULL,NULL,NULL,NULL,'Ciprofloxacin','500','Bayer','Đức','Viên nén','mg','Uống','Kháng sinh fluoroquinolone','Nơi khô mát dưới 30°C','KE_DON','Trẻ em, thai kỳ','Buồn nôn, đau đầu','Antacid, Theophylline','C',20000.00,25,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(107,NULL,'Metformin','A10BA02',NULL,NULL,NULL,NULL,NULL,'Metformin','500','Merck','Mỹ','Viên nén','mg','Uống','Hạ đường máu nhóm Biguanide','Nơi khô mát dưới 25°C','KE_DON','Suy thận nặng, suy tim','Tiêu chảy, buồn nôn','Cản quang','B',2000.00,50,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(108,NULL,'Omeprazole','A02BC01',NULL,NULL,NULL,NULL,NULL,'Omeprazole','20','AstraZeneca','Anh','Viên bao tan','mg','Uống','Giảm tiết acid, điều trị loét','Nơi khô mát dưới 25°C','KE_DON','Dị ứng thuốc nhóm PPI','Đau bụng, nhức đầu','Clopidogrel','B',10000.00,40,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(109,NULL,'Salbutamol','R03AC02',NULL,NULL,NULL,NULL,NULL,'Salbutamol','100','GlaxoSmithKline','Anh','Bình xịt','µg/phút','Hít','Giãn phế quản điều trị hen','Nơi khô mát dưới 30°C','KE_DON','Tim mạch không ổn định','Run tay, đánh trống ngực','Thuốc chẹn β','B',50000.00,15,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(110,NULL,'Insulin (trung tính)','A10AC01',NULL,NULL,NULL,NULL,NULL,'Insulin','100','Novo Nordisk','Đan Mạch','Dung dịch tiêm','IU/ml','Tiêm dưới da','Hạ đường huyết điều trị tiểu đường','Bảo quản 2–8°C','KE_DON','Hạ đường huyết cấp','Hạ đường huyết, phản ứng tại chỗ','Salicylat, rượu','B',200000.00,10,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(111,NULL,'Prednisolone','H02AB06',NULL,NULL,NULL,NULL,NULL,'Prednisolone','5','Pfizer','Ireland','Viên nén','mg','Uống','Glucocorticoid giảm viêm','Nơi khô mát dưới 25°C','KE_DON','Nhiễm trùng toàn thân không kiểm soát','Tăng đường huyết, xương giòn','NSAID','C',5000.00,40,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(112,NULL,'Atorvastatin','C10AA05',NULL,NULL,NULL,NULL,NULL,'Atorvastatin','20','Pfizer','Mỹ','Viên nén','mg','Uống','Statin hạ mỡ máu','Nơi khô mát dưới 25°C','KE_DON','Bệnh gan nặng, thai kỳ','Đau cơ, tăng men gan','CYP3A4 inhibitors','X',20000.00,30,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(113,NULL,'Simvastatin','C10AA01',NULL,NULL,NULL,NULL,NULL,'Simvastatin','10','Merck','Mỹ','Viên nén','mg','Uống','Statin hạ mỡ máu','Nơi khô mát dưới 25°C','KE_DON','Bệnh gan nặng, thai kỳ','Đau cơ, tăng men gan','Fibrate, Amiodarone','X',15000.00,30,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(114,NULL,'Furosemide','C03CA01',NULL,NULL,NULL,NULL,NULL,'Furosemide','40','Roche','Thụy Sĩ','Viên nén','mg','Uống','Lợi tiểu quai','Nơi khô mát dưới 30°C','KE_DON','Vô niệu','Hạ kali, hạ áp','NSAID','C',5000.00,40,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(115,NULL,'Metronidazol','J01XD01',NULL,NULL,NULL,NULL,NULL,'Metronidazol','400','Bayer','Đức','Viên nén','mg','Uống','Kháng khuẩn anaerobe, thuốc ký sinh','Nơi khô mát dưới 25°C','KE_DON','Rượu (tương tác nặng), thiếu máu tán huyết','Vị kim loại, đau đầu','Rượu, Warfarin','B',7000.00,30,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(116,NULL,'Doxycycline','J01AA02',NULL,NULL,NULL,NULL,NULL,'Doxycycline','100','Pfizer','Mỹ','Viên nang','mg','Uống','Tetracycline phổ rộng','Nơi khô mát dưới 30°C','KE_DON','Thai kỳ, trẻ nhỏ','Nhạy cảm ánh sáng, tiêu chảy','Retinoid, Ca/Sắt','D',7000.00,25,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(117,NULL,'Gentamicin','J01GB03',NULL,NULL,NULL,NULL,NULL,'Gentamicin','10','Sandoz','Hà Lan','Dung dịch tiêm','mg/ml','Tiêm bắp/tĩnh mạch','Kháng sinh aminoglycoside','Bảo quản 2–8°C','KE_DON','Suy thận nặng, nhược cơ','Độc thận, độc tai','Thuốc độc thận khác','D',25000.00,20,10,1,'2025-06-06 11:38:25','2025-06-06 11:39:42'),(118,NULL,'Loratadin','R06AX13',NULL,NULL,NULL,NULL,NULL,'Loratadin','10','Schering-Plough','Mỹ','Viên nén','mg','Uống','Kháng histamin H1 thế hệ 2','Nơi khô mát dưới 30°C','KE_DON','Dị ứng loratadine','Khô miệng, mệt mỏi','Rượu','B',20000.00,40,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(119,NULL,'Chloramphenicol','J01BA01',NULL,NULL,NULL,NULL,NULL,'Chloramphenicol','250','Roche','Thụy Sĩ','Viên nang','mg','Uống','Kháng sinh phổ rộng','Nơi khô mát dưới 25°C','KE_DON','Thiếu máu nặng, mang thai','Ức chế tủy xương, ban phát ban','Thuốc ức chế tủy khác','C',8000.00,15,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(120,NULL,'Atenolol','C07AB03',NULL,NULL,NULL,NULL,NULL,'Atenolol','50','AstraZeneca','Anh','Viên nén','mg','Uống','Chẹn β1 điều trị tăng HA','Nơi khô mát dưới 30°C','KE_DON','Block tim độ cao, hen nặng','Mệt mỏi, nhịp tim chậm','Thuốc HA khác','C',10000.00,30,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(121,NULL,'Amoxicillin','J01CA04',NULL,NULL,NULL,NULL,NULL,'Amoxicillin','500','GSK','Anh','Viên nang','mg','Uống','500 mg x 3 lần/ngày','Dưới 25°C','KE_DON','Dị ứng penicillin','Tiêu chảy, dị ứng','Methotrexate','B',12000.00,120,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(122,NULL,'Metformin','A10BA02',NULL,NULL,NULL,NULL,NULL,'Metformin','500','Merck','Mỹ','Viên nén','mg','Uống','500 mg x 2 lần/ngày','Dưới 25°C','KE_DON','Suy thận','Buồn nôn, tiêu chảy','Cản quang, rượu','B',15000.00,90,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(123,NULL,'Salbutamol','R03AC02',NULL,NULL,NULL,NULL,NULL,'Salbutamol','100','GSK','Anh','Bình xịt định liều','µg','Hít','1–2 hít khi cần','Dưới 30°C','KE_DON','Bệnh tim nặng','Run, hồi hộp','Chẹn beta','B',30000.00,50,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(124,NULL,'Prednisolone','H02AB06',NULL,NULL,NULL,NULL,NULL,'Prednisolone','5','Pfizer','Ireland','Viên nén','mg','Uống','5–10 mg/ngày','Dưới 25°C','KE_DON','Nhiễm trùng nặng','Tăng đường huyết, loãng xương','NSAID, vaccine sống','C',8000.00,70,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07'),(125,NULL,'Azithromycin','J01FA10',NULL,NULL,NULL,NULL,NULL,'Azithromycin','250','Pfizer','Mỹ','Viên nén','mg','Uống','500 mg ngày 1, sau đó 250 mg/ngày','Dưới 25°C','KE_DON','Dị ứng, kéo dài QT','Tiêu chảy, buồn nôn','Warfarin','B',20000.00,85,10,1,'2025-06-06 11:38:25','2025-06-06 11:43:07');
 
+-- Stored Procedure: Tổng kết doanh thu tổng thể theo tháng/quý/năm
+DELIMITER $$
+
+CREATE PROCEDURE sp_TongKetDoanhThu(
+    IN p_loai_thong_ke VARCHAR(10), -- 'THANG', 'QUY', 'NAM'
+    IN p_nam INT,
+    IN p_thang INT ,
+    IN p_quy INT 
+)
+BEGIN
+    DECLARE v_ngay_bat_dau DATE;
+    DECLARE v_ngay_ket_thuc DATE;
+
+    -- Xác định khoảng thời gian
+    IF p_loai_thong_ke = 'THANG' THEN
+        SET v_ngay_bat_dau = DATE(CONCAT(p_nam, '-', LPAD(p_thang, 2, '0'), '-01'));
+        SET v_ngay_ket_thuc = LAST_DAY(v_ngay_bat_dau);
+
+        SELECT
+            DATE_FORMAT(DATE(hd.ngay_hoa_don), '%Y-%m-%d') as nhan,
+            SUM(hd.thanh_tien) as doanh_thu,
+            COUNT(hd.ma_hoa_don) as so_hoa_don,
+            'NGAY' as loai_thong_ke
+        FROM hoa_don hd
+        WHERE hd.trang_thai = 'DA_THANH_TOAN'
+          AND DATE(hd.ngay_hoa_don) BETWEEN v_ngay_bat_dau AND v_ngay_ket_thuc
+        GROUP BY DATE(hd.ngay_hoa_don)
+        ORDER BY DATE(hd.ngay_hoa_don);
+
+    ELSEIF p_loai_thong_ke = 'QUY' THEN
+        SET v_ngay_bat_dau = DATE(CONCAT(p_nam, '-', (p_quy - 1) * 3 + 1, '-01'));
+        SET v_ngay_ket_thuc = LAST_DAY(DATE_ADD(v_ngay_bat_dau, INTERVAL 2 MONTH));
+
+        SELECT
+            CONCAT('Tháng ', MONTH(hd.ngay_hoa_don)) as nhan,
+            SUM(hd.thanh_tien) as doanh_thu,
+            COUNT(hd.ma_hoa_don) as so_hoa_don,
+            'THANG' as loai_thong_ke
+        FROM hoa_don hd
+        WHERE hd.trang_thai = 'DA_THANH_TOAN'
+          AND DATE(hd.ngay_hoa_don) BETWEEN v_ngay_bat_dau AND v_ngay_ket_thuc
+        GROUP BY MONTH(hd.ngay_hoa_don)
+        ORDER BY MONTH(hd.ngay_hoa_don);
+
+    ELSEIF p_loai_thong_ke = 'NAM' THEN
+        SET v_ngay_bat_dau = DATE(CONCAT(p_nam, '-01-01'));
+        SET v_ngay_ket_thuc = DATE(CONCAT(p_nam, '-12-31'));
+
+        SELECT
+            CONCAT('Tháng ', MONTH(hd.ngay_hoa_don)) as nhan,
+            SUM(hd.thanh_tien) as doanh_thu,
+            COUNT(hd.ma_hoa_don) as so_hoa_don,
+            'THANG' as loai_thong_ke
+        FROM hoa_don hd
+        WHERE hd.trang_thai = 'DA_THANH_TOAN'
+          AND YEAR(hd.ngay_hoa_don) = p_nam
+        GROUP BY MONTH(hd.ngay_hoa_don)
+        ORDER BY MONTH(hd.ngay_hoa_don);
+    END IF;
+END$$
+
+-- Stored Procedure: Doanh thu theo từng bác sĩ
+CREATE PROCEDURE sp_DoanhThuTheoBacSi(
+    IN p_loai_thong_ke VARCHAR(10), -- 'THANG', 'QUY', 'NAM'
+    IN p_nam INT,
+    IN p_thang INT ,
+    IN p_quy INT ,
+    IN p_ma_bac_si INT  -- NULL = tất cả bác sĩ
+)
+BEGIN
+    DECLARE v_ngay_bat_dau DATE;
+    DECLARE v_ngay_ket_thuc DATE;
+
+    -- Xác định khoảng thời gian
+    IF p_loai_thong_ke = 'THANG' THEN
+        SET v_ngay_bat_dau = DATE(CONCAT(p_nam, '-', LPAD(p_thang, 2, '0'), '-01'));
+        SET v_ngay_ket_thuc = LAST_DAY(v_ngay_bat_dau);
+    ELSEIF p_loai_thong_ke = 'QUY' THEN
+        SET v_ngay_bat_dau = DATE(CONCAT(p_nam, '-', (p_quy - 1) * 3 + 1, '-01'));
+        SET v_ngay_ket_thuc = LAST_DAY(DATE_ADD(v_ngay_bat_dau, INTERVAL 2 MONTH));
+    ELSEIF p_loai_thong_ke = 'NAM' THEN
+        SET v_ngay_bat_dau = DATE(CONCAT(p_nam, '-01-01'));
+        SET v_ngay_ket_thuc = DATE(CONCAT(p_nam, '-12-31'));
+    END IF;
+
+    SELECT
+        bs.ma_bac_si,
+        nd.ho_ten as ten_bac_si,
+        bs.chuyen_khoa,
+        CASE
+            WHEN p_loai_thong_ke = 'THANG' THEN DATE_FORMAT(DATE(hd.ngay_hoa_don), '%Y-%m-%d')
+            WHEN p_loai_thong_ke = 'QUY' THEN CONCAT('Tháng ', MONTH(hd.ngay_hoa_don))
+            WHEN p_loai_thong_ke = 'NAM' THEN CONCAT('Tháng ', MONTH(hd.ngay_hoa_don))
+            END as nhan,
+        SUM(hd.thanh_tien) as doanh_thu,
+        COUNT(hd.ma_hoa_don) as so_hoa_don,
+        p_loai_thong_ke as loai_thong_ke
+    FROM bac_si bs
+             INNER JOIN nguoi_dung nd ON bs.ma_nguoi_dung = nd.ma_nguoi_dung
+             INNER JOIN lich_hen lh ON bs.ma_bac_si = lh.ma_bac_si
+             INNER JOIN hoa_don hd ON lh.ma_lich_hen = hd.ma_lich_hen
+    WHERE hd.trang_thai = 'DA_THANH_TOAN'
+      AND DATE(hd.ngay_hoa_don) BETWEEN v_ngay_bat_dau AND v_ngay_ket_thuc
+      AND (p_ma_bac_si IS NULL OR bs.ma_bac_si = p_ma_bac_si)
+      AND bs.trang_thai_lam_viec = TRUE
+    GROUP BY
+        bs.ma_bac_si,
+        nd.ho_ten,
+        bs.chuyen_khoa,
+        CASE
+            WHEN p_loai_thong_ke = 'THANG' THEN DATE(hd.ngay_hoa_don)
+            WHEN p_loai_thong_ke = 'QUY' THEN MONTH(hd.ngay_hoa_don)
+            WHEN p_loai_thong_ke = 'NAM' THEN MONTH(hd.ngay_hoa_don)
+            END
+    ORDER BY doanh_thu DESC, bs.ma_bac_si;
+END$$
+
+DELIMITER ;
