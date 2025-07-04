@@ -1,6 +1,7 @@
 package com.example.ClinicDentail.DTO;
 
 import com.example.ClinicDentail.Enity.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.math.BigDecimal;
 import java.util.stream.Collectors;
@@ -48,8 +50,12 @@ public class KhamBenhDTO {
     private String chanDoan;
     private String ghiChuDieuTri;
     private LocalDate ngayTaiKham;
+    private LocalTime gioBatDau;
+    private LocalTime gioKetThuc;
     private List<DichVuDTO> danhSachDichVu;
 
+
+    private String ghiChu;
     // Thông tin đơn thuốc
     private List<ChiTietThuocDTO> danhSachThuoc;
     private String ghiChuDonThuoc;

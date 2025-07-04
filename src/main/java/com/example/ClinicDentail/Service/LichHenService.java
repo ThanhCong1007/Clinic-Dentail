@@ -99,12 +99,12 @@ public class LichHenService {
         // Validate appointment status
         TrangThaiLichHen trangThai = kiemTraTranngThaiLichHen(appointmentRequest.getMaTrangThai());
 
-        // Validate appointment time
+        // Xác thực thời gian hẹn
         validateAppointmentTime(appointmentRequest.getNgayHen(),
                 appointmentRequest.getGioBatDau(),
                 appointmentRequest.getGioKetThuc());
 
-        // Check for conflicts
+        // Kiểm tra xung đột lich hẹn
         checkDoctorAvailability(bacSi.getMaBacSi(),
                 appointmentRequest.getNgayHen(),
                 appointmentRequest.getGioBatDau(),
@@ -121,7 +121,56 @@ public class LichHenService {
 
         return new LichHenDTO(savedLichHen);
     }
+    public LichHen taoLichHenMoi(KhamBenhDTO dto,BenhNhan benhNhan) {
+        try {
+            // Kiểm tra thông tin bắt buộc
+            if (dto.getNgayTaiKham() == null || dto.getGioBatDau() == null || dto.getGioKetThuc() == null) {
+                throw new RuntimeException("Thiếu thông tin bắt buộc: ngày tái khám, giờ bắt đầu hoặc giờ kết thúc");
+            }
+            // Tìm bác sĩ
+            BacSi bacSi = bacSiRepository.findById(dto.getMaBacSi())
+                    .orElseThrow(()-> new RuntimeException("Không tìm thấy bác sĩ với mã: " + dto.getMaBacSi()));
 
+            // Lấy trạng thái mặc định
+            TrangThaiLichHen trangThai = trangThaiLichHenRepository.findById(1)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái mặc định"));
+            // Xác thực thời gian hẹn
+            validateAppointmentTime(dto.getNgayTaiKham(),
+                    dto.getGioBatDau(),
+                    dto.getGioKetThuc());
+            //Kiểm tra xung đột lich hẹn
+            checkDoctorAvailability(bacSi.getMaBacSi(),
+                    dto.getNgayTaiKham(),
+                    dto.getGioBatDau(),
+                    dto.getGioKetThuc());
+            // Tạo lịch hẹn mới
+            LichHen lichHen = new LichHen();
+            lichHen.setBenhNhan(benhNhan);
+            lichHen.setBacSi(bacSi);
+            lichHen.setNgayHen(dto.getNgayTaiKham());
+            lichHen.setGioBatDau(dto.getGioBatDau());
+            lichHen.setGioKetThuc(dto.getGioKetThuc());
+            lichHen.setTrangThai(trangThai);
+
+            // Thiết lập lý do khám
+            if (dto.getGhiChu() != null && !dto.getGhiChu().isBlank()) {
+                lichHen.setLydo(dto.getGhiChu().trim());
+            } else if (dto.getChanDoan() != null && !dto.getChanDoan().isBlank()) {
+                lichHen.setLydo("Tái khám: " + dto.getChanDoan().trim());
+            } else if (dto.getLyDoKham() != null && !dto.getLyDoKham().isBlank()) {
+                lichHen.setLydo(dto.getLyDoKham().trim());
+            } else {
+                lichHen.setLydo("Lịch hẹn tái khám");
+            }
+
+            lichHen.setGhiChu(dto.getGhiChu());
+
+            return lichHenRepository.save(lichHen);
+        } catch (Exception e) {
+            logger.error("Lỗi khi tạo lịch hẹn mới: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi tạo lịch hẹn mới: " + e.getMessage(), e);
+        }
+    }
     /**
      * Lấy danh sách lịch hẹn theo mã bệnh nhân
      */

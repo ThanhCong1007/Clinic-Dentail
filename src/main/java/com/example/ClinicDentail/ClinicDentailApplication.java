@@ -8,6 +8,7 @@ public class ClinicDentailApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ClinicDentailApplication.class, args);
+		System.out.println(java.util.TimeZone.getDefault());
 	}
 
 }

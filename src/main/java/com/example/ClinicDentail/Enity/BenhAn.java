@@ -1,5 +1,6 @@
 package com.example.ClinicDentail.Enity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -45,6 +46,7 @@ public class BenhAn {
     private LocalDate ngayTaiKham;
 
     @Column(name = "ngay_tao")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime ngayTao;
 
     @PrePersist

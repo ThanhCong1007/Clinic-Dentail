@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,7 +70,8 @@ public class ThamKhamService {
 
             // 6. Cập nhật trạng thái hoàn thành lịch hẹn
             hoanThanhLichHenNeuCo(lichHen);
-
+            // Nếu có lịch hẹn mới, tạo lịch hẹn mới
+            LichHen lichHenMoi = taoLichHenMoi(dto,benhNhan);
             // 7. Trả về kết quả DTO
             return taoKetQuaTraVe(benhAn, donThuoc, hoaDon);
 
@@ -81,24 +83,24 @@ public class ThamKhamService {
     public BenhNhan layHoacTaoBenhNhan(KhamBenhDTO dto) {
         BenhNhan benhNhan = null;
 
+        // 1. Tìm theo mã bệnh nhân nếu có
         if (dto.getMaBenhNhan() != null) {
-            try {
-                benhNhan = benhNhanService.layThongTinBenhNhan(dto);
-            } catch (EntityNotFoundException e) {
-                logger.warn("Không tìm thấy bệnh nhân mã: {}", dto.getMaBenhNhan());
-            }
+            benhNhan = benhNhanRepository.findById(dto.getMaBenhNhan()).orElse(null);
         }
 
+        // 2. Nếu chưa tìm được và có số điện thoại, tìm tiếp theo số điện thoại
         if (benhNhan == null && dto.getSoDienThoai() != null) {
-            benhNhan = benhNhanService.timBenhNhanTheoSoDienThoai(dto.getSoDienThoai());
+            benhNhan = benhNhanRepository.findBySoDienThoai(dto.getSoDienThoai()).orElse(null);
         }
 
+        // 3. Nếu vẫn không tìm được, tạo mới
         if (benhNhan == null) {
             benhNhan = benhNhanService.taoBenhNhanMoi(dto);
         }
 
         return benhNhan;
     }
+
 
     public LichHen capNhatTrangThaiLichHenNeuCo(Integer maLichHen) {
         if (maLichHen == null) {
@@ -137,6 +139,16 @@ public class ThamKhamService {
             return hoaDonService.taoHoaDon(dto, benhNhan, lichHen, donThuoc, benhAn);
         } catch (Exception e) {
             throw new RuntimeException("Lỗi tạo hóa đơn: " + e.getMessage(), e);
+        }
+    }
+    public LichHen taoLichHenMoi( KhamBenhDTO dto,BenhNhan benhNhan) {
+        if (dto.getNgayTaiKham() == null || dto.getGioBatDau() == null || dto.getGioKetThuc() == null) {
+            return null;
+        }
+        try {
+            return lichHenService.taoLichHenMoi(dto,benhNhan);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi tạo lịch hẹn mới: " + e.getMessage(), e);
         }
     }
 

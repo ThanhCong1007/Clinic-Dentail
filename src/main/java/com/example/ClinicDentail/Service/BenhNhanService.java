@@ -81,7 +81,9 @@ public class BenhNhanService {
         if (dto.getSoDienThoai() == null || dto.getSoDienThoai().trim().isEmpty()) {
             throw new IllegalArgumentException("Số điện thoại là thông tin bắt buộc khi tạo bệnh nhân mới");
         }
-
+        if (nguoiDungRepository.existsByEmail(dto.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại trong hệ thống");
+        }
         try {
             // 1. Tạo tài khoản người dùng với vai trò bệnh nhân
             VaiTro vaiTroBenhNhan = vaiTroRepository.findByTenVaiTro("USER")
