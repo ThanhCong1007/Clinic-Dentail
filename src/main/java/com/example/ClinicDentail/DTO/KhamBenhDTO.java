@@ -60,6 +60,8 @@ public class KhamBenhDTO {
     private List<ChiTietThuocDTO> danhSachThuoc;
     private String ghiChuDonThuoc;
 
+    private List<AnhBenhAnDTO> danhSachAnhBenhAn;
+
     // Thông tin phản hồi
     private Integer maBenhAn;
     private Integer maDonThuoc;
@@ -67,7 +69,6 @@ public class KhamBenhDTO {
     private BigDecimal tongTien;
     private String trangThaiKham;
     private LocalDateTime ngayKham;
-
     // DTO lồng bên trong
     @Data
     @NoArgsConstructor

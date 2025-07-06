@@ -35,7 +35,7 @@ public class UserDTO {
     private String tienSuBenh;
     private String diUng;
     private Integer tuoi; // Tính từ ngày sinh
-
+    private String imageUrl;
     // Constructor mặc định
     public UserDTO() {}
 
@@ -48,13 +48,16 @@ public class UserDTO {
         this.soDienThoai = nguoiDung.getSoDienThoai();
         this.trangThaiHoatDong = nguoiDung.getTrangThaiHoatDong();
         this.ngayTao = nguoiDung.getNgayTao();
+        this.imageUrl = nguoiDung.getImageUrl() != null ? Url(nguoiDung.getImageUrl()) : null;
 
         if (nguoiDung.getVaiTro() != null) {
             this.maVaiTro = nguoiDung.getVaiTro().getMaVaiTro();
             this.tenVaiTro = nguoiDung.getVaiTro().getTenVaiTro();
         }
     }
-
+    private String Url(String filePath) {
+        return "http://localhost:8080/uploads/" + filePath;
+    }
     // Constructor từ BacSi entity
     public UserDTO(BacSi bacSi) {
         this(bacSi.getNguoiDung()); // Gọi constructor trên

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -49,6 +50,8 @@ public class BenhAn {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime ngayTao;
 
+    @OneToMany(mappedBy = "benhAn", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnhBenhAn> anhBenhAnList = new ArrayList<>();
     @PrePersist
     protected void onCreate() {
         ngayTao = LocalDateTime.now();

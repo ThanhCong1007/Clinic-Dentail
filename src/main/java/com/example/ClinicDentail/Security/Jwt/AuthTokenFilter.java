@@ -39,7 +39,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             "/webjars/",
             "/api/vnpay/",
             "/api/hoa-don/",
-            "/favicon.ico"
+            "/favicon.ico",
+            "/uploads/"
     );
 
     @Override

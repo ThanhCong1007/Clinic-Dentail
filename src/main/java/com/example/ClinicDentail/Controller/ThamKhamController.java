@@ -10,10 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -34,18 +37,35 @@ public class ThamKhamController {
      * @param dto
      * @return
      */
-    @PostMapping("/kham")
-    public ResponseEntity<?> khamBenh(@RequestBody KhamBenhDTO dto) {
+    @PostMapping(value = "/kham", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> khamBenh(
+            @RequestPart("data") KhamBenhDTO dto,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         try {
+            // Gán danh sách file vào DTO
+            if (images != null && !images.isEmpty()) {
+                List<AnhBenhAnDTO> danhSachAnhBenhAn = new ArrayList<>();
+                for (int i = 0; i < images.size(); i++) {
+                    AnhBenhAnDTO anhDTO = new AnhBenhAnDTO();
+                    anhDTO.setFile(images.get(i));
+
+                    // Nếu có mô tả được gửi kèm trong DTO
+                    if (dto.getDanhSachAnhBenhAn() != null &&
+                            i < dto.getDanhSachAnhBenhAn().size()) {
+                        anhDTO.setMoTa(dto.getDanhSachAnhBenhAn().get(i).getMoTa());
+                    }
+
+                    danhSachAnhBenhAn.add(anhDTO);
+                }
+                dto.setDanhSachAnhBenhAn(danhSachAnhBenhAn);
+            }
 
             KhamBenhDTO result = thamKhamService.khamBenh(dto);
             return ResponseEntity.ok(result);
 
         } catch (RuntimeException e) {
-            // Log lỗi để debug
             logger.error("Lỗi khi khám bệnh: {}", e.getMessage(), e);
 
-            // Trả về message lỗi chi tiết cho client
             String errorMessage = e.getMessage();
             if (errorMessage == null || errorMessage.trim().isEmpty()) {
                 errorMessage = "Lỗi: Có lỗi không xác định trong quá trình khám bệnh!";
@@ -55,7 +75,6 @@ public class ThamKhamController {
                     .body(new MessageResponse(errorMessage));
 
         } catch (Exception e) {
-            // Log lỗi hệ thống
             logger.error("Lỗi hệ thống khi khám bệnh: {}", e.getMessage(), e);
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

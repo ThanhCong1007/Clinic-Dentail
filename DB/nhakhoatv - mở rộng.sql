@@ -17,6 +17,7 @@ CREATE TABLE nguoi_dung (
     email VARCHAR(100) NOT NULL UNIQUE,
     ho_ten VARCHAR(100) NOT NULL,
     so_dien_thoai VARCHAR(20),
+    image_url VARCHAR(255) NOT NULL,
     trang_thai_hoat_dong BOOLEAN DEFAULT TRUE,
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ma_vai_tro) REFERENCES vai_tro(ma_vai_tro)
@@ -108,6 +109,15 @@ CREATE TABLE benh_an (
     FOREIGN KEY (ma_lich_hen) REFERENCES lich_hen(ma_lich_hen),
     FOREIGN KEY (ma_benh_nhan) REFERENCES benh_nhan(ma_benh_nhan),
     FOREIGN KEY (ma_bac_si) REFERENCES bac_si(ma_bac_si)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE anh_benh_an (
+ma_anh INT AUTO_INCREMENT PRIMARY KEY,
+ma_benh_an INT NOT NULL,
+url VARCHAR(255) NOT NULL,       -- Đường dẫn ảnh (tốt nhất là URL tuyệt đối)
+mo_ta TEXT,                      -- (Tùy chọn) mô tả ảnh: chụp X-quang, nội soi, v.v.
+ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (ma_benh_an) REFERENCES benh_an(ma_benh_an) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE benh_an_dich_vu (

@@ -3,6 +3,7 @@ package com.example.ClinicDentail.Service;
 import com.example.ClinicDentail.DTO.*;
 import com.example.ClinicDentail.Enity.*;
 import com.example.ClinicDentail.Repository.*;
+import com.example.ClinicDentail.Repository.AnhBenhAnRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -50,6 +52,11 @@ public class ThamKhamService {
     @Autowired
     private ChiTietDonThuocRepository chiTietDonThuocRepository;
 
+    @Autowired
+    private AnhBenhAnRepository anhBenhAnRepository;
+    @Autowired
+    private AnhBenhAnService anhBenhAnService;
+
     @Transactional
     public KhamBenhDTO khamBenh(KhamBenhDTO dto) {
         try {
@@ -65,14 +72,24 @@ public class ThamKhamService {
             // 4. Tạo đơn thuốc nếu có
             DonThuoc donThuoc = taoDonThuocNeuCo(dto, benhAn);
 
-            // 5. Tạo hóa đơn
+            // 5. Lưu ảnh bệnh án nếu có
+            if (dto.getDanhSachAnhBenhAn() != null && !dto.getDanhSachAnhBenhAn().isEmpty()) {
+                for (AnhBenhAnDTO anhDTO : dto.getDanhSachAnhBenhAn()) {
+                    anhDTO.setMaBenhAn(benhAn.getMaBenhAn());
+                    AnhBenhAn anhBenhAn = anhBenhAnService.luuAnhBenhAn(anhDTO, benhAn);
+                }
+            }
+
+            // 6. Tạo hóa đơn
             HoaDon hoaDon = taoHoaDon(dto, benhNhan, lichHen, donThuoc, benhAn);
 
-            // 6. Cập nhật trạng thái hoàn thành lịch hẹn
+            // 7. Cập nhật trạng thái hoàn thành lịch hẹn
             hoanThanhLichHenNeuCo(lichHen);
-            // Nếu có lịch hẹn mới, tạo lịch hẹn mới
-            LichHen lichHenMoi = taoLichHenMoi(dto,benhNhan);
-            // 7. Trả về kết quả DTO
+
+            // 8. Nếu có lịch hẹn mới, tạo lịch hẹn mới
+            LichHen lichHenMoi = taoLichHenMoi(dto, benhNhan);
+
+            // 9. Trả về kết quả DTO
             return taoKetQuaTraVe(benhAn, donThuoc, hoaDon);
 
         } catch (Exception e) {

@@ -45,6 +45,9 @@ public class NguoiDung {
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
 
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
+
     @PrePersist
     protected void onCreate() {
         ngayTao = LocalDateTime.now();
