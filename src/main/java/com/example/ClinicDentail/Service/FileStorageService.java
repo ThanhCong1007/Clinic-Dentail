@@ -1,9 +1,11 @@
 package com.example.ClinicDentail.Service;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,8 +15,13 @@ import java.nio.file.StandardCopyOption;
 @Service
 public class FileStorageService {
 
-    private final String uploadDir = "uploads/benh-an"; // Thư mục lưu ảnh
+    private final String uploadDir = new File("src/main/resources/static/uploads/benh-an").getAbsolutePath();
+    @Value("${app.base-url}")
+    private String baseUrl;
 
+    private String getFullImageUrl(String filePath) {
+        return baseUrl  + filePath;
+    }
     @PostConstruct
     public void init() {
         try {
@@ -26,40 +33,36 @@ public class FileStorageService {
 
     public String storeFile(MultipartFile file, Integer maBenhAn) {
         try {
-            // Validate file
             if (file.isEmpty()) {
                 throw new IllegalArgumentException("File không được rỗng");
             }
 
-            // Validate file type
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 throw new IllegalArgumentException("Chỉ chấp nhận file ảnh");
             }
 
-            // Tạo tên file unique
             String originalFilename = file.getOriginalFilename();
             String fileExtension = "";
             if (originalFilename != null && originalFilename.contains(".")) {
                 fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
 
-            String fileName = "benh_an_" + maBenhAn + "_" +
-                    System.currentTimeMillis() + fileExtension;
+            String fileName = "benh_an_" + maBenhAn + "_" + System.currentTimeMillis() + fileExtension;
 
-            // Tạo đường dẫn đầy đủ
-            Path targetLocation = Paths.get(uploadDir).resolve(fileName);
-
-            // Lưu file
+            // Đường dẫn thực tế trên ổ đĩa
+            Path targetLocation = Paths.get("src/main/resources/static/uploads/benh-an").resolve(fileName);
+            Files.createDirectories(targetLocation.getParent());
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            // Trả về relative path để lưu vào DB
-            return "benh-an/" + fileName;
+            // Trả về URL đầy đủ để client sử dụng
+            return getFullImageUrl("benh-an/" + fileName);
 
         } catch (IOException e) {
             throw new RuntimeException("Lỗi khi lưu file: " + file.getOriginalFilename(), e);
         }
     }
+
 
     public void deleteFile(String filePath) {
         try {

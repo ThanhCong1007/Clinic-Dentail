@@ -1,5 +1,6 @@
 package com.example.ClinicDentail.Service;
 
+import com.example.ClinicDentail.DTO.AnhBenhAnDTO;
 import com.example.ClinicDentail.DTO.BenhAnDTO;
 import com.example.ClinicDentail.DTO.DichVuDTO;
 import com.example.ClinicDentail.DTO.KhamBenhDTO;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BenhAnService {
@@ -43,6 +45,8 @@ public class BenhAnService {
 
     @Autowired
     private BenhNhanRepository benhNhanRepository;
+    @Autowired
+    private AnhBenhAnRepository anhBenhAnRepository;
 
     public BenhAn layBenhAnHienTai(Integer maBenhAn) {
         logger.debug("Tìm kiếm bệnh án với mã: {}", maBenhAn);
@@ -169,7 +173,7 @@ public class BenhAnService {
     }
 
     /**
-     * Lấy chi tiết bệnh án cho bác sĩ
+     * Lấy chi tiết bệnh án
      */
     public BenhAnDTO getChiTietBenhAnChoBacSi(Integer maBenhAn) {
         BenhAn benhAn = benhAnRepository.findById(maBenhAn)
@@ -180,14 +184,25 @@ public class BenhAnService {
 
         // Lấy đơn thuốc
         DonThuoc donThuoc = donThuocRepository.findByBenhAn_MaBenhAn(maBenhAn).orElse(null);
-
+        List<AnhBenhAn> anhBenhAn = anhBenhAnRepository.findByBenhAn(benhAn);
         // Lấy chi tiết thuốc nếu có đơn thuốc
         List<ChiTietDonThuoc> danhSachThuoc = new ArrayList<>();
         if (donThuoc != null) {
             danhSachThuoc = chiTietDonThuocRepository.findByDonThuoc_MaDonThuoc(donThuoc.getMaDonThuoc());
         }
 
-        return new BenhAnDTO(benhAn, danhSachDichVu, donThuoc, danhSachThuoc);
+        // Khởi tạo DTO
+        BenhAnDTO dto = new BenhAnDTO(benhAn, danhSachDichVu, donThuoc, danhSachThuoc);
+
+        // Gán thêm danh sách ảnh vào DTO
+        if (anhBenhAn != null && !anhBenhAn.isEmpty()) {
+            List<AnhBenhAnDTO> danhSachAnh = anhBenhAn.stream()
+                    .map(AnhBenhAnDTO::new)
+                    .collect(Collectors.toList());
+            dto.setDanhSachAnhBenhAn(danhSachAnh);
+        }
+
+        return dto;
     }
 
     /**

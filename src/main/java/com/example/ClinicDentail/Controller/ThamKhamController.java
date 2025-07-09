@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +39,7 @@ public class ThamKhamController {
      * @return
      */
     @PostMapping(value = "/kham", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
     public ResponseEntity<?> khamBenh(
             @RequestPart("data") KhamBenhDTO dto,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
@@ -85,12 +87,35 @@ public class ThamKhamController {
     /**
      * Cập nhật bệnh án
      */
-    @PutMapping("/benh-an/{maBenhAn}")
+    @PutMapping(value = "/benh-an/{maBenhAn}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
-    public ResponseEntity<?> capNhatBenhAn(@PathVariable Integer maBenhAn, @RequestBody BenhAnDTO dto) {
+    @Transactional
+    public ResponseEntity<?> capNhatBenhAn(
+            @PathVariable Integer maBenhAn,
+            @RequestPart("data") BenhAnDTO dto,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         try {
             logger.info("Bắt đầu cập nhật bệnh án mã: {}", maBenhAn);
 
+            // Xử lý hình ảnh tương tự như hàm khám bệnh
+            if (images != null && !images.isEmpty()) {
+                List<AnhBenhAnDTO> danhSachAnhBenhAn = new ArrayList<>();
+                for (int i = 0; i < images.size(); i++) {
+                    AnhBenhAnDTO anhDTO = new AnhBenhAnDTO();
+                    anhDTO.setFile(images.get(i));
+
+                    // Nếu có mô tả được gửi kèm trong DTO
+                    if (dto.getDanhSachAnhBenhAn() != null &&
+                            i < dto.getDanhSachAnhBenhAn().size()) {
+                        anhDTO.setMoTa(dto.getDanhSachAnhBenhAn().get(i).getMoTa());
+                    }
+
+                    danhSachAnhBenhAn.add(anhDTO);
+                }
+                dto.setDanhSachAnhBenhAn(danhSachAnhBenhAn);
+            }
+
+            // Gọi service với DTO đã được xử lý
             BenhAnDTO result = thamKhamService.capNhatBenhAn(maBenhAn, dto);
 
             logger.info("Cập nhật bệnh án thành công mã: {}", maBenhAn);
@@ -129,8 +154,6 @@ public class ThamKhamController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-
-
     /** Lấy thông tin lịch hẹn
      *
      * @param maLichHen
@@ -192,35 +215,5 @@ public class ThamKhamController {
         }
     }
 
-    /**
-     * Lấy danh sách bệnh án của bệnh nhân
-     */
-    @GetMapping("/benh-nhan/{maBenhNhan}/benh-an")
-    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
-    public ResponseEntity<?> getBenhAnByBenhNhan(@PathVariable Integer maBenhNhan) {
-        try {
-            List<BenhAnDTO> result = thamKhamService.getBenhAnByBenhNhan(maBenhNhan);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
-        }
-    }
-
-    /**
-     * chi tiet bệnh án
-     * @param maBenhAn
-     * @return
-     */
-    @GetMapping("/benh-an/{maBenhAn}")
-    @PreAuthorize("hasRole('BACSI') or hasRole('ADMIN')")
-    public ResponseEntity<?> getChiTietBenhAn(@PathVariable Integer maBenhAn) {
-        try {
-            BenhAnDTO result = thamKhamService.getChiTietBenhAn(maBenhAn);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-//            e.printStackTrace(); // log lỗi rõ
-            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
-        }
-    }
 
 }

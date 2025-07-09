@@ -3,6 +3,7 @@ package com.example.ClinicDentail.Controller;
 
 import com.example.ClinicDentail.DTO.BenhAnDTO;
 import com.example.ClinicDentail.Service.BenhAnService;
+import com.example.ClinicDentail.payload.request.MessageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,22 +61,11 @@ public class BenhAnController {
         try {
             BenhAnDTO benhAnChiTiet = benhAnService.getChiTietBenhAnChoBacSi(maBenhAn);
 
-            return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "message", "Lấy chi tiết bệnh án thành công",
-                    "data", benhAnChiTiet
-            ));
+            return ResponseEntity.ok(benhAnChiTiet);
 
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", e.getMessage()
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                    "success", false,
-                    "message", "Lỗi hệ thống: " + e.getMessage()
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Lỗi khi lấy danh sách bênh án: " + e.getMessage()));
         }
     }
 
