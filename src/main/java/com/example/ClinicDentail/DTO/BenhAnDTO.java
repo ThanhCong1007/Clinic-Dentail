@@ -51,6 +51,7 @@ public class BenhAnDTO {
 
     // Lịch hẹn mới (sau khám nếu có)
     private List<DichVuDTO> danhSachDichVu;
+    private List<AnhBenhAnDTO> danhSachAnhBenhAn;
     private LocalDate ngayHenMoi;
     private LocalTime gioBatDauMoi;
     private LocalTime gioKetThucMoi;

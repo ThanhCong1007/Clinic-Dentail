@@ -186,8 +186,18 @@ public class ThamKhamService {
             BenhAn benhAn = layBenhAn(maBenhAn);
 
             capNhatThongTinKhamBenh(benhAn, dto);
+
             capNhatBenhNhan(benhAn, dto);
+
             DonThuoc donThuoc = capNhatDonThuocNeuCo(benhAn, dto);
+
+            if (dto.getDanhSachAnhBenhAn() != null && !dto.getDanhSachAnhBenhAn().isEmpty()) {
+                for (AnhBenhAnDTO anhDTO : dto.getDanhSachAnhBenhAn()) {
+                    anhDTO.setMaBenhAn(benhAn.getMaBenhAn());
+                    AnhBenhAn anhBenhAn = anhBenhAnService.luuAnhBenhAn(anhDTO, benhAn);
+                }
+            }
+
             LichHen lichHenMoi = taoLichHenMoiNeuCo(benhAn, dto);
 
             BenhAn benhAnDaCapNhat = benhAnRepository.save(benhAn);
