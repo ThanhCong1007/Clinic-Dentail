@@ -2,14 +2,12 @@ package com.example.ClinicDentail.Service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -100,6 +98,55 @@ public class SMSService {
         } catch (Exception e) {
             logger.error("Exception khi gửi SMS: {}", e.getMessage(), e);
             throw new RuntimeException("Không thể gửi SMS thông báo: " + e.getMessage(), e);
+        }
+    }
+    /**
+     * Gửi OTP để đặt lại mật khẩu
+     */
+    public void guiOTPQuenMatKhau(String soDienThoai, String otp) {
+        String noiDungTinNhan = String.format(
+                "Mã OTP để đặt lại mật khẩu của bạn là: %s. " +
+                        "Mã này có hiệu lực trong 5 phút. " +
+                        "Không chia sẻ mã này với bất kỳ ai.", otp
+        );
+        guiTinNhanDonGian(soDienThoai, noiDungTinNhan);
+    }
+
+    /**
+     * Hàm tái sử dụng nội bộ để gửi tin nhắn đơn giản
+     */
+    private void guiTinNhanDonGian(String soDienThoai, String noiDungTinNhan) {
+        try {
+            String soDienThoaiFormatted = chuyenDoiSoDienThoai(soDienThoai);
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("recipients", Collections.singletonList(soDienThoaiFormatted));
+            requestBody.put("message", noiDungTinNhan);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("x-api-key", SMS_API_KEY);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    SMS_API_URL,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                logger.info("SMS đã được gửi đến {}. Nội dung: {}", soDienThoai, noiDungTinNhan);
+            } else {
+                logger.error("Lỗi khi gửi SMS. Status: {}, Response: {}",
+                        response.getStatusCode(), response.getBody());
+                throw new RuntimeException("Lỗi khi gửi SMS: " + response.getStatusCode());
+            }
+
+        } catch (Exception e) {
+            logger.error("Exception khi gửi SMS: {}", e.getMessage(), e);
+            throw new RuntimeException("Không thể gửi SMS: " + e.getMessage(), e);
         }
     }
 }

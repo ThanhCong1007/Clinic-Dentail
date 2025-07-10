@@ -1,6 +1,11 @@
 package com.example.ClinicDentail.Controller;
 
+import com.example.ClinicDentail.DTO.QuenMatKhauDTO;
+import com.example.ClinicDentail.Enity.NguoiDung;
+import com.example.ClinicDentail.Repository.NguoiDungRepository;
 import com.example.ClinicDentail.Service.AuthService;
+import com.example.ClinicDentail.Service.OTPService;
+import com.example.ClinicDentail.Service.SMSService;
 import com.example.ClinicDentail.payload.request.*;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -8,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,6 +28,14 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+    @Autowired
+    private NguoiDungRepository nguoiDungRepository;
+    @Autowired
+    private OTPService otpService;
+    @Autowired
+    private SMSService smsService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Xử lý yêu cầu đăng nhập
@@ -122,6 +136,60 @@ public class AuthController {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponse("Lỗi đăng ký: " + e.getMessage()));
+        }
+    }
+    @PostMapping("/gui-otp")
+    public ResponseEntity<QuenMatKhauDTO> guiOTP(@RequestBody QuenMatKhauDTO request) {
+        try {
+            // Kiểm tra số điện thoại có tồn tại không
+            NguoiDung nguoiDung = nguoiDungRepository.findBySoDienThoai(request.getSoDienThoai());
+            if (nguoiDung == null) {
+                return ResponseEntity.badRequest()
+                        .body(new QuenMatKhauDTO(false, "Số điện thoại không tồn tại trong hệ thống"));
+            }
+
+            // Tạo và gửi OTP
+            String otp = otpService.taoOTP();
+            otpService.luuOTP(request.getSoDienThoai(), otp);
+            smsService.guiOTPQuenMatKhau(request.getSoDienThoai(), otp);
+
+            return ResponseEntity.ok(new QuenMatKhauDTO(true, "OTP đã được gửi đến số điện thoại của bạn"));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new QuenMatKhauDTO(false, "Lỗi khi gửi OTP: " + e.getMessage()));
+        }
+    }
+
+    // Bước 2: Xác thực OTP và đặt lại mật khẩu
+    @PostMapping("/dat-lai-mat-khau")
+    public ResponseEntity<QuenMatKhauDTO> datLaiMatKhau(@RequestBody QuenMatKhauDTO request) {
+        try {
+            // Kiểm tra OTP
+            if (!otpService.kiemTraOTP(request.getSoDienThoai(), request.getOtp())) {
+                return ResponseEntity.badRequest()
+                        .body(new QuenMatKhauDTO(false, "OTP không đúng hoặc đã hết hạn"));
+            }
+
+            // Tìm người dùng
+            NguoiDung nguoiDung = nguoiDungRepository.findBySoDienThoai(request.getSoDienThoai());
+            if (nguoiDung == null) {
+                return ResponseEntity.badRequest()
+                        .body(new QuenMatKhauDTO(false, "Số điện thoại không tồn tại"));
+            }
+
+            // Cập nhật mật khẩu mới
+            nguoiDung.setMatKhau(passwordEncoder.encode(request.getMatKhauMoi()));
+            nguoiDungRepository.save(nguoiDung);
+
+            // Xóa OTP đã sử dụng
+            otpService.xoaOTP(request.getSoDienThoai());
+
+            return ResponseEntity.ok(new QuenMatKhauDTO(true, "Mật khẩu đã được đặt lại thành công"));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new QuenMatKhauDTO(false, "Lỗi khi đặt lại mật khẩu: " + e.getMessage()));
         }
     }
 }

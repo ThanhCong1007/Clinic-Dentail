@@ -22,8 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
@@ -114,24 +116,15 @@ public class AdminService {
     /**
      * Lấy tất cả người dùng với phân trang
      */
-    public Map<String, Object> getAllUsers(int page, int size, String sortBy, String sortDir) {
-        logger.info("Getting all users - page: {}, size: {}, sortBy: {}, sortDir: {}",
-                page, size, sortBy, sortDir);
+    public List<UserDTO> getAllUsers() {
+        logger.info("Getting all users (no pagination)");
 
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        List<NguoiDung> users = nguoiDungRepository.findAll(Sort.by("maNguoiDung").ascending()); // Có thể sửa sort nếu muốn
+        List<UserDTO> userDTOs = users.stream()
+                .map(userDTOConverter::convertToDTO)
+                .collect(Collectors.toList());
 
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<NguoiDung> usersPage = nguoiDungRepository.findAll(pageable);
-        Page<UserDTO> userDTOPage = userDTOConverter.convertToDTO(usersPage);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("users", userDTOPage.getContent());
-        response.put("currentPage", userDTOPage.getNumber());
-        response.put("totalItems", userDTOPage.getTotalElements());
-        response.put("totalPages", userDTOPage.getTotalPages());
-
-        return response;
+        return userDTOs;
     }
 
     /**

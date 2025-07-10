@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -77,24 +78,15 @@ public class AdminController {
     }
 
     /**
-     * Xem tất cả người dùng (có phân trang)
-     * @param page trang hiện tại
-     * @param size số lượng item trên mỗi trang
-     * @param sortBy trường sắp xếp
-     * @param sortDir hướng sắp xếp (asc/desc)
-     * @return ResponseEntity chứa danh sách người dùng và thông tin phân trang
+     * Xem tất cả người dùng (không phân trang)
+     * @return ResponseEntity chứa danh sách người dùng
      */
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllUsers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "maNguoiDung") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
-
+    public ResponseEntity<?> getAllUsers() {
         try {
-            Map<String, Object> response = adminService.getAllUsers(page, size, sortBy, sortDir);
-            return ResponseEntity.ok(response);
+            List<UserDTO> users = adminService.getAllUsers();
+            return ResponseEntity.ok(users);
         } catch (Exception e) {
             logger.error("Error getting all users: {}", e.getMessage());
             return ResponseEntity
@@ -102,6 +94,7 @@ public class AdminController {
                     .body(new MessageResponse("Lỗi: Không thể lấy danh sách người dùng!"));
         }
     }
+
 
     /**
      * Xem danh sách người dùng theo vai trò
