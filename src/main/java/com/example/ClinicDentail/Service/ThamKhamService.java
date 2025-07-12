@@ -114,7 +114,8 @@ public class ThamKhamService {
         if (benhNhan == null) {
             benhNhan = benhNhanService.taoBenhNhanMoi(dto);
         }
-
+        benhNhan.setTienSuBenh(dto.getTienSuBenh());
+        benhNhan.setDiUng(dto.getDiUng());
         return benhNhan;
     }
 
