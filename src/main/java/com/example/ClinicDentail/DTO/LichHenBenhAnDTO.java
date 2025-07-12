@@ -28,6 +28,8 @@ public class LichHenBenhAnDTO {
     private String ghiChuLichHen;
     private String lyDoHen;
     private long thoiGian;
+    private String tienSuBenh;
+    private String diUng;
 
     // Thông tin bệnh án (nullable)
     private Integer maBenhAn;
@@ -56,6 +58,8 @@ public class LichHenBenhAnDTO {
             this.maBenhNhan = bn.getMaBenhNhan();
             this.tenBenhNhan = bn.getHoTen();
             this.soDienThoaiBenhNhan = bn.getSoDienThoai();
+            this.tienSuBenh = bn.getTienSuBenh();
+            this.diUng = bn.getDiUng();
         }
 
         // Bác sĩ
