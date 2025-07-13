@@ -30,7 +30,10 @@ public class LichHenBenhAnDTO {
     private long thoiGian;
     private String tienSuBenh;
     private String diUng;
-
+    private String diaChi;
+    private LocalDate ngaySinh;
+    private String gioiTinh;
+    private String Email;
     // Thông tin bệnh án (nullable)
     private Integer maBenhAn;
     private String lyDoKham;
@@ -60,6 +63,10 @@ public class LichHenBenhAnDTO {
             this.soDienThoaiBenhNhan = bn.getSoDienThoai();
             this.tienSuBenh = bn.getTienSuBenh();
             this.diUng = bn.getDiUng();
+            this.diaChi = bn.getDiaChi();
+            this.ngaySinh = bn.getNgaySinh();
+            this.Email = bn.getEmail();
+            this.gioiTinh= bn.getGioiTinh() != null ? bn.getGioiTinh().toString() : null;
         }
 
         // Bác sĩ
