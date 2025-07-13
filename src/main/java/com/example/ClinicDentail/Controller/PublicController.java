@@ -188,8 +188,15 @@ public class PublicController {
         while (currentTime.isBefore(endWork)) {
             LocalTime slotEnd = currentTime.plusMinutes(30);
 
-            // Bỏ qua giờ nghỉ trưa
+            // 👉 Bỏ qua giờ nghỉ trưa
             if (!(currentTime.isBefore(breakEnd) && slotEnd.isAfter(breakStart))) {
+
+                // 👉 Bỏ qua những slot đã qua nếu là hôm nay
+                if (date.equals(LocalDate.now()) && slotEnd.isBefore(LocalTime.now())) {
+                    currentTime = currentTime.plusMinutes(30);
+                    continue;
+                }
+
                 LocalTime finalCurrentTime = currentTime;
                 boolean isBooked = bookedAppointments.stream()
                         .anyMatch(app ->
@@ -211,6 +218,7 @@ public class PublicController {
 
         return availableSlots;
     }
+
 
     /**
      * Kiểm tra khung giờ có khả dụng không

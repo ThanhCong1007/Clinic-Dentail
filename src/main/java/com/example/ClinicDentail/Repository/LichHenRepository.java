@@ -51,22 +51,44 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
                                       @Param("ngayHen") LocalDate ngayHen,
                                       @Param("gioBatDau") LocalTime gioBatDau,
                                       @Param("gioKetThuc") LocalTime gioKetThuc);
+    //Theo ngày
+//    @Modifying
+//    @Transactional
+//    @Query(value = "UPDATE lich_hen SET ma_trang_thai = 5, ly_do = :lyDo " +
+//            "WHERE ngay_hen < CURRENT_DATE AND ma_trang_thai NOT IN (4, 5)",
+//            nativeQuery = true)
+//    int huyLichHenQuaHan(@Param("lyDo") String lyDo);
+//
+//
+//    // Query đếm số lượng
+//    @Query("SELECT COUNT(lh) FROM LichHen lh WHERE lh.ngayHen < CURRENT_DATE AND lh.trangThai.maTrangThai NOT IN (4, 5)")
+//    int demLichHenQuaHan();
 
+    // Lấy danh sách chi tiết
+
+//    @Query("SELECT lh FROM LichHen lh WHERE lh.ngayHen < CURRENT_DATE AND lh.trangThai.maTrangThai NOT IN (4, 5)")
+//    List<LichHen> findLichHenQuaHan();
+
+    //theo ngày và giờ
     @Modifying
     @Transactional
     @Query(value = "UPDATE lich_hen SET ma_trang_thai = 5, ly_do = :lyDo " +
-            "WHERE ngay_hen < CURRENT_DATE AND ma_trang_thai NOT IN (4, 5)",
+            "WHERE (ngay_hen < CURDATE() OR (ngay_hen = CURDATE() AND gio_ket_thuc < CURTIME())) " +
+            "AND ma_trang_thai NOT IN (4, 5)",
             nativeQuery = true)
     int huyLichHenQuaHan(@Param("lyDo") String lyDo);
 
-
-    // Query đếm số lượng
-    @Query("SELECT COUNT(lh) FROM LichHen lh WHERE lh.ngayHen < CURRENT_DATE AND lh.trangThai.maTrangThai NOT IN (4, 5)")
-    int demLichHenQuaHan();
-
-    // Lấy danh sách chi tiết
-    @Query("SELECT lh FROM LichHen lh WHERE lh.ngayHen < CURRENT_DATE AND lh.trangThai.maTrangThai NOT IN (4, 5)")
+    @Query("SELECT lh FROM LichHen lh " +
+            "WHERE (lh.ngayHen < CURRENT_DATE " +
+            "OR (lh.ngayHen = CURRENT_DATE AND lh.gioKetThuc < CURRENT_TIME)) " +
+            "AND lh.trangThai.maTrangThai NOT IN (4, 5)")
     List<LichHen> findLichHenQuaHan();
+
+    @Query("SELECT COUNT(lh) FROM LichHen lh " +
+            "WHERE (lh.ngayHen < CURRENT_DATE " +
+            "OR (lh.ngayHen = CURRENT_DATE AND lh.gioKetThuc < CURRENT_TIME)) " +
+            "AND lh.trangThai.maTrangThai NOT IN (4, 5)")
+    int demLichHenQuaHan();
 
     List<LichHen> findByBacSi_MaBacSiOrderByNgayTaoDesc(Integer bacSiMaBacSi);
 
