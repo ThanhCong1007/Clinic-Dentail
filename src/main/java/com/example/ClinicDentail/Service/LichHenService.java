@@ -110,13 +110,18 @@ public class LichHenService {
         // Create new appointment
         LichHen lichHen = createAppointment(benhNhan, bacSi, dichVu, trangThai, appointmentRequest);
 
-        // Save appointment
-        LichHen savedLichHen = lichHenRepository.save(lichHen);
-        logger.info("Appointment registered successfully for patient ID {}, doctor ID {}, on {} from {} to {}",
-                benhNhan.getMaBenhNhan(), bacSi.getMaBacSi(),
-                appointmentRequest.getNgayHen(), appointmentRequest.getGioBatDau(), appointmentRequest.getGioKetThuc());
+        boolean lh= lichHenRepository.existsByBenhNhan_MaBenhNhanAndNgayHen(appointmentRequest.getMaBenhNhan(),appointmentRequest.getNgayHen());
 
-        return new LichHenDTO(savedLichHen);
+        if(!lh) {
+            // Save appointment
+            LichHen savedLichHen = lichHenRepository.save(lichHen);
+            logger.info("Appointment registered successfully for patient ID {}, doctor ID {}, on {} from {} to {}",
+                    benhNhan.getMaBenhNhan(), bacSi.getMaBacSi(),
+                    appointmentRequest.getNgayHen(), appointmentRequest.getGioBatDau(), appointmentRequest.getGioKetThuc());
+
+            return new LichHenDTO(savedLichHen);
+        }else
+            throw new RuntimeException("Bạn đã có lịch hẹn vào ngày này!");
     }
 
     public LichHen taoLichHenMoi(KhamBenhDTO dto,BenhNhan benhNhan) {

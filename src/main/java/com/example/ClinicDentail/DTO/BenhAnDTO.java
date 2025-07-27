@@ -67,6 +67,7 @@ public class BenhAnDTO {
 
     // Thông báo kết quả xử lý nếu cần
     private String thongBao;
+    private boolean editable;
 
     // Constructor từ Entity (dùng cho hiển thị)
     public BenhAnDTO(BenhAn benhAn) {

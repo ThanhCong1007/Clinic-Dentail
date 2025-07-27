@@ -42,6 +42,7 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
      */
     List<LichHen> findByBacSi_MaBacSiAndNgayHenOrderByGioBatDauAsc(Integer maBacSi, LocalDate ngayHen);
 
+    boolean existsByBenhNhan_MaBenhNhanAndNgayHen(Integer maBenhNhan, LocalDate ngayHen);
     /**
      * Kiểm tra xung đột lịch hẹn
      */

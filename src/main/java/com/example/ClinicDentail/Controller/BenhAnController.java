@@ -2,6 +2,10 @@ package com.example.ClinicDentail.Controller;
 
 
 import com.example.ClinicDentail.DTO.BenhAnDTO;
+import com.example.ClinicDentail.Enity.BenhAn;
+import com.example.ClinicDentail.Enity.NguoiDung;
+import com.example.ClinicDentail.Repository.BenhAnRepository;
+import com.example.ClinicDentail.Service.AuthUtils;
 import com.example.ClinicDentail.Service.BenhAnService;
 import com.example.ClinicDentail.payload.request.MessageResponse;
 import org.springframework.data.domain.Page;
@@ -10,15 +14,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/benh-an")
 public class BenhAnController {
     private final BenhAnService benhAnService;
+    private final BenhAnRepository benhAnRepository;
+    private final AuthUtils authUtils;
 
-    public BenhAnController(BenhAnService benhAnService) {
+    public BenhAnController(BenhAnService benhAnService, BenhAnRepository benhAnRepository, AuthUtils authUtils) {
         this.benhAnService = benhAnService;
+        this.benhAnRepository = benhAnRepository;
+        this.authUtils = authUtils;
     }
 
     /**
@@ -67,6 +77,14 @@ public class BenhAnController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponse("Lỗi khi lấy danh sách bênh án: " + e.getMessage()));
         }
+    }
+    /**
+     * Bác sĩ lấy tất cả bệnh án
+     */
+    @GetMapping("/benhan")
+    public List<BenhAnDTO> getAllBenhAn() {
+        NguoiDung currentUser = authUtils.getCurrentUser();
+        return benhAnService.getAllForDoctor(currentUser);
     }
 
     /**

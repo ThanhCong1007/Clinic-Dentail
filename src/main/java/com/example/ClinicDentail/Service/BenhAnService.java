@@ -171,7 +171,33 @@ public class BenhAnService {
 
         return benhAnPage.map(BenhAnDTO::new);
     }
+    public List<BenhAnDTO> getAllForDoctor(Integer maBacSiDangNhap) {
+        List<BenhAn> list = benhAnRepository.findAll();
+        return list.stream()
+                .map(benhAn -> {
+                    BenhAnDTO dto = new BenhAnDTO(benhAn);
+                    boolean isOwner = benhAn.getBacSi().getMaBacSi().equals(maBacSiDangNhap);
+                    dto.setEditable(isOwner);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+    public List<BenhAnDTO> getAllForDoctor(NguoiDung currentUser) {
+        List<BenhAn> danhSachBenhAn = benhAnRepository.findAll(); // Lấy tất cả bệnh án
 
+        return danhSachBenhAn.stream()
+                .map(benhAn -> {
+                    BenhAnDTO dto = new BenhAnDTO(benhAn);
+                    // Gắn cờ editable nếu là người tạo
+                    if (benhAn.getBacSi().getMaBacSi().equals(currentUser.getMaNguoiDung())) {
+                        dto.setEditable(true);
+                    } else {
+                        dto.setEditable(false);
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
     /**
      * Lấy chi tiết bệnh án
      */
@@ -219,4 +245,5 @@ public class BenhAnService {
 
         return benhAnPage.map(BenhAnDTO::new);
     }
+
 }
