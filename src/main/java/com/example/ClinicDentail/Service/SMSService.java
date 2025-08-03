@@ -18,10 +18,11 @@ import java.util.Map;
 @Service
 public class SMSService {
     private static final Logger logger = LoggerFactory.getLogger(SMSService.class);
-    private static final String SMS_API_URL = "https://api.textbee.dev/api/v1/gateway/devices/684e82e14080863dda265bd5/send-sms";
-    private static final String SMS_API_KEY = "f4644e52-989b-4460-8eb8-df5dce06a4d1";
+//    private static final String SMS_API_URL = "https://api.textbee.dev/api/v1/gateway/devices/684e82e14080863dda265bd5/send-sms";
+//    private static final String SMS_API_KEY = "f4644e52-989b-4460-8eb8-df5dce06a4d1";
     private final RestTemplate restTemplate;
-
+    private static final String SMS_API_URL = "https://api.textbee.dev/api/v1/gateway/devices/688edfcd6cd203ecb58dfa80/send-sms";
+    private static final String SMS_API_KEY = "b3a5f42b-7408-4f90-a6a3-fb0cfcfb89f6";
     public SMSService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
