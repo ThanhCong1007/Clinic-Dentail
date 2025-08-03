@@ -184,12 +184,13 @@ public class BenhAnService {
     }
     public List<BenhAnDTO> getAllForDoctor(NguoiDung currentUser) {
         List<BenhAn> danhSachBenhAn = benhAnRepository.findAll(); // Lấy tất cả bệnh án
-
+        // Lấy thông tin bác sĩ từ người dùng hiện tại
+        BacSi bacSi = bacSiRepository.findByNguoiDung_MaNguoiDung(currentUser.getMaNguoiDung());
         return danhSachBenhAn.stream()
                 .map(benhAn -> {
                     BenhAnDTO dto = new BenhAnDTO(benhAn);
-                    // Gắn cờ editable nếu là người tạo
-                    if (benhAn.getBacSi().getMaBacSi().equals(currentUser.getMaNguoiDung())) {
+                    // Gắn cờ editable nếu mã bác sĩ trùng khớp
+                    if (benhAn.getBacSi().getMaBacSi().equals(bacSi.getMaBacSi())) {
                         dto.setEditable(true);
                     } else {
                         dto.setEditable(false);
