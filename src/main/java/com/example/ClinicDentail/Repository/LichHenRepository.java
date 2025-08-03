@@ -36,6 +36,9 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
     boolean existsByBacSi_MaBacSiAndMaLichHenNotAndNgayHenAndGioBatDauBeforeAndGioKetThucAfter(
             Integer maBacSi, Integer maLichHen, LocalDate ngayHen, LocalTime gioBatDau, LocalTime gioKetThuc);
 
+    boolean existsByBacSi_MaBacSiAndNgayHenAndGioBatDauLessThanEqualAndGioKetThucGreaterThanEqual(
+            Integer maBacSi, LocalDate ngayHen, LocalTime gioKetThuc, LocalTime gioBatDau);
+
 
     /**
      * Tìm lịch hẹn theo bác sĩ và ngày, sắp xếp theo giờ bắt đầu

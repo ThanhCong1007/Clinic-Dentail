@@ -5,6 +5,7 @@ import com.example.ClinicDentail.Enity.BacSi;
 import com.example.ClinicDentail.Enity.BenhNhan;
 import com.example.ClinicDentail.Repository.BacSiRepository;
 import com.example.ClinicDentail.Repository.BenhNhanRepository;
+import com.example.ClinicDentail.Repository.LichHenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +37,8 @@ public class BacSiService {
 
     @Autowired
     private UserDTOConverter userDTOConverter;
+    @Autowired
+    private LichHenRepository lichHenRepository;
 
     /**
      * Lấy thông tin chi tiết bệnh nhân theo ID với kiểm tra quyền truy cập
@@ -136,4 +141,21 @@ public class BacSiService {
         }
     }
 
+    public BacSi timBacSiKhacRanh(LocalDate ngayHen, LocalTime gioBatDau, LocalTime gioKetThuc, BacSi bacSiCu) {
+        List<BacSi> danhSachBacSi = bacSiRepository.findByTrangThaiLamViecTrue();
+
+        for (BacSi bacSi : danhSachBacSi) {
+            if (bacSi.getMaBacSi().equals(bacSiCu.getMaBacSi())) continue;
+
+            boolean coXungDot = lichHenRepository.existsByBacSi_MaBacSiAndNgayHenAndGioBatDauLessThanEqualAndGioKetThucGreaterThanEqual(
+                    bacSi.getMaBacSi(), ngayHen, gioKetThuc, gioBatDau
+            );
+
+            if (!coXungDot) {
+                return bacSi; // Tìm thấy bác sĩ rảnh
+            }
+        }
+
+        return null; // Không tìm thấy
+    }
 }

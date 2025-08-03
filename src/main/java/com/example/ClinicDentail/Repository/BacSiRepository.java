@@ -29,5 +29,6 @@ public interface BacSiRepository extends JpaRepository<BacSi,Integer> {
     @Query("SELECT DISTINCT b.chuyenKhoa FROM BacSi b WHERE b.trangThaiLamViec = true AND b.nguoiDung.trangThaiHoatDong = true")
     List<String> findDistinctChuyenKhoaByTrangThaiLamViecTrueAndNguoiDung_TrangThaiHoatDongTrue();
 
+    List<BacSi> findByTrangThaiLamViecTrue();
 
 }

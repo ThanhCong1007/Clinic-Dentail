@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -126,6 +127,7 @@ public class LichHenController {
      * API để hủy lịch hẹn (thay đổi trạng thái thành "Đã hủy" thay vì xóa hoàn toàn)
      */
     @PutMapping("/{maLichHen}/cancel")
+    @PreAuthorize("hasRole('BACSI') or hasRole('USER')")
     public ResponseEntity<?> cancelAppointment(@PathVariable Integer maLichHen,
                                                @RequestBody(required = false) Map<String, Object> body) {
         try {

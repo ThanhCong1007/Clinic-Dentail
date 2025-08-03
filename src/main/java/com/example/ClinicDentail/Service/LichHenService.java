@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,12 @@ public class LichHenService {
     private TrangThaiLichHenRepository trangThaiLichHenRepository;
     @Autowired
     private BenhAnDichVuRepository benhAnDichVuRepository;
+    @Autowired
+    private AuthUtils authUtils;
+    @Autowired
+    private SMSService smsService;
+    @Autowired
+    private BacSiService bacSiService;
 
     /**
      * Tự động hủy lịch hẹn quá hạn - chạy mỗi 30 phút
@@ -244,36 +252,184 @@ public class LichHenService {
     }
 
     public LichHenDTO huyLichHen(Integer maLichHen, String lyDo) {
-        logger.info("Cancelling appointment ID: {}", maLichHen);
+        logger.info("Bắt đầu hủy lịch hẹn ID: {}", maLichHen);
 
-        Optional<LichHen> lichHenOpt = lichHenRepository.findById(maLichHen);
-        if (!lichHenOpt.isPresent()) {
-            logger.warn("Cancel appointment failed: Appointment ID {} not found", maLichHen);
-            throw new RuntimeException("Không tìm thấy lịch hẹn với mã: " + maLichHen);
-        }
+        LichHen lichHen = lichHenRepository.findById(maLichHen)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn với mã: " + maLichHen));
 
-        LichHen lichHen = lichHenOpt.get();
-
-        // Validate cancellation conditions
         validateCancellationConditions(lichHen, maLichHen);
 
-        // Get cancelled status
-        Optional<TrangThaiLichHen> trangThaiHuyOpt = trangThaiLichHenRepository.findByTenTrangThai("Đã hủy");
-        if (!trangThaiHuyOpt.isPresent()) {
-            logger.error("Cancel appointment failed: 'Đã hủy' status not found in database");
-            throw new RuntimeException("Lỗi hệ thống: Không tìm thấy trạng thái 'Đã hủy'!");
-        }
+        TrangThaiLichHen trangThaiHuy = trangThaiLichHenRepository.findByTenTrangThai("Đã hủy")
+                .orElseThrow(() -> new RuntimeException("Lỗi hệ thống: Không tìm thấy trạng thái 'Đã hủy'!"));
 
-        // Update status and notes
-        lichHen.setTrangThai(trangThaiHuyOpt.get());
-//        updateCancellationNotes(lichHen, lyDo);
+        lichHen.setTrangThai(trangThaiHuy);
         lichHen.setLydo(lyDo);
-        // Save to database
         LichHen lichHenDaHuy = lichHenRepository.save(lichHen);
-        logger.info("Appointment ID {} cancelled successfully", maLichHen);
+
+        // Xử lý logic khi bác sĩ hủy lịch hẹn
+        try {
+            NguoiDung currentUser = authUtils.getCurrentUser();
+            if (laBacSiHuyLichHen(currentUser, lichHen)) {
+                logger.info("Bác sĩ {} hủy lịch hẹn ID: {}, bắt đầu tìm bác sĩ thay thế",
+                        currentUser.getHoTen(), maLichHen);
+
+                // Tìm bác sĩ thay thế
+                BacSi bacSiMoi = bacSiService.timBacSiKhacRanh(
+                        lichHen.getNgayHen(),
+                        lichHen.getGioBatDau(),
+                        lichHen.getGioKetThuc(),
+                        lichHen.getBacSi()
+                );
+
+                if (bacSiMoi != null) {
+                    // Tạo lịch hẹn mới với bác sĩ thay thế
+                    LichHen lichHenMoi = taoLichHenMoiChoBenhNhan(lichHen, bacSiMoi);
+
+                    // Gửi SMS thông báo thay đổi bác sĩ
+                    guiThongBaoThayDoiBacSi(lichHen, bacSiMoi, lyDo);
+
+                    logger.info("Đã tái đăng ký lịch hẹn với bác sĩ mới ID {} cho bệnh nhân {}",
+                            bacSiMoi.getMaBacSi(), lichHen.getBenhNhan().getMaBenhNhan());
+
+                    return new LichHenDTO(lichHenMoi);
+                } else {
+                    // Không tìm thấy bác sĩ thay thế, gửi SMS thông báo hủy
+                    guiThongBaoHuyLichHenDenBenhNhan(lichHen, lyDo);
+                    logger.warn("Không tìm thấy bác sĩ khác phù hợp để chuyển lịch hẹn ID: {}", maLichHen);
+                }
+            } else {
+                // User/bệnh nhân hủy lịch hẹn - không cần tìm bác sĩ thay thế
+                logger.info("Bệnh nhân hủy lịch hẹn ID: {}", maLichHen);
+            }
+        } catch (Exception e) {
+            logger.error("Lỗi khi xử lý hủy lịch hẹn ID {}: {}", maLichHen, e.getMessage(), e);
+            // Nếu có lỗi trong quá trình tìm bác sĩ thay thế, vẫn gửi thông báo hủy
+            try {
+                NguoiDung currentUser = authUtils.getCurrentUser();
+                if (laBacSiHuyLichHen(currentUser, lichHen)) {
+                    guiThongBaoHuyLichHenDenBenhNhan(lichHen, lyDo);
+                }
+            } catch (Exception ex) {
+                logger.error("Lỗi khi gửi thông báo hủy lịch hẹn: {}", ex.getMessage());
+            }
+        }
 
         return new LichHenDTO(lichHenDaHuy);
     }
+
+    /**
+     * Tạo lịch hẹn mới với bác sĩ thay thế
+     */
+    public LichHen taoLichHenMoiChoBenhNhan(LichHen lichHenCu, BacSi bacSiMoi) {
+        LichHen lichHenMoi = new LichHen();
+        lichHenMoi.setBenhNhan(lichHenCu.getBenhNhan());
+        lichHenMoi.setBacSi(bacSiMoi);
+        lichHenMoi.setDichVu(lichHenCu.getDichVu());
+        lichHenMoi.setNgayHen(lichHenCu.getNgayHen());
+        lichHenMoi.setGioBatDau(lichHenCu.getGioBatDau());
+        lichHenMoi.setGioKetThuc(lichHenCu.getGioKetThuc());
+        lichHenMoi.setTrangThai(kiemTraTranngThaiLichHen(1)); // trạng thái "Chờ xác nhận"
+        lichHenMoi.setGhiChu("Lịch hẹn được chuyển tự động do bác sĩ " +
+                lichHenCu.getBacSi().getNguoiDung().getHoTen() + " hủy lịch");
+
+        return lichHenRepository.save(lichHenMoi);
+    }
+
+    /**
+     * Kiểm tra xem có phải bác sĩ hủy lịch hẹn không
+     */
+    private boolean laBacSiHuyLichHen(NguoiDung currentUser, LichHen lichHen) {
+        try {
+            if (currentUser == null || currentUser.getVaiTro() == null) {
+                return false;
+            }
+
+            String vaiTro = currentUser.getVaiTro().getTenVaiTro();
+            if (!"BACSI".equalsIgnoreCase(vaiTro)) {
+                return false;
+            }
+
+            if (currentUser.getBacSi() == null || lichHen.getBacSi() == null) {
+                return false;
+            }
+
+            Integer idBacSiHienTai = currentUser.getBacSi().getMaBacSi();
+            Integer idBacSiLichHen = lichHen.getBacSi().getMaBacSi();
+
+            return Objects.equals(idBacSiHienTai, idBacSiLichHen);
+        } catch (Exception e) {
+            logger.error("Lỗi khi xác định bác sĩ hủy lịch hẹn: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Gửi thông báo hủy lịch hẹn đến bệnh nhân
+     */
+    private void guiThongBaoHuyLichHenDenBenhNhan(LichHen lichHen, String lyDoHuy) {
+        try {
+            BenhNhan benhNhan = lichHen.getBenhNhan();
+            BacSi bacSi = lichHen.getBacSi();
+
+            String soDienThoai = benhNhan.getSoDienThoai();
+            if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+                logger.warn("Không có số điện thoại để gửi SMS cho bệnh nhân trong lịch hẹn ID {}",
+                        lichHen.getMaLichHen());
+                return;
+            }
+
+            smsService.guiSMSThongBaoHuyLichHen(
+                    soDienThoai,
+                    benhNhan.getHoTen(),
+                    bacSi.getNguoiDung().getHoTen(),
+                    lichHen.getNgayHen(),
+                    lichHen.getGioBatDau(),
+                    lyDoHuy
+            );
+
+            logger.info("Đã gửi SMS hủy lịch hẹn ID {} đến bệnh nhân {}",
+                    lichHen.getMaLichHen(), benhNhan.getHoTen());
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi gửi SMS hủy lịch hẹn ID {}: {}",
+                    lichHen.getMaLichHen(), e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Gửi thông báo thay đổi bác sĩ đến bệnh nhân
+     */
+    private void guiThongBaoThayDoiBacSi(LichHen lichHenCu, BacSi bacSiMoi, String lyDoThayDoi) {
+        try {
+            BenhNhan benhNhan = lichHenCu.getBenhNhan();
+            BacSi bacSiCu = lichHenCu.getBacSi();
+
+            String soDienThoai = benhNhan.getSoDienThoai();
+            if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+                logger.warn("Không có số điện thoại để gửi SMS cho bệnh nhân trong lịch hẹn ID {}",
+                        lichHenCu.getMaLichHen());
+                return;
+            }
+
+            smsService.guiSMSThongBaoThayDoiBacSi(
+                    soDienThoai,
+                    benhNhan.getHoTen(),
+                    bacSiCu.getNguoiDung().getHoTen(),
+                    bacSiMoi.getNguoiDung().getHoTen(),
+                    lichHenCu.getNgayHen(),
+                    lichHenCu.getGioBatDau(),
+                    lyDoThayDoi
+            );
+
+            logger.info("Đã gửi SMS thông báo thay đổi bác sĩ cho lịch hẹn ID {} đến bệnh nhân {}",
+                    lichHenCu.getMaLichHen(), benhNhan.getHoTen());
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi gửi SMS thông báo thay đổi bác sĩ cho lịch hẹn ID {}: {}",
+                    lichHenCu.getMaLichHen(), e.getMessage(), e);
+        }
+    }
+
 
     private BenhNhan kiemTraBenhNhanTonTai(Integer maBenhNhan) {
         Optional<BenhNhan> benhNhanOpt = benhNhanRepository.findById(maBenhNhan);
